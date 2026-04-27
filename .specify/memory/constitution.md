@@ -15,6 +15,7 @@ Follow-up TODOs: None
 
 ### 1. Idioma e Plataforma
 - Todo código-fonte (nomes de classes, métodos, variáveis, comentários e mensagens internas) deve ser escrito em **Português (pt-BR)**.
+- Exceções pontuais de sufixos técnicos consolidados em inglês são permitidas quando seguirem padrão arquitetural amplamente adotado e não comprometerem a leitura do domínio, como `UseCase`.
 - O projeto deve utilizar **Java 21** como versão padrão da linguagem.
 
 ### 2. Padrões de Código
