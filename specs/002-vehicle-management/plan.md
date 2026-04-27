@@ -1,0 +1,105 @@
+# Implementation Plan: Gestao de Veiculos de Clientes
+
+**Branch**: `002-vehicle-management` | **Date**: 2026-04-26 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/002-vehicle-management/spec.md`
+
+## Summary
+
+Adicionar um modulo de veiculos com cadastro, atualizacao, consulta paginada, busca por placa e cliente, e remocao logica, preservando historico e suportando vinculo obrigatorio de cada veiculo com um ou mais clientes existentes por meio de relacionamento muitos-para-muitos.
+
+## Technical Context
+
+**Language/Version**: Java 21  
+**Primary Dependencies**: Spring Boot 3.4.1, Spring Web, Spring Data JPA, Spring Validation, Spring Security, SpringDoc OpenAPI, Lombok, MapStruct, Flyway  
+**Storage**: PostgreSQL com Flyway para schema versionado  
+**Testing**: JUnit 5, Spring Boot Test, Testcontainers (PostgreSQL), JaCoCo  
+**Target Platform**: Servico web Spring Boot para back-office interno  
+**Project Type**: Web-service monolitico  
+**Performance Goals**: Consultas por placa, identificador e listagem paginada com comportamento consistente para a carga operacional normal da oficina, sem meta formal de benchmark nesta iteracao MVP  
+**Constraints**: DDD em camadas, codigo e contratos em pt-BR, validacao estrutural com HTTP 422, regras de negocio com HTTP 400, remocao logica obrigatoria, placa unica apenas entre veiculos ativos, ao menos um cliente por veiculo em qualquer estado, endpoints preparados para futura restricao de acesso sem implementacao de autenticacao no MVP  
+**Scale/Scope**: Cadastro operacional de oficina com milhares de clientes e veiculos, consultas frequentes por placa, cliente e listagem administrativa paginada
+
+## Constitution Check
+
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+
+- [x] **Idioma e Plataforma**: Implementacao planejada em Java 21 e nomenclatura/documentacao em pt-BR.
+- [x] **Padroes de Codigo**: Lombok sera usado sem expor mutadores genericos no dominio; invariantes ficarao encapsuladas em entidades e value objects.
+- [x] **Arquitetura**: Fluxo controller -> use case -> dominio -> repositorio -> JPA, sem regras de negocio em controllers ou DTOs.
+- [x] **Dominio (DDD)**: `Veiculo` sera aggregate root com comportamento explicito para atualizar dados, vinculos e remocao logica; placa e demais identificadores sensiveis ficarao em value objects.
+- [x] **Documentacao**: Endpoints documentados em OpenAPI e implementacao prevista com Javadocs para todos os metodos publicos relevantes.
+- [x] **Testes**: Planejados testes unitarios para dominio e casos de uso, alem de integracao para controller e persistencia.
+- [x] **Validacao e Padroes de Erro**: DTOs cuidarao da validacao estrutural; regras como placa duplicada, clientes inexistentes e veiculo sem clientes retornarao HTTP 400.
+- [x] **Banco de Dados**: Novas migrations Flyway seguirao `V0.YYYYMMDDHHMMSS__descricao.sql`, com comentarios SQL, PK UUID, auditoria e FKs nomeadas.
+
+## Project Structure
+
+### Documentation (this feature)
+
+```text
+specs/002-vehicle-management/
+├── plan.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/
+│   └── openapi.yaml
+└── tasks.md
+```
+
+### Source Code (repository root)
+
+```text
+src/
+├── main/
+│   ├── java/com/postech/workshop_service/
+│   │   ├── api/
+│   │   │   ├── controllers/
+│   │   │   └── dtos/
+│   │   ├── application/usecases/
+│   │   ├── domain/
+│   │   │   ├── entities/
+│   │   │   ├── repositories/
+│   │   │   └── valueobjects/
+│   │   └── infrastructure/
+│   │       ├── config/
+│   │       └── persistence/
+│   │           ├── entities/
+│   │           ├── mappers/
+│   │           └── repositories/
+│   └── resources/
+│       └── db/migration/
+└── test/
+    └── java/com/postech/workshop_service/
+        ├── api/controllers/
+        ├── application/usecases/
+        ├── domain/
+        └── infrastructure/persistence/repositories/
+```
+
+**Structure Decision**: Manter o monolito Spring Boot existente e acrescentar o modulo de veiculos nas mesmas camadas ja usadas por clientes, incluindo migration dedicada e testes unitarios/integracao no mesmo arranjo de pacotes.
+
+## Phase 0: Research Summary
+
+As decisoes de pesquisa foram consolidadas em [research.md](./research.md), resolvendo as definicoes de modelagem muitos-para-muitos, estrategia de soft delete, normalizacao de placa, faixa de ano e estrategia de seguranca/testes.
+
+## Phase 1: Design Outputs
+
+- Modelo de dados detalhado em [data-model.md](./data-model.md)
+- Contrato HTTP planejado em [contracts/openapi.yaml](./contracts/openapi.yaml)
+- Passos de implementacao e verificacao em [quickstart.md](./quickstart.md)
+
+## Post-Design Constitution Check
+
+- [x] **Idioma e Plataforma**: Artefatos e contrato mantidos em pt-BR; stack continua Java 21.
+- [x] **Padroes de Codigo**: O desenho privilegia comportamento no dominio (`cadastrar`, `atualizar`, `inativar`, `substituirClientesVinculados`) em vez de setters indiscriminados.
+- [x] **Arquitetura**: A integracao com clientes ocorre por repositorio/caso de uso, sem acoplamento da API a JPA.
+- [x] **Dominio (DDD)**: A obrigatoriedade de ao menos um cliente vinculado e a unicidade operacional da placa ficam no dominio/aplicacao, nao no controller.
+- [x] **Documentacao**: OpenAPI cobre endpoints, filtros e payloads do MVP; Javadocs continuarao obrigatorios para todos os metodos publicos relevantes.
+- [x] **Testes**: O quickstart exige cobertura unitaria e de integracao para todas as operacoes publicas da feature.
+- [x] **Validacao e Padroes de Erro**: O contrato distingue 422 (estrutura) de 400 (negocio) e preserva 404 para recursos inexistentes.
+- [x] **Banco de Dados**: O modelo inclui tabela `veiculos` e tabela de associacao `veiculos_clientes` com auditoria, FKs nomeadas e suporte a remocao logica do agregado principal.
+
+## Complexity Tracking
+
+Nenhuma violacao constitucional planejada.

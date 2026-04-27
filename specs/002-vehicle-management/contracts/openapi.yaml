@@ -1,0 +1,369 @@
+openapi: 3.0.3
+info:
+  title: API de Veiculos
+  version: 1.0.0
+  description: Contrato do MVP para gestao de veiculos vinculados a um ou mais clientes da oficina.
+servers:
+  - url: /api/v1
+tags:
+  - name: Veiculos
+    description: Operacoes de cadastro, consulta, atualizacao e inativacao de veiculos
+paths:
+  /veiculos:
+    post:
+      tags: [Veiculos]
+      summary: Cadastrar veiculo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroVeiculoRequest'
+      responses:
+        '201':
+          description: Veiculo cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '400':
+          description: Regra de negocio violada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validacao estrutural invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags: [Veiculos]
+      summary: Listar veiculos com filtros e paginacao
+      parameters:
+        - in: query
+          name: pagina
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: tamanho
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: placa
+          schema:
+            type: string
+        - in: query
+          name: clienteId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: incluirInativos
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Lista paginada de veiculos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaVeiculosResponse'
+  /veiculos/{id}:
+    get:
+      tags: [Veiculos]
+      summary: Buscar veiculo por identificador
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: incluirInativos
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Veiculo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '404':
+          description: Veiculo nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags: [Veiculos]
+      summary: Atualizar veiculo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarVeiculoRequest'
+      responses:
+        '200':
+          description: Veiculo atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '400':
+          description: Regra de negocio violada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Veiculo nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validacao estrutural invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Veiculos]
+      summary: Remover veiculo logicamente
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Veiculo removido logicamente
+        '404':
+          description: Veiculo nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /veiculos/placa/{placa}:
+    get:
+      tags: [Veiculos]
+      summary: Buscar veiculo por placa
+      parameters:
+        - in: path
+          name: placa
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: incluirInativos
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Veiculo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '404':
+          description: Veiculo nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /veiculos/cliente/{clienteId}:
+    get:
+      tags: [Veiculos]
+      summary: Listar veiculos de um cliente
+      parameters:
+        - in: path
+          name: clienteId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: incluirInativos
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Veiculos encontrados para o cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VeiculoResponse'
+        '404':
+          description: Cliente nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    CadastroVeiculoRequest:
+      type: object
+      required:
+        - placa
+        - marca
+        - modelo
+        - ano
+        - clientesIds
+      properties:
+        placa:
+          type: string
+          example: BRA1D23
+        marca:
+          type: string
+          maxLength: 60
+          example: Toyota
+        modelo:
+          type: string
+          maxLength: 80
+          example: Corolla
+        ano:
+          type: integer
+          minimum: 1900
+          example: 2020
+        clientesIds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+        cor:
+          type: string
+          maxLength: 30
+        chassi:
+          type: string
+          maxLength: 17
+        renavam:
+          type: string
+        quilometragemAtual:
+          type: integer
+          format: int64
+          minimum: 0
+        tipoCombustivel:
+          type: string
+          enum: [GASOLINA, ETANOL, FLEX, DIESEL, GNV, ELETRICO, HIBRIDO, OUTRO]
+        observacoes:
+          type: string
+          maxLength: 2000
+    AtualizarVeiculoRequest:
+      allOf:
+        - $ref: '#/components/schemas/CadastroVeiculoRequest'
+    ClienteVinculadoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        documentoMascarado:
+          type: string
+    VeiculoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        placa:
+          type: string
+        marca:
+          type: string
+        modelo:
+          type: string
+        ano:
+          type: integer
+        cor:
+          type: string
+          nullable: true
+        chassi:
+          type: string
+          nullable: true
+        renavam:
+          type: string
+          nullable: true
+        quilometragemAtual:
+          type: integer
+          format: int64
+          nullable: true
+        tipoCombustivel:
+          type: string
+          nullable: true
+        observacoes:
+          type: string
+          nullable: true
+        clientes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClienteVinculadoResponse'
+        ativo:
+          type: boolean
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+        dataRemocao:
+          type: string
+          format: date-time
+          nullable: true
+    PaginaVeiculosResponse:
+      type: object
+      properties:
+        conteudo:
+          type: array
+          items:
+            $ref: '#/components/schemas/VeiculoResponse'
+        pagina:
+          type: integer
+        tamanho:
+          type: integer
+        totalElementos:
+          type: integer
+          format: int64
+        totalPaginas:
+          type: integer
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
