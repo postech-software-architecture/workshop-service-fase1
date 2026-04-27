@@ -31,13 +31,14 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- [ ] **Idioma e Plataforma**: Portuguese (pt-BR) used? Java 25 used?
+- [ ] **Idioma e Plataforma**: Portuguese (pt-BR) used? Java 21 used?
 - [ ] **Padrões de Código**: Lombok used correctly? Domain encapsulation respected?
 - [ ] **Arquitetura**: Layered architecture followed? Domain doesn't depend on infrastructure?
 - [ ] **Domínio (DDD)**: DDD principles applied? Rich domain used?
 - [ ] **Documentação**: Javadoc for public methods? OpenAPI for endpoints?
 - [ ] **Testes**: Public methods tested (unit + integration)?
 - [ ] **Validação e Padrões de Erro**: Validations return 422? Business rules return 400?
+- [ ] **Banco de Dados**: Flyway pattern used? Comments and audit fields included? PK is UUID?
 
 ## Project Structure
 

@@ -1,12 +1,12 @@
 <!-- Sync Impact Report
-Version: 1.0.0
-Modified Principles: All
-Added Sections: 1. Idioma e Plataforma, 2. Padrões de Código, 3. Arquitetura, 4. Domínio (DDD), 5. Documentação, 6. Testes, 7. Validação e Padrões de Erro (HTTP)
-Removed Sections: Core Principles (placeholder)
+Version: 1.1.2
+Modified Principles: 8. Banco de Dados e Migrations (Fixed Flyway pattern to use dot after V0)
+Added Sections: None
+Removed Sections: None
 Templates Updated:
 - .specify/templates/plan-template.md (✅ updated)
 - .specify/templates/spec-template.md (✅ no changes needed)
-- .specify/templates/tasks-template.md (✅ updated)
+- .specify/templates/tasks-template.md (✅ no changes needed)
 Follow-up TODOs: None
 -->
 # workshop-service Constitution
@@ -15,7 +15,7 @@ Follow-up TODOs: None
 
 ### 1. Idioma e Plataforma
 - Todo código-fonte (nomes de classes, métodos, variáveis, comentários e mensagens internas) deve ser escrito em **Português (pt-BR)**.
-- O projeto deve utilizar **Java 25** como versão padrão da linguagem.
+- O projeto deve utilizar **Java 21** como versão padrão da linguagem.
 
 ### 2. Padrões de Código
 - Deve-se utilizar **Lombok** para redução de código boilerplate (`getters`, `constructors`, `equals`, `hashCode`, etc.).
@@ -60,10 +60,20 @@ Follow-up TODOs: None
 - Violações de regra de negócio devem retornar **HTTP 400**.
 - Regras de negócio devem ser validadas na camada de aplicação/serviço, não no controller.
 
+### 8. Banco de Dados e Migrations (Flyway)
+As migrations devem seguir o padrão cronológico do Flyway:
+- **Formato**: `V0.YYYYMMDDHHMMSS__descricao_da_acao.sql`
+- **Exemplo**: `V0.20260424213700__create_table_clientes.sql`
+- É **obrigatório** que toda tabela e coluna criada possua um comentário explicativo direto no SQL (compatível com PostgreSQL).
+- Toda tabela de entidade deve conter os campos de auditoria: `data_criacao` e `data_ultima_atualizacao` (TIMESTAMP/TIMESTAMPTZ, não nulo).
+- Utilizar `UUID` como chave primária (`PK`).
+- Chaves estrangeiras (`FK`) devem ser nomeadas como `fk_origem_destino`.
+- Índices de unicidade (`UNIQUE`) para campos de identificação de negócio.
+
 ## Governance
 
 - All PRs/reviews must verify compliance with the principles.
 - Amendments require documentation, approval, and a migration plan.
 - Use this constitution for runtime development guidance.
 
-**Version**: 1.0.0 | **Ratified**: 2026-04-24 | **Last Amended**: 2026-04-24
+**Version**: 1.1.2 | **Ratified**: 2026-04-24 | **Last Amended**: 2026-04-26
