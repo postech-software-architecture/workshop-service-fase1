@@ -1,6 +1,8 @@
 package com.postech.workshop_service.api.controllers;
 
 import com.postech.workshop_service.api.dtos.ErrorResponse;
+import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +15,63 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Handler centralizado para traducao de excecoes em respostas HTTP padronizadas.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Trata erros de regra de negocio.
+     *
+     * @param ex excecao capturada.
+     * @param request requisicao corrente.
+     * @return payload padronizado de erro HTTP 400.
+     */
+    @ExceptionHandler(RegraDeNegocioException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(
+            RegraDeNegocioException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * Trata recursos nao encontrados.
+     *
+     * @param ex excecao capturada.
+     * @param request requisicao corrente.
+     * @return payload padronizado de erro HTTP 404.
+     */
+    @ExceptionHandler(RecursoNaoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(
+            RecursoNaoEncontradoException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Trata erros estruturais de validacao no payload.
+     *
+     * @param ex excecao capturada.
+     * @param request requisicao corrente.
+     * @return payload padronizado de erro HTTP 422.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
@@ -29,7 +85,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
                 .error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
-                .message("Erro de validação estrutural no payload.")
+                .message("Erro de validacao estrutural no payload.")
                 .path(request.getRequestURI())
                 .fieldErrors(fieldErrors)
                 .build();
@@ -37,6 +93,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
     }
 
+    /**
+     * Mantem compatibilidade com erros legados tratados como validacao estrutural.
+     *
+     * @param ex excecao capturada.
+     * @param request requisicao corrente.
+     * @return payload padronizado de erro HTTP 422.
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
             IllegalArgumentException ex, HttpServletRequest request) {
@@ -52,6 +115,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
     }
 
+    /**
+     * Trata erros nao previstos da aplicacao.
+     *
+     * @param ex excecao capturada.
+     * @param request requisicao corrente.
+     * @return payload padronizado de erro HTTP 500.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(
             Exception ex, HttpServletRequest request) {
