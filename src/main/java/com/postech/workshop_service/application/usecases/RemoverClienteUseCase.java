@@ -1,0 +1,36 @@
+package com.postech.workshop_service.application.usecases;
+
+import com.postech.workshop_service.domain.repositories.ClienteRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+@Service
+public class RemoverClienteUseCase {
+
+    private final ClienteRepository clienteRepository;
+
+    /**
+     * Construtor para injeção de dependências.
+     *
+     * @param clienteRepository repositório de clientes.
+     */
+    public RemoverClienteUseCase(ClienteRepository clienteRepository) {
+        this.clienteRepository = clienteRepository;
+    }
+
+    /**
+     * Executa a remoção de um cliente do sistema.
+     *
+     * @param id identificador único do cliente a ser removido.
+     * @throws IllegalArgumentException caso o cliente não seja encontrado.
+     */
+    @Transactional
+    public void executar(UUID id) {
+        if (!clienteRepository.buscarPorId(id).isPresent()) {
+            throw new IllegalArgumentException("Cliente não encontrado com o ID informado.");
+        }
+        clienteRepository.remover(id);
+    }
+}
