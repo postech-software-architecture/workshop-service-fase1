@@ -1,3 +1,9 @@
+---
+trigger: always_on
+description: 
+globs: 
+---
+
 # OpenAPI Sync Rule
 
 When any file under `src/main/java/com/postech/workshop_service/api/controllers/` is modified (created, edited, or deleted), you MUST update the OpenAPI spec file at `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml` to keep it in sync.

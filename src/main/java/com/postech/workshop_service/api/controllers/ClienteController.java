@@ -63,7 +63,8 @@ public class ClienteController {
 	@Operation(summary = "Criar um novo cliente")
 	public ResponseEntity<ClienteResponse> criar(@RequestBody @Valid CadastroClienteRequest request) {
 		Cliente cliente = criarClienteUseCase.executar(request.getNome(), request.getDocumento(), request.getEmail(),
-				request.getTelefone());
+				request.getTelefone(), toDomain(request.getEndereco()), request.getDataNascimentoFundacao(),
+				request.getObservacoes());
 		return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(cliente));
 	}
 

@@ -31,6 +31,14 @@ public class Cliente extends EntidadeBase {
 	 * Constrói um novo cliente (Cadastro Inicial).
 	 */
 	public Cliente(UUID id, String nome, Documento documento, String email, String telefone) {
+		this(id, nome, documento, email, telefone, null, null, null);
+	}
+
+	/**
+	 * Constrói um novo cliente (Cadastro Inicial) com dados opcionais.
+	 */
+	public Cliente(UUID id, String nome, Documento documento, String email, String telefone, Endereco endereco,
+			LocalDate dataNascimentoFundacao, String observacoes) {
 		super(id != null ? id : UUID.randomUUID());
 		validarNome(nome);
 		validarDocumento(documento);
@@ -39,6 +47,9 @@ public class Cliente extends EntidadeBase {
 		this.documento = documento;
 		this.email = email;
 		this.telefone = telefone;
+		this.endereco = endereco;
+		this.dataNascimentoFundacao = dataNascimentoFundacao;
+		this.observacoes = observacoes;
 	}
 
 	/**
