@@ -17,7 +17,7 @@
 
 **Purpose**: Preparar os artefatos da feature para a implementacao de dominio sem alterar camadas fora do escopo
 
-- [ ] T001 Revisar e alinhar os artefatos de design da feature em `specs/003-ordem-servico-base/spec.md`, `specs/003-ordem-servico-base/plan.md`, `specs/003-ordem-servico-base/data-model.md` e `specs/003-ordem-servico-base/quickstart.md`
+- [X] T001 Revisar e alinhar os artefatos de design da feature em `specs/003-ordem-servico-base/spec.md`, `specs/003-ordem-servico-base/plan.md`, `specs/003-ordem-servico-base/data-model.md` e `specs/003-ordem-servico-base/quickstart.md`
 
 ---
 
@@ -27,9 +27,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Criar o enum `StatusOrdemServico` em `src/main/java/com/postech/workshop_service/domain/entities/StatusOrdemServico.java`
-- [ ] T003 Criar a estrutura inicial da entidade `OrdemServico` herdando de `EntidadeBase` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
-- [ ] T004 Criar a classe de testes unitarios da entidade em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
+- [X] T002 [P] Criar o enum `StatusOrdemServico` em `src/main/java/com/postech/workshop_service/domain/entities/StatusOrdemServico.java`
+- [X] T003 Criar a estrutura inicial da entidade `OrdemServico` herdando de `EntidadeBase` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T004 [P] Criar a classe de testes unitarios da entidade em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -43,13 +43,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T005 [US1] Implementar testes de criacao e invariantes obrigatorias em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
+- [X] T005 [US1] Implementar testes de criacao e invariantes obrigatorias em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Implementar construtor de criacao com `idCliente` e `idVeiculo` obrigatorios em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
-- [ ] T007 [US1] Implementar construtor de reconstituicao com campos de auditoria herdados de `EntidadeBase` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
-- [ ] T008 [US1] Adicionar Javadoc e validacoes de nulos para identidade e vinculos da entidade em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T006 [US1] Implementar construtor de criacao com `idCliente` e `idVeiculo` obrigatorios em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T007 [US1] Implementar construtor de reconstituicao com campos de auditoria herdados de `EntidadeBase` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T008 [US1] Adicionar Javadoc e validacoes de nulos para identidade e vinculos da entidade em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -63,13 +63,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T009 [US2] Implementar testes para status inicial e cobertura dos status suportados em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
+- [X] T009 [US2] Implementar testes para status inicial e cobertura dos status suportados em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Definir os valores `RECEBIDA`, `AGUARDANDO_APROVACAO_ORCAMENTO`, `EM_EXECUCAO`, `CANCELADA` e `FINALIZADA` em `src/main/java/com/postech/workshop_service/domain/entities/StatusOrdemServico.java`
-- [ ] T011 [US2] Garantir atribuicao automatica de `StatusOrdemServico.RECEBIDA` na criacao da entidade em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
-- [ ] T012 [US2] Ajustar a reconstituicao da entidade para aceitar apenas status nao nulo e consistente com o enum em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T010 [US2] Definir os valores `RECEBIDA`, `AGUARDANDO_APROVACAO_ORCAMENTO`, `EM_EXECUCAO`, `CANCELADA` e `FINALIZADA` em `src/main/java/com/postech/workshop_service/domain/entities/StatusOrdemServico.java`
+- [X] T011 [US2] Garantir atribuicao automatica de `StatusOrdemServico.RECEBIDA` na criacao da entidade em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T012 [US2] Ajustar a reconstituicao da entidade para aceitar apenas status nao nulo e consistente com o enum em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -83,14 +83,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T013 [US3] Implementar testes de `podeSerCancelada()` para estados permitidos e bloqueados em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
-- [ ] T014 [US3] Implementar testes de `cancelar()` cobrindo sucesso, excecao e preservacao de estado em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
+- [X] T013 [US3] Implementar testes de `podeSerCancelada()` para estados permitidos e bloqueados em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
+- [X] T014 [US3] Implementar testes de `cancelar()` cobrindo sucesso, excecao e preservacao de estado em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] Implementar o metodo `podeSerCancelada()` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
-- [ ] T016 [US3] Implementar o metodo `cancelar()` com uso de `RegraDeNegocioException` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
-- [ ] T017 [US3] Atualizar `dataUltimaAtualizacao` ao cancelar com sucesso e adicionar Javadoc dos comportamentos publicos em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T015 [US3] Implementar o metodo `podeSerCancelada()` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T016 [US3] Implementar o metodo `cancelar()` com uso de `RegraDeNegocioException` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T017 [US3] Atualizar `dataUltimaAtualizacao` ao cancelar com sucesso e adicionar Javadoc dos comportamentos publicos em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -100,9 +100,9 @@
 
 **Purpose**: Validacao final da entrega restrita ao dominio
 
-- [ ] T018 [P] Executar a suite de testes com `mvn test` a partir de `pom.xml`
-- [ ] T019 Revisar se nenhum controller, endpoint, repository, migration ou use case completo foi criado fora de `src/main/java/com/postech/workshop_service/domain/entities/` e `src/test/java/com/postech/workshop_service/domain/entities/`
-- [ ] T020 [P] Atualizar a documentacao de execucao da feature se necessario em `specs/003-ordem-servico-base/quickstart.md`
+- [X] T018 [P] Executar a suite de testes com `mvn test` a partir de `pom.xml`
+- [X] T019 Revisar se nenhum controller, endpoint, repository, migration ou use case completo foi criado fora de `src/main/java/com/postech/workshop_service/domain/entities/` e `src/test/java/com/postech/workshop_service/domain/entities/`
+- [X] T020 [P] Atualizar a documentacao de execucao da feature se necessario em `specs/003-ordem-servico-base/quickstart.md`
 
 ---
 
