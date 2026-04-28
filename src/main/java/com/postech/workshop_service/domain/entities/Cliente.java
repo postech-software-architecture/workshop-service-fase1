@@ -1,8 +1,6 @@
 package com.postech.workshop_service.domain.entities;
 
 import com.postech.workshop_service.domain.valueobjects.Documento;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -13,11 +11,7 @@ import java.util.UUID;
  * Entidade raiz (Aggregate Root) que representa um Cliente do sistema.
  */
 @Getter
-@Builder
-@AllArgsConstructor
-public class Cliente {
-
-	private final UUID id;
+public class Cliente extends EntidadeBase {
 
 	private String nome;
 
@@ -33,25 +27,45 @@ public class Cliente {
 
 	private String observacoes;
 
-	private final LocalDateTime dataCriacao;
-
-	private LocalDateTime dataUltimaAtualizacao;
-
 	/**
 	 * Constrói um novo cliente (Cadastro Inicial).
 	 */
 	public Cliente(UUID id, String nome, Documento documento, String email, String telefone) {
+		super(id != null ? id : UUID.randomUUID());
 		validarNome(nome);
 		validarDocumento(documento);
 		validarContatos(email, telefone);
-
-		this.id = id != null ? id : UUID.randomUUID();
 		this.nome = nome;
 		this.documento = documento;
 		this.email = email;
 		this.telefone = telefone;
-		this.dataCriacao = LocalDateTime.now();
-		this.dataUltimaAtualizacao = this.dataCriacao;
+	}
+
+	/**
+	 * Reconstroi um cliente previamente persistido.
+	 */
+	@Default
+	public Cliente(UUID id, String nome, Documento documento, String email, String telefone, Endereco endereco,
+			LocalDate dataNascimentoFundacao, String observacoes, LocalDateTime dataCriacao,
+			LocalDateTime dataUltimaAtualizacao, LocalDateTime dataRemocao) {
+		super(id, dataCriacao, dataUltimaAtualizacao, dataRemocao);
+		validarNome(nome);
+		validarDocumento(documento);
+		validarContatos(email, telefone);
+		this.nome = nome;
+		this.documento = documento;
+		this.email = email;
+		this.telefone = telefone;
+		this.endereco = endereco;
+		this.dataNascimentoFundacao = dataNascimentoFundacao;
+		this.observacoes = observacoes;
+	}
+
+	/**
+	 * Executa a remocao logica do cliente.
+	 */
+	public void removerLogicamente() {
+		registrarRemocaoLogica();
 	}
 
 	public void atualizarDados(String nome, String email, String telefone, Endereco endereco,
@@ -65,7 +79,7 @@ public class Cliente {
 		this.endereco = endereco;
 		this.dataNascimentoFundacao = dataNascimentoFundacao;
 		this.observacoes = observacoes;
-		this.dataUltimaAtualizacao = LocalDateTime.now();
+		atualizarDataUltimaAtualizacao();
 	}
 
 	private void validarNome(String nome) {

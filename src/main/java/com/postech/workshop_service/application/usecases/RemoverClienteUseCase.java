@@ -1,5 +1,6 @@
 package com.postech.workshop_service.application.usecases;
 
+import com.postech.workshop_service.domain.entities.Cliente;
 import com.postech.workshop_service.domain.repositories.ClienteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +27,10 @@ public class RemoverClienteUseCase {
 	 */
 	@Transactional
 	public void executar(UUID id) {
-		if (!clienteRepository.buscarPorId(id).isPresent()) {
-			throw new IllegalArgumentException("Cliente não encontrado com o ID informado.");
-		}
-		clienteRepository.remover(id);
+		Cliente cliente = clienteRepository.buscarPorId(id)
+			.orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado com o ID informado."));
+		cliente.removerLogicamente();
+		clienteRepository.salvar(cliente);
 	}
 
 }

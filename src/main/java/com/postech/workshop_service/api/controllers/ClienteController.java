@@ -162,6 +162,7 @@ public class ClienteController {
 			.observacoes(cliente.getObservacoes())
 			.dataCriacao(cliente.getDataCriacao())
 			.dataUltimaAtualizacao(cliente.getDataUltimaAtualizacao())
+			.dataRemocao(cliente.getDataRemocao())
 			.build();
 	}
 

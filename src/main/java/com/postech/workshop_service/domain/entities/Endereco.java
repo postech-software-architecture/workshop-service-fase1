@@ -1,18 +1,15 @@
 package com.postech.workshop_service.domain.entities;
 
-import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
  * Entidade que representa um endereço físico dentro do agregado de Cliente.
  */
 @Getter
-@Builder
-public class Endereco {
-
-	private final UUID id;
+public class Endereco extends EntidadeBase {
 
 	private String logradouro;
 
@@ -30,7 +27,7 @@ public class Endereco {
 
 	public Endereco(UUID id, String logradouro, String numero, String complemento, String bairro, String cidade,
 			String estado, String cep) {
-		this.id = id != null ? id : UUID.randomUUID();
+		super(id != null ? id : UUID.randomUUID());
 		this.logradouro = logradouro;
 		this.numero = numero;
 		this.complemento = complemento;
@@ -45,6 +42,24 @@ public class Endereco {
 	public Endereco(String logradouro, String numero, String complemento, String bairro, String cidade, String estado,
 			String cep) {
 		this(UUID.randomUUID(), logradouro, numero, complemento, bairro, cidade, estado, cep);
+	}
+
+	/**
+	 * Reconstroi um endereco previamente persistido.
+	 */
+	@Default
+	public Endereco(UUID id, String logradouro, String numero, String complemento, String bairro, String cidade,
+			String estado, String cep, LocalDateTime dataCriacao, LocalDateTime dataUltimaAtualizacao,
+			LocalDateTime dataRemocao) {
+		super(id, dataCriacao, dataUltimaAtualizacao, dataRemocao);
+		this.logradouro = logradouro;
+		this.numero = numero;
+		this.complemento = complemento;
+		this.bairro = bairro;
+		this.cidade = cidade;
+		this.estado = estado;
+		this.cep = cep != null ? cep.replaceAll("[^0-9]", "") : null;
+		validar();
 	}
 
 	private void validar() {

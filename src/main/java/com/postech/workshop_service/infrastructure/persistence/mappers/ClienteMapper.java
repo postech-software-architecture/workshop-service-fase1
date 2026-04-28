@@ -25,12 +25,18 @@ public interface ClienteMapper {
 		if (entity.getEndereco() != null) {
 			entity.getEndereco().setCliente(entity);
 			entity.getEndereco().setClienteId(entity.getId());
+			if (entity.getEndereco().getDataCriacao() == null) {
+				entity.getEndereco().setDataCriacao(entity.getDataCriacao());
+				entity.getEndereco().setDataUltimaAtualizacao(entity.getDataUltimaAtualizacao());
+			}
 		}
 	}
 
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "documento", source = "documento.valor")
 	@Mapping(target = "dataCriacao", ignore = true)
+	@Mapping(target = "dataUltimaAtualizacao", ignore = true)
+	@Mapping(target = "dataRemocao", source = "dataRemocao")
 	void updateEntityFromDomain(Cliente domain, @MappingTarget ClienteJpaEntity entity);
 
 }

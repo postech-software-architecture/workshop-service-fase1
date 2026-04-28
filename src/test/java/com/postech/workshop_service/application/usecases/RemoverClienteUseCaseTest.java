@@ -26,11 +26,13 @@ class RemoverClienteUseCaseTest {
 	@Test
 	void shouldRemoveCliente() {
 		UUID id = UUID.randomUUID();
-		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(mock(Cliente.class)));
+		Cliente cliente = mock(Cliente.class);
+		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(cliente));
 
 		removerClienteUseCase.executar(id);
 
-		verify(clienteRepository).remover(id);
+		verify(cliente).removerLogicamente();
+		verify(clienteRepository).salvar(cliente);
 	}
 
 	@Test

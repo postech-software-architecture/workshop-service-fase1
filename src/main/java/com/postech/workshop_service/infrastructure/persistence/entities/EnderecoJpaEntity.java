@@ -3,6 +3,7 @@ package com.postech.workshop_service.infrastructure.persistence.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -43,5 +44,14 @@ public class EnderecoJpaEntity {
 
 	@Column(length = 10)
 	private String cep;
+
+	@Column(name = "data_criacao", nullable = false)
+	private LocalDateTime dataCriacao;
+
+	@Column(name = "data_ultima_atualizacao", nullable = false)
+	private LocalDateTime dataUltimaAtualizacao;
+
+	@Column(name = "data_remocao")
+	private LocalDateTime dataRemocao;
 
 }

@@ -10,6 +10,9 @@ import org.mapstruct.ReportingPolicy;
 public interface EnderecoMapper {
 
 	@Mapping(target = "cliente", ignore = true)
+	@Mapping(target = "dataCriacao", ignore = true)
+	@Mapping(target = "dataUltimaAtualizacao", ignore = true)
+	@Mapping(target = "dataRemocao", ignore = true)
 	EnderecoJpaEntity toEntity(Endereco domain);
 
 	Endereco toDomain(EnderecoJpaEntity entity);

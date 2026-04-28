@@ -6,7 +6,6 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,11 +13,9 @@ import java.util.UUID;
  * Entidade raiz que representa um veiculo da oficina.
  */
 @Getter
-public class Veiculo {
+public class Veiculo extends EntidadeBase {
 
 	private static final int ANO_MINIMO = 1900;
-
-	private final UUID id;
 
 	private Placa placa;
 
@@ -36,12 +33,6 @@ public class Veiculo {
 
 	private boolean ativo;
 
-	private final LocalDateTime dataCriacao;
-
-	private LocalDateTime dataUltimaAtualizacao;
-
-	private LocalDateTime dataRemocao;
-
 	/**
 	 * Cria um novo veiculo com os dados operacionais obrigatorios.
 	 * @param id identificador tecnico do veiculo.
@@ -55,9 +46,7 @@ public class Veiculo {
 	 */
 	public Veiculo(UUID id, Placa placa, String marca, String modelo, int ano, String cor, String observacoes,
 			Collection<UUID> clientesVinculados) {
-		this.id = id != null ? id : UUID.randomUUID();
-		this.dataCriacao = LocalDateTime.now();
-		this.dataUltimaAtualizacao = this.dataCriacao;
+		super(id != null ? id : UUID.randomUUID());
 		this.clientesVinculados = new LinkedHashSet<>();
 		this.ativo = true;
 
@@ -80,14 +69,11 @@ public class Veiculo {
 	 * @param dataUltimaAtualizacao data da ultima atualizacao.
 	 * @param dataRemocao data da remocao logica.
 	 */
+	@Default
 	public Veiculo(UUID id, Placa placa, String marca, String modelo, int ano, String cor, String observacoes,
 			Collection<UUID> clientesVinculados, boolean ativo, LocalDateTime dataCriacao,
 			LocalDateTime dataUltimaAtualizacao, LocalDateTime dataRemocao) {
-		this.id = Objects.requireNonNull(id, "O identificador do veiculo e obrigatorio.");
-		this.dataCriacao = Objects.requireNonNull(dataCriacao, "A data de criacao do veiculo e obrigatoria.");
-		this.dataUltimaAtualizacao = Objects.requireNonNull(dataUltimaAtualizacao,
-				"A data de ultima atualizacao do veiculo e obrigatoria.");
-		this.dataRemocao = dataRemocao;
+		super(id, dataCriacao, dataUltimaAtualizacao, dataRemocao);
 		this.clientesVinculados = new LinkedHashSet<>();
 		this.ativo = ativo;
 
@@ -106,7 +92,7 @@ public class Veiculo {
 	 */
 	public void atualizarDados(Placa placa, String marca, String modelo, int ano, String cor, String observacoes) {
 		aplicarDados(placa, marca, modelo, ano, cor, observacoes);
-		this.dataUltimaAtualizacao = LocalDateTime.now();
+		atualizarDataUltimaAtualizacao();
 	}
 
 	/**
@@ -118,7 +104,7 @@ public class Veiculo {
 		if (!this.clientesVinculados.add(clienteId)) {
 			throw new IllegalArgumentException("O cliente informado ja esta vinculado ao veiculo.");
 		}
-		this.dataUltimaAtualizacao = LocalDateTime.now();
+		atualizarDataUltimaAtualizacao();
 	}
 
 	/**
@@ -134,7 +120,7 @@ public class Veiculo {
 			throw new IllegalArgumentException("O veiculo deve possuir ao menos um cliente vinculado.");
 		}
 		this.clientesVinculados.remove(clienteId);
-		this.dataUltimaAtualizacao = LocalDateTime.now();
+		atualizarDataUltimaAtualizacao();
 	}
 
 	/**
@@ -145,8 +131,7 @@ public class Veiculo {
 			return;
 		}
 		this.ativo = false;
-		this.dataRemocao = LocalDateTime.now();
-		this.dataUltimaAtualizacao = this.dataRemocao;
+		registrarRemocaoLogica();
 	}
 
 	private void aplicarDados(Placa placa, String marca, String modelo, int ano, String cor, String observacoes) {

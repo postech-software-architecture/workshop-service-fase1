@@ -42,6 +42,9 @@ public class ClienteJpaEntity {
 	@Column(name = "data_ultima_atualizacao", nullable = false)
 	private LocalDateTime dataUltimaAtualizacao;
 
+	@Column(name = "data_remocao")
+	private LocalDateTime dataRemocao;
+
 	@OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
 	private EnderecoJpaEntity endereco;
 

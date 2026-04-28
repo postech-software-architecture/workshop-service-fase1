@@ -46,4 +46,7 @@ public class ClienteResponse {
 	@Schema(example = "2024-04-24T10:00:00")
 	private LocalDateTime dataUltimaAtualizacao;
 
+	@Schema(example = "2024-04-24T10:00:00")
+	private LocalDateTime dataRemocao;
+
 }

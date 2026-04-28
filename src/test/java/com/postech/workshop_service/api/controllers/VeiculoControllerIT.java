@@ -144,7 +144,7 @@ class VeiculoControllerIT extends PostgresTestContainer {
 
 	@Test
 	void shouldReturn400WhenTryingToRemoveLastCliente() throws Exception {
-		UUID clienteA = criarCliente("Cliente Unico", "98712345600");
+		UUID clienteA = criarCliente("Cliente Unico", "98712345628");
 
 		CadastroVeiculoRequest cadastro = CadastroVeiculoRequest.builder()
 			.placa("XYZ1A23")

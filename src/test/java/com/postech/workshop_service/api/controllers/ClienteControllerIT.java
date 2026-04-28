@@ -74,11 +74,13 @@ class ClienteControllerIT extends PostgresTestContainer {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$[0].id").value(idStr));
 
-		// 5. Delete
+		// 5. Delete (soft delete)
 		mockMvc.perform(delete("/api/v1/clientes/{id}", id)).andExpect(status().isNoContent());
 
-		// 6. Verify Delete
-		mockMvc.perform(get("/api/v1/clientes/{id}", id)).andExpect(status().isNotFound());
+		// 6. Verify soft delete - client still exists but with dataRemocao set
+		mockMvc.perform(get("/api/v1/clientes/{id}", id))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.dataRemocao").isNotEmpty());
 	}
 
 	@Test
