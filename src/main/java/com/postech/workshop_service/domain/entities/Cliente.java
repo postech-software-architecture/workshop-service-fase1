@@ -27,6 +27,8 @@ public class Cliente extends EntidadeBase {
 
 	private String observacoes;
 
+	private boolean ativo;
+
 	/**
 	 * Constrói um novo cliente (Cadastro Inicial).
 	 */
@@ -50,6 +52,7 @@ public class Cliente extends EntidadeBase {
 		this.endereco = endereco;
 		this.dataNascimentoFundacao = dataNascimentoFundacao;
 		this.observacoes = observacoes;
+		this.ativo = true;
 	}
 
 	/**
@@ -57,7 +60,7 @@ public class Cliente extends EntidadeBase {
 	 */
 	@Default
 	public Cliente(UUID id, String nome, Documento documento, String email, String telefone, Endereco endereco,
-			LocalDate dataNascimentoFundacao, String observacoes, LocalDateTime dataCriacao,
+			LocalDate dataNascimentoFundacao, String observacoes, boolean ativo, LocalDateTime dataCriacao,
 			LocalDateTime dataUltimaAtualizacao, LocalDateTime dataRemocao) {
 		super(id, dataCriacao, dataUltimaAtualizacao, dataRemocao);
 		validarNome(nome);
@@ -70,12 +73,20 @@ public class Cliente extends EntidadeBase {
 		this.endereco = endereco;
 		this.dataNascimentoFundacao = dataNascimentoFundacao;
 		this.observacoes = observacoes;
+		this.ativo = ativo;
 	}
 
 	/**
-	 * Executa a remocao logica do cliente.
+	 * Executa a remocao logica do cliente e de seu endereco.
 	 */
 	public void removerLogicamente() {
+		if (!this.ativo) {
+			return;
+		}
+		this.ativo = false;
+		if (this.endereco != null) {
+			this.endereco.removerLogicamente();
+		}
 		registrarRemocaoLogica();
 	}
 

@@ -62,6 +62,13 @@ public class Endereco extends EntidadeBase {
 		validar();
 	}
 
+	/**
+	 * Executa a remocao logica do endereco.
+	 */
+	public void removerLogicamente() {
+		registrarRemocaoLogica();
+	}
+
 	private void validar() {
 		if (logradouro == null || logradouro.isBlank())
 			throw new IllegalArgumentException("Logradouro é obrigatório.");

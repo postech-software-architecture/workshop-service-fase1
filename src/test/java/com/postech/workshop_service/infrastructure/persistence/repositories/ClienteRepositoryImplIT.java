@@ -33,7 +33,7 @@ class ClienteRepositoryImplIT extends PostgresTestContainer {
 				new Endereco("Rua T", "1", null, "B", "C", "SP", "01234567"), null, "Obs");
 		repository.salvar(cliente);
 
-		Optional<Cliente> found = repository.buscarPorId(id);
+		Optional<Cliente> found = repository.buscarPorId(id, false);
 		assertTrue(found.isPresent());
 		assertEquals("Novo Nome", found.get().getNome());
 		assertEquals("01234567", found.get().getEndereco().getCep());
@@ -43,26 +43,26 @@ class ClienteRepositoryImplIT extends PostgresTestContainer {
 				new Endereco("Rua U", "2", null, "B", "C", "SP", "01234567"), null, "Obs");
 		repository.salvar(cliente);
 
-		found = repository.buscarPorId(id);
+		found = repository.buscarPorId(id, false);
 		assertEquals("Rua U", found.get().getEndereco().getLogradouro());
 
 		// Remove address
 		cliente.atualizarDados("Novo Nome", "novo@test.com", "11888888888", null, null, "Obs");
 		repository.salvar(cliente);
 
-		found = repository.buscarPorId(id);
+		found = repository.buscarPorId(id, false);
 		assertNull(found.get().getEndereco());
 	}
 
 	@Test
 	void shouldReturnEmptyWhenNotFound() {
-		Optional<Cliente> found = repository.buscarPorId(UUID.randomUUID());
+		Optional<Cliente> found = repository.buscarPorId(UUID.randomUUID(), false);
 		assertTrue(found.isEmpty());
 	}
 
 	@Test
 	void shouldReturnEmptyByDocumentWhenNotFound() {
-		Optional<Cliente> found = repository.buscarPorDocumento("000");
+		Optional<Cliente> found = repository.buscarPorDocumento("000", false);
 		assertTrue(found.isEmpty());
 	}
 
@@ -72,7 +72,7 @@ class ClienteRepositoryImplIT extends PostgresTestContainer {
 		Cliente cliente = new Cliente(id, "D", new Documento("98765432100"), "d@d.com", "1");
 		repository.salvar(cliente);
 		repository.remover(id);
-		assertTrue(repository.buscarPorId(id).isEmpty());
+		assertTrue(repository.buscarPorId(id, false).isEmpty());
 	}
 
 	@Test

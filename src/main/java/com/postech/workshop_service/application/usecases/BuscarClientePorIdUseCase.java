@@ -29,8 +29,8 @@ public class BuscarClientePorIdUseCase {
 	 * @return um {@link Optional} contendo o cliente se encontrado, ou vazio caso
 	 * contrário.
 	 */
-	public Optional<Cliente> executar(UUID id) {
-		return clienteRepository.buscarPorId(id);
+	public Optional<Cliente> executar(UUID id, boolean incluirInativos) {
+		return clienteRepository.buscarPorId(id, incluirInativos);
 	}
 
 }

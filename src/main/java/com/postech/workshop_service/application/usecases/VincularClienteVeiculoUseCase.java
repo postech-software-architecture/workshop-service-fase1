@@ -36,7 +36,7 @@ public class VincularClienteVeiculoUseCase {
 		Veiculo veiculo = veiculoRepository.buscarPorId(veiculoId, true)
 			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
 
-		if (clienteRepository.buscarPorId(clienteId).isEmpty()) {
+		if (clienteRepository.buscarPorId(clienteId, false).isEmpty()) {
 			throw new RegraDeNegocioException("O cliente informado deve existir previamente.");
 		}
 

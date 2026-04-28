@@ -35,7 +35,7 @@ class ListarVeiculosUseCaseTest {
 	@Test
 	void shouldValidateClientFilterBeforeListing() {
 		UUID clienteId = UUID.randomUUID();
-		when(clienteRepository.buscarPorId(clienteId)).thenReturn(
+		when(clienteRepository.buscarPorId(clienteId, false)).thenReturn(
 				Optional.of(new Cliente(clienteId, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
 		when(veiculoRepository.listar(0, 20, null, clienteId, false))
 			.thenReturn(new PaginaResultado<>(List.of(), 0, 0, 0, 20));

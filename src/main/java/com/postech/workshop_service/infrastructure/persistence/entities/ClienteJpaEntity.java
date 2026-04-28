@@ -36,6 +36,9 @@ public class ClienteJpaEntity {
 	@Column(columnDefinition = "TEXT")
 	private String observacoes;
 
+	@Column(nullable = false)
+	private boolean ativo;
+
 	@Column(name = "data_criacao", nullable = false)
 	private LocalDateTime dataCriacao;
 

@@ -29,9 +29,9 @@ public class BuscarClientePorDocumentoUseCase {
 	 * @return um {@link Optional} contendo o cliente se encontrado, ou vazio caso
 	 * contrário.
 	 */
-	public Optional<Cliente> executar(String documento) {
+	public Optional<Cliente> executar(String documento, boolean incluirInativos) {
 		String cleanDoc = documento.replaceAll("[^0-9]", "");
-		return clienteRepository.buscarPorDocumento(cleanDoc);
+		return clienteRepository.buscarPorDocumento(cleanDoc, incluirInativos);
 	}
 
 }

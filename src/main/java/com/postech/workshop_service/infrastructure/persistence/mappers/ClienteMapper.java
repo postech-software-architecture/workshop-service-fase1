@@ -35,7 +35,7 @@ public interface ClienteMapper {
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "documento", source = "documento.valor")
 	@Mapping(target = "dataCriacao", ignore = true)
-	@Mapping(target = "dataUltimaAtualizacao", ignore = true)
+	@Mapping(target = "dataUltimaAtualizacao", source = "dataUltimaAtualizacao")
 	@Mapping(target = "dataRemocao", source = "dataRemocao")
 	void updateEntityFromDomain(Cliente domain, @MappingTarget ClienteJpaEntity entity);
 

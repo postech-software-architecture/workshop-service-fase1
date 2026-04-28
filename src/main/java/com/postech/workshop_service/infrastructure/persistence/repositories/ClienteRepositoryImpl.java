@@ -4,7 +4,9 @@ import com.postech.workshop_service.domain.entities.Cliente;
 import com.postech.workshop_service.domain.repositories.ClienteRepository;
 import com.postech.workshop_service.infrastructure.persistence.entities.ClienteJpaEntity;
 import com.postech.workshop_service.infrastructure.persistence.mappers.ClienteMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,22 +46,30 @@ public class ClienteRepositoryImpl implements ClienteRepository {
 	}
 
 	@Override
-	public Optional<Cliente> buscarPorId(UUID id) {
-		return jpaClienteRepository.findById(id).map(clienteMapper::toDomain);
+	public Optional<Cliente> buscarPorId(UUID id, boolean incluirInativos) {
+		return jpaClienteRepository.findById(id)
+			.filter(entity -> incluirInativos || entity.isAtivo())
+			.map(clienteMapper::toDomain);
 	}
 
 	@Override
-	public Optional<Cliente> buscarPorDocumento(String documento) {
-		return jpaClienteRepository.findByDocumento(documento).map(clienteMapper::toDomain);
+	public Optional<Cliente> buscarPorDocumento(String documento, boolean incluirInativos) {
+		if (incluirInativos) {
+			return jpaClienteRepository.findByDocumento(documento).map(clienteMapper::toDomain);
+		}
+		return jpaClienteRepository.findByDocumentoAndAtivoTrue(documento).map(clienteMapper::toDomain);
 	}
 
 	@Override
-	public List<Cliente> listar(int pagina, int tamanho) {
-		return jpaClienteRepository.findAll(PageRequest.of(pagina, tamanho))
-			.getContent()
-			.stream()
-			.map(clienteMapper::toDomain)
-			.collect(Collectors.toList());
+	public List<Cliente> listar(int pagina, int tamanho, boolean incluirInativos) {
+		Specification<ClienteJpaEntity> spec = (root, query, cb) -> {
+			if (incluirInativos) {
+				return cb.conjunction();
+			}
+			return cb.isTrue(root.get("ativo"));
+		};
+		Page<ClienteJpaEntity> resultado = jpaClienteRepository.findAll(spec, PageRequest.of(pagina, tamanho));
+		return resultado.getContent().stream().map(clienteMapper::toDomain).collect(Collectors.toList());
 	}
 
 	@Override

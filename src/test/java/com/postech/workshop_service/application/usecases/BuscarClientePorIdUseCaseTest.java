@@ -29,9 +29,9 @@ class BuscarClientePorIdUseCaseTest {
 	void shouldFindById() {
 		UUID id = UUID.randomUUID();
 		Cliente cliente = new Cliente(id, "Nome", new Documento("98765432100"), "e@e.com", null);
-		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(cliente));
+		when(clienteRepository.buscarPorId(id, false)).thenReturn(Optional.of(cliente));
 
-		Optional<Cliente> result = useCase.executar(id);
+		Optional<Cliente> result = useCase.executar(id, false);
 
 		assertTrue(result.isPresent());
 		assertEquals("Nome", result.get().getNome());

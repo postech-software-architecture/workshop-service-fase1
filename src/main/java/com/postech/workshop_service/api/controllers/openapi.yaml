@@ -51,6 +51,11 @@ paths:
           schema:
             type: integer
             default: 20
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Lista de clientes
@@ -73,6 +78,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Cliente encontrado
@@ -138,6 +148,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Cliente encontrado
@@ -516,6 +531,9 @@ components:
         observacoes:
           type: string
           example: 'Cliente VIP'
+        ativo:
+          type: boolean
+          example: true
         dataCriacao:
           type: string
           format: date-time
@@ -544,6 +562,7 @@ components:
           cep: '01234567'
         dataNascimentoFundacao: '1990-01-15'
         observacoes: 'Cliente VIP'
+        ativo: true
         dataCriacao: '2024-04-24T10:00:00'
         dataUltimaAtualizacao: '2024-04-24T10:00:00'
         dataRemocao: null

@@ -40,6 +40,9 @@ public class ClienteResponse {
 	@Schema(example = "Cliente VIP")
 	private String observacoes;
 
+	@Schema(example = "true")
+	private boolean ativo;
+
 	@Schema(example = "2024-04-24T10:00:00")
 	private LocalDateTime dataCriacao;
 

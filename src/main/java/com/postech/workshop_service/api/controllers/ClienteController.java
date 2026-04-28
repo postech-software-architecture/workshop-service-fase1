@@ -91,8 +91,9 @@ public class ClienteController {
 	 */
 	@GetMapping("/{id}")
 	@Operation(summary = "Buscar cliente por ID")
-	public ResponseEntity<ClienteResponse> buscarPorId(@PathVariable UUID id) {
-		return buscarClientePorIdUseCase.executar(id)
+	public ResponseEntity<ClienteResponse> buscarPorId(@PathVariable UUID id,
+			@RequestParam(defaultValue = "false") boolean incluirInativos) {
+		return buscarClientePorIdUseCase.executar(id, incluirInativos)
 			.map(cliente -> ResponseEntity.ok(toResponse(cliente)))
 			.orElse(ResponseEntity.notFound().build());
 	}
@@ -104,8 +105,9 @@ public class ClienteController {
 	 */
 	@GetMapping("/documento/{documento}")
 	@Operation(summary = "Buscar cliente por CPF ou CNPJ")
-	public ResponseEntity<ClienteResponse> buscarPorDocumento(@PathVariable String documento) {
-		return buscarClientePorDocumentoUseCase.executar(documento)
+	public ResponseEntity<ClienteResponse> buscarPorDocumento(@PathVariable String documento,
+			@RequestParam(defaultValue = "false") boolean incluirInativos) {
+		return buscarClientePorDocumentoUseCase.executar(documento, incluirInativos)
 			.map(cliente -> ResponseEntity.ok(toResponse(cliente)))
 			.orElse(ResponseEntity.notFound().build());
 	}
@@ -119,8 +121,9 @@ public class ClienteController {
 	@GetMapping
 	@Operation(summary = "Listar clientes com paginação")
 	public ResponseEntity<List<ClienteResponse>> listar(@RequestParam(defaultValue = "0") int pagina,
-			@RequestParam(defaultValue = "20") int tamanho) {
-		List<ClienteResponse> lista = listarClientesUseCase.executar(pagina, tamanho)
+			@RequestParam(defaultValue = "20") int tamanho,
+			@RequestParam(defaultValue = "false") boolean incluirInativos) {
+		List<ClienteResponse> lista = listarClientesUseCase.executar(pagina, tamanho, incluirInativos)
 			.stream()
 			.map(this::toResponse)
 			.collect(Collectors.toList());
@@ -161,6 +164,7 @@ public class ClienteController {
 			.endereco(enderecoDTO)
 			.dataNascimentoFundacao(cliente.getDataNascimentoFundacao())
 			.observacoes(cliente.getObservacoes())
+			.ativo(cliente.isAtivo())
 			.dataCriacao(cliente.getDataCriacao())
 			.dataUltimaAtualizacao(cliente.getDataUltimaAtualizacao())
 			.dataRemocao(cliente.getDataRemocao())

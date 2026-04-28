@@ -26,9 +26,9 @@ class ListarClientesUseCaseTest {
 	@Test
 	void shouldList() {
 		List<Cliente> list = List.of(new Cliente(null, "A", new Documento("98765432100"), "a@a.com", null));
-		when(clienteRepository.listar(0, 10)).thenReturn(list);
+		when(clienteRepository.listar(0, 10, false)).thenReturn(list);
 
-		List<Cliente> result = useCase.executar(0, 10);
+		List<Cliente> result = useCase.executar(0, 10, false);
 
 		assertEquals(1, result.size());
 	}

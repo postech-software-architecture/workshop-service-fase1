@@ -38,7 +38,7 @@ public class AtualizarClienteUseCase {
 	public Cliente executar(UUID id, String nome, String email, String telefone, Endereco endereco,
 			LocalDate dataNascimentoFundacao, String observacoes) {
 
-		Cliente cliente = clienteRepository.buscarPorId(id)
+		Cliente cliente = clienteRepository.buscarPorId(id, true)
 			.orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado com o ID informado."));
 
 		cliente.atualizarDados(nome, email, telefone, endereco, dataNascimentoFundacao, observacoes);

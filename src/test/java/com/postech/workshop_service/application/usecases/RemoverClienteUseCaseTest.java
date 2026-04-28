@@ -1,5 +1,6 @@
 package com.postech.workshop_service.application.usecases;
 
+import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.domain.entities.Cliente;
 import com.postech.workshop_service.domain.repositories.ClienteRepository;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class RemoverClienteUseCaseTest {
 	void shouldRemoveCliente() {
 		UUID id = UUID.randomUUID();
 		Cliente cliente = mock(Cliente.class);
-		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(cliente));
+		when(clienteRepository.buscarPorId(id, true)).thenReturn(Optional.of(cliente));
 
 		removerClienteUseCase.executar(id);
 
@@ -38,9 +39,9 @@ class RemoverClienteUseCaseTest {
 	@Test
 	void shouldThrowExceptionWhenClienteNotFound() {
 		UUID id = UUID.randomUUID();
-		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.empty());
+		when(clienteRepository.buscarPorId(id, true)).thenReturn(Optional.empty());
 
-		assertThrows(IllegalArgumentException.class, () -> removerClienteUseCase.executar(id));
+		assertThrows(RecursoNaoEncontradoException.class, () -> removerClienteUseCase.executar(id));
 	}
 
 }

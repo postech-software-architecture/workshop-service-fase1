@@ -44,7 +44,7 @@ class VincularClienteVeiculoUseCaseTest {
 				List.of(clienteAtual));
 
 		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
-		when(clienteRepository.buscarPorId(novoCliente)).thenReturn(Optional
+		when(clienteRepository.buscarPorId(novoCliente, false)).thenReturn(Optional
 			.of(new Cliente(novoCliente, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
 		when(veiculoRepository.salvar(any(Veiculo.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

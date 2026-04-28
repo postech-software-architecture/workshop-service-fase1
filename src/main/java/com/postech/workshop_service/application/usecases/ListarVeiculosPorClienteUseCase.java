@@ -36,7 +36,7 @@ public class ListarVeiculosPorClienteUseCase {
 	 * @return lista de veiculos encontrados.
 	 */
 	public List<Veiculo> executar(UUID clienteId, boolean incluirInativos) {
-		if (clienteRepository.buscarPorId(clienteId).isEmpty()) {
+		if (clienteRepository.buscarPorId(clienteId, false).isEmpty()) {
 			throw new RecursoNaoEncontradoException("Cliente nao encontrado com o ID informado.");
 		}
 		return veiculoRepository.listarPorCliente(clienteId, incluirInativos);

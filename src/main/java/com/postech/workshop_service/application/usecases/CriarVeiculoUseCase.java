@@ -70,7 +70,7 @@ public class CriarVeiculoUseCase {
 			throw new RegraDeNegocioException("O veiculo deve possuir ao menos um cliente vinculado.");
 		}
 		for (UUID clienteId : clientesIds) {
-			if (clienteRepository.buscarPorId(clienteId).isEmpty()) {
+			if (clienteRepository.buscarPorId(clienteId, false).isEmpty()) {
 				throw new RegraDeNegocioException("Todos os clientes vinculados devem existir previamente.");
 			}
 		}

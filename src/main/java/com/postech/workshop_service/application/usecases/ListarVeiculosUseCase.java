@@ -41,7 +41,7 @@ public class ListarVeiculosUseCase {
 	 */
 	public PaginaResultado<Veiculo> executar(int pagina, int tamanho, String placaRaw, UUID clienteId,
 			boolean incluirInativos) {
-		if (clienteId != null && clienteRepository.buscarPorId(clienteId).isEmpty()) {
+		if (clienteId != null && clienteRepository.buscarPorId(clienteId, false).isEmpty()) {
 			throw new RecursoNaoEncontradoException("Cliente nao encontrado com o ID informado.");
 		}
 		String placaNormalizada = placaRaw != null && !placaRaw.isBlank() ? new Placa(placaRaw).getValor() : null;

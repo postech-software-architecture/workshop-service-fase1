@@ -78,7 +78,7 @@ public interface VeiculoMapper {
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "placa", source = "placa.valor")
 	@Mapping(target = "dataCriacao", ignore = true)
-	@Mapping(target = "dataUltimaAtualizacao", ignore = true)
+	@Mapping(target = "dataUltimaAtualizacao", source = "dataUltimaAtualizacao")
 	@Mapping(target = "dataRemocao", source = "dataRemocao")
 	@Mapping(target = "clientesVinculados", ignore = true)
 	void updateEntityFromDomain(Veiculo domain, @MappingTarget VeiculoJpaEntity entity);

@@ -40,7 +40,7 @@ class ListarVeiculosPorClienteUseCaseTest {
 	@Test
 	void shouldReturnVehiclesWhenClientExists() {
 		UUID clienteId = UUID.randomUUID();
-		when(clienteRepository.buscarPorId(clienteId)).thenReturn(
+		when(clienteRepository.buscarPorId(clienteId, false)).thenReturn(
 				Optional.of(new Cliente(clienteId, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
 		when(veiculoRepository.listarPorCliente(clienteId, false)).thenReturn(List.of());
 

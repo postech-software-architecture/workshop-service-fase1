@@ -29,8 +29,8 @@ public class ListarClientesUseCase {
 	 * @param tamanho quantidade de registros por página.
 	 * @return lista de {@link Cliente} encontrados.
 	 */
-	public List<Cliente> executar(int pagina, int tamanho) {
-		return clienteRepository.listar(pagina, tamanho);
+	public List<Cliente> executar(int pagina, int tamanho, boolean incluirInativos) {
+		return clienteRepository.listar(pagina, tamanho, incluirInativos);
 	}
 
 	/**

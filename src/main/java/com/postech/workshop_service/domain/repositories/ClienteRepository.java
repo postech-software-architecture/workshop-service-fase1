@@ -9,11 +9,11 @@ public interface ClienteRepository {
 
 	Cliente salvar(Cliente cliente);
 
-	Optional<Cliente> buscarPorId(UUID id);
+	Optional<Cliente> buscarPorId(UUID id, boolean incluirInativos);
 
-	Optional<Cliente> buscarPorDocumento(String documento);
+	Optional<Cliente> buscarPorDocumento(String documento, boolean incluirInativos);
 
-	List<Cliente> listar(int pagina, int tamanho);
+	List<Cliente> listar(int pagina, int tamanho, boolean incluirInativos);
 
 	long contarTodos();
 

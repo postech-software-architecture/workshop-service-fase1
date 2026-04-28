@@ -260,7 +260,7 @@ public class VeiculoController {
 	private List<ClienteVinculadoResponse> montarClientes(Veiculo veiculo) {
 		return veiculo.getClientesVinculados()
 			.stream()
-			.map(clienteId -> buscarClientePorIdUseCase.executar(clienteId)
+			.map(clienteId -> buscarClientePorIdUseCase.executar(clienteId, true)
 				.map(cliente -> ClienteVinculadoResponse.builder()
 					.id(cliente.getId())
 					.nome(cliente.getNome())

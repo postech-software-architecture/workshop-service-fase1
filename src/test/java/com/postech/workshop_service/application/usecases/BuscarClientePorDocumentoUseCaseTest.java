@@ -29,9 +29,9 @@ class BuscarClientePorDocumentoUseCaseTest {
 		String doc = "987.654.321-00";
 		String cleanDoc = "98765432100";
 		Cliente cliente = new Cliente(null, "Nome", new Documento(cleanDoc), "e@e.com", null);
-		when(clienteRepository.buscarPorDocumento(cleanDoc)).thenReturn(Optional.of(cliente));
+		when(clienteRepository.buscarPorDocumento(cleanDoc, false)).thenReturn(Optional.of(cliente));
 
-		Optional<Cliente> result = useCase.executar(doc);
+		Optional<Cliente> result = useCase.executar(doc, false);
 
 		assertTrue(result.isPresent());
 		assertEquals(cleanDoc, result.get().getDocumento().getValor());

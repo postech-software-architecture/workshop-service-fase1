@@ -31,7 +31,7 @@ class AtualizarClienteUseCaseTest {
 		UUID id = UUID.randomUUID();
 		Cliente cliente = new Cliente(id, "Antigo", new Documento("98765432100"), "email@email.com", null);
 
-		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(cliente));
+		when(clienteRepository.buscarPorId(id, true)).thenReturn(Optional.of(cliente));
 		when(clienteRepository.salvar(any())).thenAnswer(i -> i.getArguments()[0]);
 
 		Cliente updated = atualizarClienteUseCase.executar(id, "Novo", "novo@email.com", null, null, null, null);
@@ -43,7 +43,7 @@ class AtualizarClienteUseCaseTest {
 	@Test
 	void shouldThrowExceptionWhenClienteNotFound() {
 		UUID id = UUID.randomUUID();
-		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.empty());
+		when(clienteRepository.buscarPorId(id, true)).thenReturn(Optional.empty());
 
 		assertThrows(IllegalArgumentException.class,
 				() -> atualizarClienteUseCase.executar(id, "Novo", "email", null, null, null, null));
