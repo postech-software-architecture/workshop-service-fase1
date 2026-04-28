@@ -17,7 +17,7 @@
 
 **Purpose**: Preparar os artefatos da feature para a implementacao do agregado de dominio sem expandir o escopo para camadas externas
 
-- [ ] T001 Revisar e alinhar os artefatos de design da feature em `specs/004-orcamento-ordem-servico/spec.md`, `specs/004-orcamento-ordem-servico/plan.md`, `specs/004-orcamento-ordem-servico/data-model.md` e `specs/004-orcamento-ordem-servico/quickstart.md`
+- [X] T001 Revisar e alinhar os artefatos de design da feature em `specs/004-orcamento-ordem-servico/spec.md`, `specs/004-orcamento-ordem-servico/plan.md`, `specs/004-orcamento-ordem-servico/data-model.md` e `specs/004-orcamento-ordem-servico/quickstart.md`
 
 ---
 
@@ -27,13 +27,13 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 [P] Criar o enum `StatusOrcamento` em `src/main/java/com/postech/workshop_service/domain/entities/StatusOrcamento.java`
-- [ ] T003 [P] Criar o enum `TipoOrcamento` em `src/main/java/com/postech/workshop_service/domain/entities/TipoOrcamento.java`
-- [ ] T004 [P] Criar o tipo de dominio `ItemOrcamento` em `src/main/java/com/postech/workshop_service/domain/entities/ItemOrcamento.java`
-- [ ] T005 Criar a estrutura inicial da entidade `Orcamento` herdando de `EntidadeBase` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
-- [ ] T006 [P] Criar a classe de testes unitarios `OrcamentoTest` em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
-- [ ] T007 Ajustar a base de `OrdemServico` para suportar entrada explicita em `EM_EXECUCAO` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
-- [ ] T008 [P] Expandir `OrdemServicoTest` para cobrir a nova transicao para `EM_EXECUCAO` em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
+- [X] T002 [P] Criar o enum `StatusOrcamento` em `src/main/java/com/postech/workshop_service/domain/entities/StatusOrcamento.java`
+- [X] T003 [P] Criar o enum `TipoOrcamento` em `src/main/java/com/postech/workshop_service/domain/entities/TipoOrcamento.java`
+- [X] T004 [P] Criar o tipo de dominio `ItemOrcamento` em `src/main/java/com/postech/workshop_service/domain/entities/ItemOrcamento.java`
+- [X] T005 Criar a estrutura inicial da entidade `Orcamento` herdando de `EntidadeBase` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
+- [X] T006 [P] Criar a classe de testes unitarios `OrcamentoTest` em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
+- [X] T007 Ajustar a base de `OrdemServico` para suportar entrada explicita em `EM_EXECUCAO` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java`
+- [X] T008 [P] Expandir `OrdemServicoTest` para cobrir a nova transicao para `EM_EXECUCAO` em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -47,13 +47,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T009 [US1] Implementar testes de criacao e invariantes obrigatorias de `Orcamento` em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
+- [X] T009 [US1] Implementar testes de criacao e invariantes obrigatorias de `Orcamento` em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Implementar os campos obrigatorios, construtor de criacao e inicializacao com status `CRIADO` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
-- [ ] T011 [US1] Implementar construtor de reconstituicao com campos herdados de `EntidadeBase` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
-- [ ] T012 [US1] Implementar validacoes de nulos, regra de minimo de 1 item e Javadoc dos comportamentos publicos em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java` e `src/main/java/com/postech/workshop_service/domain/entities/ItemOrcamento.java`
+- [X] T010 [US1] Implementar os campos obrigatorios, construtor de criacao e inicializacao com status `CRIADO` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
+- [X] T011 [US1] Implementar construtor de reconstituicao com campos herdados de `EntidadeBase` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
+- [X] T012 [US1] Implementar validacoes de nulos, regra de minimo de 1 item e Javadoc dos comportamentos publicos em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java` e `src/main/java/com/postech/workshop_service/domain/entities/ItemOrcamento.java`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -67,15 +67,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T013 [US2] Implementar testes de `enviarParaAprovacao()` cobrindo sucesso e bloqueio por status em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
-- [ ] T014 [US2] Implementar testes de `aprovar(OrdemServico)` e `rejeitar()` cobrindo transicoes validas e invalidas em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
+- [X] T013 [US2] Implementar testes de `enviarParaAprovacao()` cobrindo sucesso e bloqueio por status em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
+- [X] T014 [US2] Implementar testes de `aprovar(OrdemServico)` e `rejeitar()` cobrindo transicoes validas e invalidas em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Definir os valores `CRIADO`, `PENDENTE_APROVACAO`, `APROVADO`, `REJEITADO` e `CANCELADO` em `src/main/java/com/postech/workshop_service/domain/entities/StatusOrcamento.java`
-- [ ] T016 [US2] Definir os valores `SERVICO_ORIGINAL` e `ADICAO_SERVICO` em `src/main/java/com/postech/workshop_service/domain/entities/TipoOrcamento.java`
-- [ ] T017 [US2] Implementar `enviarParaAprovacao()`, `aprovar(OrdemServico)` e `rejeitar()` com `RegraDeNegocioException` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
-- [ ] T018 [US2] Implementar o comportamento de `OrdemServico` para entrar em `EM_EXECUCAO` e integrá-lo na aprovacao do `SERVICO_ORIGINAL` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java` e `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
+- [X] T015 [US2] Definir os valores `CRIADO`, `PENDENTE_APROVACAO`, `APROVADO`, `REJEITADO` e `CANCELADO` em `src/main/java/com/postech/workshop_service/domain/entities/StatusOrcamento.java`
+- [X] T016 [US2] Definir os valores `SERVICO_ORIGINAL` e `ADICAO_SERVICO` em `src/main/java/com/postech/workshop_service/domain/entities/TipoOrcamento.java`
+- [X] T017 [US2] Implementar `enviarParaAprovacao()`, `aprovar(OrdemServico)` e `rejeitar()` com `RegraDeNegocioException` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
+- [X] T018 [US2] Implementar o comportamento de `OrdemServico` para entrar em `EM_EXECUCAO` e integrá-lo na aprovacao do `SERVICO_ORIGINAL` em `src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java` e `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -89,14 +89,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T019 [US3] Implementar testes de `cancelar(OrdemServico)` para cancelamento permitido do `SERVICO_ORIGINAL` e bloqueio por status do orcamento em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
-- [ ] T020 [US3] Implementar testes de `cancelar(OrdemServico)` cobrindo `ADICAO_SERVICO`, ordem nao cancelavel e preservacao de estado em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
+- [X] T019 [US3] Implementar testes de `cancelar(OrdemServico)` para cancelamento permitido do `SERVICO_ORIGINAL` e bloqueio por status do orcamento em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
+- [X] T020 [US3] Implementar testes de `cancelar(OrdemServico)` cobrindo `ADICAO_SERVICO`, ordem nao cancelavel e preservacao de estado em `src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java`
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Implementar `cancelar(OrdemServico)` com `RegraDeNegocioException`, transicao para `CANCELADO` e atualizacao de `dataUltimaAtualizacao` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
-- [ ] T022 [US3] Integrar o cancelamento do `SERVICO_ORIGINAL` com `podeSerCancelada()` e `cancelar()` da `OrdemServico`, sem alterar a ordem para `ADICAO_SERVICO`, em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
-- [ ] T023 [US3] Ajustar a cobertura de `OrdemServico` para garantir que a transicao para `EM_EXECUCAO` impeça cancelamento posterior via orcamento em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
+- [X] T021 [US3] Implementar `cancelar(OrdemServico)` com `RegraDeNegocioException`, transicao para `CANCELADO` e atualizacao de `dataUltimaAtualizacao` em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
+- [X] T022 [US3] Integrar o cancelamento do `SERVICO_ORIGINAL` com `podeSerCancelada()` e `cancelar()` da `OrdemServico`, sem alterar a ordem para `ADICAO_SERVICO`, em `src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java`
+- [X] T023 [US3] Ajustar a cobertura de `OrdemServico` para garantir que a transicao para `EM_EXECUCAO` impeça cancelamento posterior via orcamento em `src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java`
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -106,9 +106,9 @@
 
 **Purpose**: Validacao final da entrega restrita ao dominio
 
-- [ ] T024 [P] Executar a suite de testes com `mvn test` a partir de `pom.xml`
-- [ ] T025 Revisar se nenhum controller, endpoint, repository, migration ou use case completo do orcamento foi criado fora de `src/main/java/com/postech/workshop_service/domain/entities/` e `src/test/java/com/postech/workshop_service/domain/entities/`
-- [ ] T026 [P] Atualizar a documentacao de execucao da feature se necessario em `specs/004-orcamento-ordem-servico/quickstart.md`
+- [X] T024 [P] Executar a suite de testes com `mvn test` a partir de `pom.xml`
+- [X] T025 Revisar se nenhum controller, endpoint, repository, migration ou use case completo do orcamento foi criado fora de `src/main/java/com/postech/workshop_service/domain/entities/` e `src/test/java/com/postech/workshop_service/domain/entities/`
+- [X] T026 [P] Atualizar a documentacao de execucao da feature se necessario em `specs/004-orcamento-ordem-servico/quickstart.md`
 
 ---
 

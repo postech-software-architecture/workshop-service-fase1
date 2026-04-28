@@ -124,4 +124,31 @@ class OrdemServicoTest {
 		assertEquals(agora, ordemServico.getDataUltimaAtualizacao());
 	}
 
+	@Test
+	void shouldStartExecutionWhenStatusAllowsIt() {
+		OrdemServico ordemServico = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
+		LocalDateTime dataAnterior = ordemServico.getDataUltimaAtualizacao();
+
+		ordemServico.iniciarExecucao();
+
+		assertEquals(StatusOrdemServico.EM_EXECUCAO, ordemServico.getStatus());
+		assertTrue(ordemServico.getDataUltimaAtualizacao().isAfter(dataAnterior)
+				|| ordemServico.getDataUltimaAtualizacao().isEqual(dataAnterior));
+		assertFalse(ordemServico.podeSerCancelada());
+	}
+
+	@Test
+	void shouldRejectStartExecutionWhenStatusDoesNotAllowIt() {
+		LocalDateTime agora = LocalDateTime.now();
+		OrdemServico ordemServico = new OrdemServico(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+				StatusOrdemServico.CANCELADA, agora, agora, null);
+
+		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class, ordemServico::iniciarExecucao);
+
+		assertEquals("Nao e permitido iniciar a execucao de uma ordem de servico com status CANCELADA.",
+				exception.getMessage());
+		assertEquals(StatusOrdemServico.CANCELADA, ordemServico.getStatus());
+		assertEquals(agora, ordemServico.getDataUltimaAtualizacao());
+	}
+
 }

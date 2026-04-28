@@ -72,6 +72,21 @@ public class OrdemServico extends EntidadeBase {
 		atualizarDataUltimaAtualizacao();
 	}
 
+	/**
+	 * Avanca a ordem de servico para o estado de execucao.
+	 * @throws RegraDeNegocioException quando a ordem de servico nao puder entrar em
+	 * execucao.
+	 */
+	public void iniciarExecucao() {
+		if (this.status != StatusOrdemServico.RECEBIDA
+				&& this.status != StatusOrdemServico.AGUARDANDO_APROVACAO_ORCAMENTO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido iniciar a execucao de uma ordem de servico com status " + this.status + ".");
+		}
+		this.status = StatusOrdemServico.EM_EXECUCAO;
+		atualizarDataUltimaAtualizacao();
+	}
+
 	private UUID validarIdentificador(UUID identificador, String mensagem) {
 		if (identificador == null) {
 			throw new IllegalArgumentException(mensagem);
