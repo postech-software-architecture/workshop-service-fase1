@@ -1,10 +1,9 @@
 {
-  "ai": "codex",
-  "ai_skills": true,
+  "ai": "windsurf",
   "branch_numbering": "sequential",
+  "context_file": ".windsurf/rules/specify-rules.md",
   "here": true,
-  "integration": "codex",
-  "preset": null,
+  "integration": "windsurf",
   "script": "sh",
-  "speckit_version": "0.5.1.dev0"
+  "speckit_version": "0.8.2.dev0"
 }
