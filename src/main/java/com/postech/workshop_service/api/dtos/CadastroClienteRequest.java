@@ -17,26 +17,27 @@ import java.time.LocalDate;
 @Schema(description = "Dados para cadastro de um novo cliente")
 public class CadastroClienteRequest {
 
-    @NotBlank(message = "O nome é obrigatório")
-    @Schema(example = "João da Silva")
-    private String nome;
+	@NotBlank(message = "O nome é obrigatório")
+	@Schema(example = "João da Silva")
+	private String nome;
 
-    @NotBlank(message = "O documento (CPF/CNPJ) é obrigatório")
-    @Schema(example = "123.456.789-01")
-    private String documento;
+	@NotBlank(message = "O documento (CPF/CNPJ) é obrigatório")
+	@Schema(example = "123.456.789-01")
+	private String documento;
 
-    @Email(message = "E-mail inválido")
-    @Schema(example = "joao@email.com")
-    private String email;
+	@Email(message = "E-mail inválido")
+	@Schema(example = "joao@email.com")
+	private String email;
 
-    @Schema(example = "(11) 99999-9999")
-    private String telefone;
+	@Schema(example = "(11) 99999-9999")
+	private String telefone;
 
-    private EnderecoDTO endereco;
+	private EnderecoDTO endereco;
 
-    @Schema(example = "1990-01-01")
-    private LocalDate dataNascimentoFundacao;
+	@Schema(example = "1990-01-01")
+	private LocalDate dataNascimentoFundacao;
 
-    @Schema(example = "Cliente prefere contato via WhatsApp")
-    private String observacoes;
+	@Schema(example = "Cliente prefere contato via WhatsApp")
+	private String observacoes;
+
 }

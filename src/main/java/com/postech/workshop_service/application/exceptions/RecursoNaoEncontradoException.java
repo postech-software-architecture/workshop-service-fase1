@@ -5,12 +5,12 @@ package com.postech.workshop_service.application.exceptions;
  */
 public class RecursoNaoEncontradoException extends RuntimeException {
 
-    /**
-     * Cria uma nova excecao de recurso nao encontrado.
-     *
-     * @param mensagem descricao do recurso ausente.
-     */
-    public RecursoNaoEncontradoException(String mensagem) {
-        super(mensagem);
-    }
+	/**
+	 * Cria uma nova excecao de recurso nao encontrado.
+	 * @param mensagem descricao do recurso ausente.
+	 */
+	public RecursoNaoEncontradoException(String mensagem) {
+		super(mensagem);
+	}
+
 }

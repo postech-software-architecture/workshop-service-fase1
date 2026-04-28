@@ -10,27 +10,28 @@ import lombok.Getter;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public final class Placa {
 
-    private static final String PADRAO_ANTIGO = "^[A-Z]{3}[0-9]{4}$";
-    private static final String PADRAO_MERCOSUL = "^[A-Z]{3}[0-9][A-Z][0-9]{2}$";
+	private static final String PADRAO_ANTIGO = "^[A-Z]{3}[0-9]{4}$";
 
-    @EqualsAndHashCode.Include
-    private final String valor;
+	private static final String PADRAO_MERCOSUL = "^[A-Z]{3}[0-9][A-Z][0-9]{2}$";
 
-    /**
-     * Cria uma nova placa validando e normalizando o valor informado.
-     *
-     * @param valorOriginal valor bruto informado pelo usuario.
-     */
-    public Placa(String valorOriginal) {
-        if (valorOriginal == null || valorOriginal.trim().isEmpty()) {
-            throw new IllegalArgumentException("A placa do veiculo e obrigatoria.");
-        }
+	@EqualsAndHashCode.Include
+	private final String valor;
 
-        String normalizada = valorOriginal.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
-        if (!normalizada.matches(PADRAO_ANTIGO) && !normalizada.matches(PADRAO_MERCOSUL)) {
-            throw new IllegalArgumentException("A placa informada nao corresponde aos formatos aceitos.");
-        }
+	/**
+	 * Cria uma nova placa validando e normalizando o valor informado.
+	 * @param valorOriginal valor bruto informado pelo usuario.
+	 */
+	public Placa(String valorOriginal) {
+		if (valorOriginal == null || valorOriginal.trim().isEmpty()) {
+			throw new IllegalArgumentException("A placa do veiculo e obrigatoria.");
+		}
 
-        this.valor = normalizada;
-    }
+		String normalizada = valorOriginal.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+		if (!normalizada.matches(PADRAO_ANTIGO) && !normalizada.matches(PADRAO_MERCOSUL)) {
+			throw new IllegalArgumentException("A placa informada nao corresponde aos formatos aceitos.");
+		}
+
+		this.valor = normalizada;
+	}
+
 }

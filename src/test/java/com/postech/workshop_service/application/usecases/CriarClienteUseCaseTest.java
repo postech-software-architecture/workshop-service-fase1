@@ -17,29 +17,29 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CriarClienteUseCaseTest {
 
-    @Mock
-    private ClienteRepository clienteRepository;
+	@Mock
+	private ClienteRepository clienteRepository;
 
-    @InjectMocks
-    private CriarClienteUseCase criarClienteUseCase;
+	@InjectMocks
+	private CriarClienteUseCase criarClienteUseCase;
 
-    @Test
-    void shouldCreateCliente() {
-        when(clienteRepository.existePorDocumento(any())).thenReturn(false);
-        when(clienteRepository.salvar(any())).thenAnswer(i -> i.getArguments()[0]);
+	@Test
+	void shouldCreateCliente() {
+		when(clienteRepository.existePorDocumento(any())).thenReturn(false);
+		when(clienteRepository.salvar(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        Cliente cliente = criarClienteUseCase.executar("Nome", "98765432100", "email@email.com", null);
+		Cliente cliente = criarClienteUseCase.executar("Nome", "98765432100", "email@email.com", null);
 
-        assertNotNull(cliente);
-        verify(clienteRepository).salvar(any());
-    }
+		assertNotNull(cliente);
+		verify(clienteRepository).salvar(any());
+	}
 
-    @Test
-    void shouldThrowExceptionWhenDocumentAlreadyExists() {
-        when(clienteRepository.existePorDocumento(any())).thenReturn(true);
+	@Test
+	void shouldThrowExceptionWhenDocumentAlreadyExists() {
+		when(clienteRepository.existePorDocumento(any())).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> 
-            criarClienteUseCase.executar("Nome", "98765432100", "email@email.com", null)
-        );
-    }
+		assertThrows(IllegalArgumentException.class,
+				() -> criarClienteUseCase.executar("Nome", "98765432100", "email@email.com", null));
+	}
+
 }

@@ -18,12 +18,13 @@ import java.util.UUID;
 @Schema(description = "Cliente vinculado ao veiculo")
 public class ClienteVinculadoResponse {
 
-    @Schema(example = "550e8400-e29b-41d4-a716-446655440000")
-    private UUID id;
+	@Schema(example = "550e8400-e29b-41d4-a716-446655440000")
+	private UUID id;
 
-    @Schema(example = "Joao da Silva")
-    private String nome;
+	@Schema(example = "Joao da Silva")
+	private String nome;
 
-    @Schema(example = "***.654.321-**")
-    private String documentoMascarado;
+	@Schema(example = "***.654.321-**")
+	private String documentoMascarado;
+
 }

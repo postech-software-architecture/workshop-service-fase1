@@ -30,40 +30,41 @@ import java.util.UUID;
 @AllArgsConstructor
 public class VeiculoJpaEntity {
 
-    @Id
-    private UUID id;
+	@Id
+	private UUID id;
 
-    @Column(nullable = false, length = 7)
-    private String placa;
+	@Column(nullable = false, length = 7)
+	private String placa;
 
-    @Column(nullable = false, length = 60)
-    private String marca;
+	@Column(nullable = false, length = 60)
+	private String marca;
 
-    @Column(nullable = false, length = 80)
-    private String modelo;
+	@Column(nullable = false, length = 80)
+	private String modelo;
 
-    @Column(nullable = false)
-    private Integer ano;
+	@Column(nullable = false)
+	private Integer ano;
 
-    @Column(length = 30)
-    private String cor;
+	@Column(length = 30)
+	private String cor;
 
-    @Column(columnDefinition = "TEXT")
-    private String observacoes;
+	@Column(columnDefinition = "TEXT")
+	private String observacoes;
 
-    @Column(nullable = false)
-    private Boolean ativo;
+	@Column(nullable = false)
+	private Boolean ativo;
 
-    @Column(name = "data_remocao")
-    private LocalDateTime dataRemocao;
+	@Column(name = "data_remocao")
+	private LocalDateTime dataRemocao;
 
-    @Column(name = "data_criacao", nullable = false)
-    private LocalDateTime dataCriacao;
+	@Column(name = "data_criacao", nullable = false)
+	private LocalDateTime dataCriacao;
 
-    @Column(name = "data_ultima_atualizacao", nullable = false)
-    private LocalDateTime dataUltimaAtualizacao;
+	@Column(name = "data_ultima_atualizacao", nullable = false)
+	private LocalDateTime dataUltimaAtualizacao;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "veiculo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<VeiculoClienteJpaEntity> clientesVinculados = new LinkedHashSet<>();
+	@Builder.Default
+	@OneToMany(mappedBy = "veiculo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private Set<VeiculoClienteJpaEntity> clientesVinculados = new LinkedHashSet<>();
+
 }

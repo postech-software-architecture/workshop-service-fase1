@@ -17,22 +17,23 @@ import java.time.LocalDate;
 @Schema(description = "Dados para atualização de um cliente existente")
 public class AtualizarClienteRequest {
 
-    @NotBlank(message = "O nome é obrigatório")
-    @Schema(example = "João da Silva Sauro")
-    private String nome;
+	@NotBlank(message = "O nome é obrigatório")
+	@Schema(example = "João da Silva Sauro")
+	private String nome;
 
-    @Email(message = "E-mail inválido")
-    @Schema(example = "joao.sauro@email.com")
-    private String email;
+	@Email(message = "E-mail inválido")
+	@Schema(example = "joao.sauro@email.com")
+	private String email;
 
-    @Schema(example = "(11) 98888-8888")
-    private String telefone;
+	@Schema(example = "(11) 98888-8888")
+	private String telefone;
 
-    private EnderecoDTO endereco;
+	private EnderecoDTO endereco;
 
-    @Schema(example = "1990-01-01")
-    private LocalDate dataNascimentoFundacao;
+	@Schema(example = "1990-01-01")
+	private LocalDate dataNascimentoFundacao;
 
-    @Schema(example = "Cliente VIP")
-    private String observacoes;
+	@Schema(example = "Cliente VIP")
+	private String observacoes;
+
 }

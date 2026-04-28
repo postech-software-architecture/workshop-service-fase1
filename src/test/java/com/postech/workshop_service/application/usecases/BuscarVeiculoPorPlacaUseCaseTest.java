@@ -19,18 +19,19 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BuscarVeiculoPorPlacaUseCaseTest {
 
-    @Mock
-    private VeiculoRepository veiculoRepository;
+	@Mock
+	private VeiculoRepository veiculoRepository;
 
-    @InjectMocks
-    private BuscarVeiculoPorPlacaUseCase buscarVeiculoPorPlacaUseCase;
+	@InjectMocks
+	private BuscarVeiculoPorPlacaUseCase buscarVeiculoPorPlacaUseCase;
 
-    @Test
-    void shouldNormalizePlateBeforeSearch() {
-        Veiculo veiculo = new Veiculo(UUID.randomUUID(), new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null,
-                null, List.of(UUID.randomUUID()));
-        when(veiculoRepository.buscarPorPlaca("BRA1D23", false)).thenReturn(Optional.of(veiculo));
+	@Test
+	void shouldNormalizePlateBeforeSearch() {
+		Veiculo veiculo = new Veiculo(UUID.randomUUID(), new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
+				List.of(UUID.randomUUID()));
+		when(veiculoRepository.buscarPorPlaca("BRA1D23", false)).thenReturn(Optional.of(veiculo));
 
-        assertTrue(buscarVeiculoPorPlacaUseCase.executar("bra-1d23", false).isPresent());
-    }
+		assertTrue(buscarVeiculoPorPlacaUseCase.executar("bra-1d23", false).isPresent());
+	}
+
 }

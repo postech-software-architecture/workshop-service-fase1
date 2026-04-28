@@ -15,31 +15,31 @@ import java.util.UUID;
 @Service
 public class ListarVeiculosPorClienteUseCase {
 
-    private final VeiculoRepository veiculoRepository;
-    private final ClienteRepository clienteRepository;
+	private final VeiculoRepository veiculoRepository;
 
-    /**
-     * Construtor para injecao de dependencias.
-     *
-     * @param veiculoRepository repositorio de veiculos.
-     * @param clienteRepository repositorio de clientes.
-     */
-    public ListarVeiculosPorClienteUseCase(VeiculoRepository veiculoRepository, ClienteRepository clienteRepository) {
-        this.veiculoRepository = veiculoRepository;
-        this.clienteRepository = clienteRepository;
-    }
+	private final ClienteRepository clienteRepository;
 
-    /**
-     * Lista os veiculos vinculados a um cliente.
-     *
-     * @param clienteId identificador do cliente.
-     * @param incluirInativos indica se veiculos inativos devem ser considerados.
-     * @return lista de veiculos encontrados.
-     */
-    public List<Veiculo> executar(UUID clienteId, boolean incluirInativos) {
-        if (clienteRepository.buscarPorId(clienteId).isEmpty()) {
-            throw new RecursoNaoEncontradoException("Cliente nao encontrado com o ID informado.");
-        }
-        return veiculoRepository.listarPorCliente(clienteId, incluirInativos);
-    }
+	/**
+	 * Construtor para injecao de dependencias.
+	 * @param veiculoRepository repositorio de veiculos.
+	 * @param clienteRepository repositorio de clientes.
+	 */
+	public ListarVeiculosPorClienteUseCase(VeiculoRepository veiculoRepository, ClienteRepository clienteRepository) {
+		this.veiculoRepository = veiculoRepository;
+		this.clienteRepository = clienteRepository;
+	}
+
+	/**
+	 * Lista os veiculos vinculados a um cliente.
+	 * @param clienteId identificador do cliente.
+	 * @param incluirInativos indica se veiculos inativos devem ser considerados.
+	 * @return lista de veiculos encontrados.
+	 */
+	public List<Veiculo> executar(UUID clienteId, boolean incluirInativos) {
+		if (clienteRepository.buscarPorId(clienteId).isEmpty()) {
+			throw new RecursoNaoEncontradoException("Cliente nao encontrado com o ID informado.");
+		}
+		return veiculoRepository.listarPorCliente(clienteId, incluirInativos);
+	}
+
 }

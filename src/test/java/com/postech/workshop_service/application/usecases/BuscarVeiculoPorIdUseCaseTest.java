@@ -19,19 +19,20 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BuscarVeiculoPorIdUseCaseTest {
 
-    @Mock
-    private VeiculoRepository veiculoRepository;
+	@Mock
+	private VeiculoRepository veiculoRepository;
 
-    @InjectMocks
-    private BuscarVeiculoPorIdUseCase buscarVeiculoPorIdUseCase;
+	@InjectMocks
+	private BuscarVeiculoPorIdUseCase buscarVeiculoPorIdUseCase;
 
-    @Test
-    void shouldReturnVeiculoWhenFound() {
-        UUID veiculoId = UUID.randomUUID();
-        Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null,
-                null, List.of(UUID.randomUUID()));
-        when(veiculoRepository.buscarPorId(veiculoId, false)).thenReturn(Optional.of(veiculo));
+	@Test
+	void shouldReturnVeiculoWhenFound() {
+		UUID veiculoId = UUID.randomUUID();
+		Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
+				List.of(UUID.randomUUID()));
+		when(veiculoRepository.buscarPorId(veiculoId, false)).thenReturn(Optional.of(veiculo));
 
-        assertTrue(buscarVeiculoPorIdUseCase.executar(veiculoId, false).isPresent());
-    }
+		assertTrue(buscarVeiculoPorIdUseCase.executar(veiculoId, false).isPresent());
+	}
+
 }

@@ -16,35 +16,37 @@ import java.util.UUID;
 @Service
 public class VincularClienteVeiculoUseCase {
 
-    private final VeiculoRepository veiculoRepository;
-    private final ClienteRepository clienteRepository;
+	private final VeiculoRepository veiculoRepository;
 
-    public VincularClienteVeiculoUseCase(VeiculoRepository veiculoRepository, ClienteRepository clienteRepository) {
-        this.veiculoRepository = veiculoRepository;
-        this.clienteRepository = clienteRepository;
-    }
+	private final ClienteRepository clienteRepository;
 
-    /**
-     * Vincula um cliente existente ao veiculo informado.
-     *
-     * @param veiculoId identificador do veiculo.
-     * @param clienteId identificador do cliente.
-     * @return veiculo atualizado.
-     */
-    @Transactional
-    public Veiculo executar(UUID veiculoId, UUID clienteId) {
-        Veiculo veiculo = veiculoRepository.buscarPorId(veiculoId, true)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
+	public VincularClienteVeiculoUseCase(VeiculoRepository veiculoRepository, ClienteRepository clienteRepository) {
+		this.veiculoRepository = veiculoRepository;
+		this.clienteRepository = clienteRepository;
+	}
 
-        if (clienteRepository.buscarPorId(clienteId).isEmpty()) {
-            throw new RegraDeNegocioException("O cliente informado deve existir previamente.");
-        }
+	/**
+	 * Vincula um cliente existente ao veiculo informado.
+	 * @param veiculoId identificador do veiculo.
+	 * @param clienteId identificador do cliente.
+	 * @return veiculo atualizado.
+	 */
+	@Transactional
+	public Veiculo executar(UUID veiculoId, UUID clienteId) {
+		Veiculo veiculo = veiculoRepository.buscarPorId(veiculoId, true)
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
 
-        try {
-            veiculo.vincularCliente(clienteId);
-            return veiculoRepository.salvar(veiculo);
-        } catch (IllegalArgumentException ex) {
-            throw new RegraDeNegocioException(ex.getMessage());
-        }
-    }
+		if (clienteRepository.buscarPorId(clienteId).isEmpty()) {
+			throw new RegraDeNegocioException("O cliente informado deve existir previamente.");
+		}
+
+		try {
+			veiculo.vincularCliente(clienteId);
+			return veiculoRepository.salvar(veiculo);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new RegraDeNegocioException(ex.getMessage());
+		}
+	}
+
 }

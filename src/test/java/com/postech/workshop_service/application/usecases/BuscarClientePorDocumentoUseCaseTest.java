@@ -18,22 +18,23 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BuscarClientePorDocumentoUseCaseTest {
 
-    @Mock
-    private ClienteRepository clienteRepository;
+	@Mock
+	private ClienteRepository clienteRepository;
 
-    @InjectMocks
-    private BuscarClientePorDocumentoUseCase useCase;
+	@InjectMocks
+	private BuscarClientePorDocumentoUseCase useCase;
 
-    @Test
-    void shouldFindByDocument() {
-        String doc = "987.654.321-00";
-        String cleanDoc = "98765432100";
-        Cliente cliente = new Cliente(null, "Nome", new Documento(cleanDoc), "e@e.com", null);
-        when(clienteRepository.buscarPorDocumento(cleanDoc)).thenReturn(Optional.of(cliente));
+	@Test
+	void shouldFindByDocument() {
+		String doc = "987.654.321-00";
+		String cleanDoc = "98765432100";
+		Cliente cliente = new Cliente(null, "Nome", new Documento(cleanDoc), "e@e.com", null);
+		when(clienteRepository.buscarPorDocumento(cleanDoc)).thenReturn(Optional.of(cliente));
 
-        Optional<Cliente> result = useCase.executar(doc);
+		Optional<Cliente> result = useCase.executar(doc);
 
-        assertTrue(result.isPresent());
-        assertEquals(cleanDoc, result.get().getDocumento().getValor());
-    }
+		assertTrue(result.isPresent());
+		assertEquals(cleanDoc, result.get().getDocumento().getValor());
+	}
+
 }

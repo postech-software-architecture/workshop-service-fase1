@@ -24,37 +24,38 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CriarVeiculoUseCaseTest {
 
-    @Mock
-    private VeiculoRepository veiculoRepository;
+	@Mock
+	private VeiculoRepository veiculoRepository;
 
-    @Mock
-    private ClienteRepository clienteRepository;
+	@Mock
+	private ClienteRepository clienteRepository;
 
-    @InjectMocks
-    private CriarVeiculoUseCase criarVeiculoUseCase;
+	@InjectMocks
+	private CriarVeiculoUseCase criarVeiculoUseCase;
 
-    @Test
-    void shouldCreateVeiculo() {
-        UUID clienteId = UUID.randomUUID();
-        when(clienteRepository.buscarPorId(clienteId))
-                .thenReturn(Optional.of(new Cliente(clienteId, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
-        when(veiculoRepository.existePlacaAtiva("BRA1D23", null)).thenReturn(false);
-        when(veiculoRepository.salvar(any(Veiculo.class))).thenAnswer(invocation -> invocation.getArgument(0));
+	@Test
+	void shouldCreateVeiculo() {
+		UUID clienteId = UUID.randomUUID();
+		when(clienteRepository.buscarPorId(clienteId)).thenReturn(
+				Optional.of(new Cliente(clienteId, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
+		when(veiculoRepository.existePlacaAtiva("BRA1D23", null)).thenReturn(false);
+		when(veiculoRepository.salvar(any(Veiculo.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Veiculo veiculo = criarVeiculoUseCase.executar("BRA1D23", "Toyota", "Corolla", 2020, "Prata",
-                "Obs", List.of(clienteId));
+		Veiculo veiculo = criarVeiculoUseCase.executar("BRA1D23", "Toyota", "Corolla", 2020, "Prata", "Obs",
+				List.of(clienteId));
 
-        assertEquals("BRA1D23", veiculo.getPlaca().getValor());
-    }
+		assertEquals("BRA1D23", veiculo.getPlaca().getValor());
+	}
 
-    @Test
-    void shouldRejectDuplicatedActivePlate() {
-        UUID clienteId = UUID.randomUUID();
-        when(clienteRepository.buscarPorId(clienteId))
-                .thenReturn(Optional.of(new Cliente(clienteId, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
-        when(veiculoRepository.existePlacaAtiva("BRA1D23", null)).thenReturn(true);
+	@Test
+	void shouldRejectDuplicatedActivePlate() {
+		UUID clienteId = UUID.randomUUID();
+		when(clienteRepository.buscarPorId(clienteId)).thenReturn(
+				Optional.of(new Cliente(clienteId, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
+		when(veiculoRepository.existePlacaAtiva("BRA1D23", null)).thenReturn(true);
 
-        assertThrows(RegraDeNegocioException.class, () -> criarVeiculoUseCase.executar("BRA1D23", "Toyota", "Corolla", 2020,
-                null, null, List.of(clienteId)));
-    }
+		assertThrows(RegraDeNegocioException.class, () -> criarVeiculoUseCase.executar("BRA1D23", "Toyota", "Corolla",
+				2020, null, null, List.of(clienteId)));
+	}
+
 }

@@ -20,33 +20,33 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AtualizarClienteUseCaseTest {
 
-    @Mock
-    private ClienteRepository clienteRepository;
+	@Mock
+	private ClienteRepository clienteRepository;
 
-    @InjectMocks
-    private AtualizarClienteUseCase atualizarClienteUseCase;
+	@InjectMocks
+	private AtualizarClienteUseCase atualizarClienteUseCase;
 
-    @Test
-    void shouldUpdateCliente() {
-        UUID id = UUID.randomUUID();
-        Cliente cliente = new Cliente(id, "Antigo", new Documento("98765432100"), "email@email.com", null);
-        
-        when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(cliente));
-        when(clienteRepository.salvar(any())).thenAnswer(i -> i.getArguments()[0]);
+	@Test
+	void shouldUpdateCliente() {
+		UUID id = UUID.randomUUID();
+		Cliente cliente = new Cliente(id, "Antigo", new Documento("98765432100"), "email@email.com", null);
 
-        Cliente updated = atualizarClienteUseCase.executar(id, "Novo", "novo@email.com", null, null, null, null);
+		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(cliente));
+		when(clienteRepository.salvar(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        assertEquals("Novo", updated.getNome());
-        assertEquals("novo@email.com", updated.getEmail());
-    }
+		Cliente updated = atualizarClienteUseCase.executar(id, "Novo", "novo@email.com", null, null, null, null);
 
-    @Test
-    void shouldThrowExceptionWhenClienteNotFound() {
-        UUID id = UUID.randomUUID();
-        when(clienteRepository.buscarPorId(id)).thenReturn(Optional.empty());
+		assertEquals("Novo", updated.getNome());
+		assertEquals("novo@email.com", updated.getEmail());
+	}
 
-        assertThrows(IllegalArgumentException.class, () -> 
-            atualizarClienteUseCase.executar(id, "Novo", "email", null, null, null, null)
-        );
-    }
+	@Test
+	void shouldThrowExceptionWhenClienteNotFound() {
+		UUID id = UUID.randomUUID();
+		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.empty());
+
+		assertThrows(IllegalArgumentException.class,
+				() -> atualizarClienteUseCase.executar(id, "Novo", "email", null, null, null, null));
+	}
+
 }

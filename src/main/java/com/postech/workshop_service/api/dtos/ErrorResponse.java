@@ -13,18 +13,28 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ErrorResponse {
-    private LocalDateTime timestamp;
-    private int status;
-    private String error;
-    private String message;
-    private String path;
-    private List<FieldErrorDetail> fieldErrors;
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class FieldErrorDetail {
-        private String field;
-        private String message;
-    }
+	private LocalDateTime timestamp;
+
+	private int status;
+
+	private String error;
+
+	private String message;
+
+	private String path;
+
+	private List<FieldErrorDetail> fieldErrors;
+
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class FieldErrorDetail {
+
+		private String field;
+
+		private String message;
+
+	}
+
 }

@@ -17,29 +17,28 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class RemoverClienteUseCaseTest {
 
-    @Mock
-    private ClienteRepository clienteRepository;
+	@Mock
+	private ClienteRepository clienteRepository;
 
-    @InjectMocks
-    private RemoverClienteUseCase removerClienteUseCase;
+	@InjectMocks
+	private RemoverClienteUseCase removerClienteUseCase;
 
-    @Test
-    void shouldRemoveCliente() {
-        UUID id = UUID.randomUUID();
-        when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(mock(Cliente.class)));
+	@Test
+	void shouldRemoveCliente() {
+		UUID id = UUID.randomUUID();
+		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(mock(Cliente.class)));
 
-        removerClienteUseCase.executar(id);
+		removerClienteUseCase.executar(id);
 
-        verify(clienteRepository).remover(id);
-    }
+		verify(clienteRepository).remover(id);
+	}
 
-    @Test
-    void shouldThrowExceptionWhenClienteNotFound() {
-        UUID id = UUID.randomUUID();
-        when(clienteRepository.buscarPorId(id)).thenReturn(Optional.empty());
+	@Test
+	void shouldThrowExceptionWhenClienteNotFound() {
+		UUID id = UUID.randomUUID();
+		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> 
-            removerClienteUseCase.executar(id)
-        );
-    }
+		assertThrows(IllegalArgumentException.class, () -> removerClienteUseCase.executar(id));
+	}
+
 }

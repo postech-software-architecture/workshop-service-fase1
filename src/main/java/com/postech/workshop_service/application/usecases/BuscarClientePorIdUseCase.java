@@ -13,24 +13,24 @@ import java.util.UUID;
 @Service
 public class BuscarClientePorIdUseCase {
 
-    private final ClienteRepository clienteRepository;
+	private final ClienteRepository clienteRepository;
 
-    /**
-     * Construtor para injeção de dependências.
-     *
-     * @param clienteRepository repositório de clientes.
-     */
-    public BuscarClientePorIdUseCase(ClienteRepository clienteRepository) {
-        this.clienteRepository = clienteRepository;
-    }
+	/**
+	 * Construtor para injeção de dependências.
+	 * @param clienteRepository repositório de clientes.
+	 */
+	public BuscarClientePorIdUseCase(ClienteRepository clienteRepository) {
+		this.clienteRepository = clienteRepository;
+	}
 
-    /**
-     * Busca um cliente pelo seu ID.
-     *
-     * @param id identificador único do cliente.
-     * @return um {@link Optional} contendo o cliente se encontrado, ou vazio caso contrário.
-     */
-    public Optional<Cliente> executar(UUID id) {
-        return clienteRepository.buscarPorId(id);
-    }
+	/**
+	 * Busca um cliente pelo seu ID.
+	 * @param id identificador único do cliente.
+	 * @return um {@link Optional} contendo o cliente se encontrado, ou vazio caso
+	 * contrário.
+	 */
+	public Optional<Cliente> executar(UUID id) {
+		return clienteRepository.buscarPorId(id);
+	}
+
 }

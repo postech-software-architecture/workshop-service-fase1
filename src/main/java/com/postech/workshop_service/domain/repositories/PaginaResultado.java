@@ -12,11 +12,5 @@ import java.util.List;
  * @param tamanho tamanho solicitado.
  * @param <T> tipo dos itens retornados.
  */
-public record PaginaResultado<T>(
-        List<T> itens,
-        long totalElementos,
-        int totalPaginas,
-        int pagina,
-        int tamanho
-) {
+public record PaginaResultado<T>(List<T> itens, long totalElementos, int totalPaginas, int pagina, int tamanho) {
 }

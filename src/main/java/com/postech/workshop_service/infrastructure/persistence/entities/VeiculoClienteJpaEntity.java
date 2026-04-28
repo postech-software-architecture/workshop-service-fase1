@@ -28,20 +28,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class VeiculoClienteJpaEntity {
 
-    @EmbeddedId
-    private VeiculoClienteId id;
+	@EmbeddedId
+	private VeiculoClienteId id;
 
-    @MapsId("veiculoId")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "veiculo_id", nullable = false)
-    private VeiculoJpaEntity veiculo;
+	@MapsId("veiculoId")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "veiculo_id", nullable = false)
+	private VeiculoJpaEntity veiculo;
 
-    @Column(name = "cliente_id", nullable = false, insertable = false, updatable = false)
-    private java.util.UUID clienteId;
+	@Column(name = "cliente_id", nullable = false, insertable = false, updatable = false)
+	private java.util.UUID clienteId;
 
-    @Column(name = "data_criacao", nullable = false)
-    private LocalDateTime dataCriacao;
+	@Column(name = "data_criacao", nullable = false)
+	private LocalDateTime dataCriacao;
 
-    @Column(name = "data_ultima_atualizacao", nullable = false)
-    private LocalDateTime dataUltimaAtualizacao;
+	@Column(name = "data_ultima_atualizacao", nullable = false)
+	private LocalDateTime dataUltimaAtualizacao;
+
 }

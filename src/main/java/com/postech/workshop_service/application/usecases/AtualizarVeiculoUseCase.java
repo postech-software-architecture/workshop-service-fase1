@@ -16,61 +16,50 @@ import java.util.UUID;
 @Service
 public class AtualizarVeiculoUseCase {
 
-    private final VeiculoRepository veiculoRepository;
+	private final VeiculoRepository veiculoRepository;
 
-    /**
-     * Construtor para injecao de dependencias.
-     *
-     * @param veiculoRepository repositorio de veiculos.
-     */
-    public AtualizarVeiculoUseCase(VeiculoRepository veiculoRepository) {
-        this.veiculoRepository = veiculoRepository;
-    }
+	/**
+	 * Construtor para injecao de dependencias.
+	 * @param veiculoRepository repositorio de veiculos.
+	 */
+	public AtualizarVeiculoUseCase(VeiculoRepository veiculoRepository) {
+		this.veiculoRepository = veiculoRepository;
+	}
 
-    /**
-     * Executa a atualizacao de um veiculo existente.
-     *
-     * @param id identificador do veiculo.
-     * @param placaRaw placa informada.
-     * @param marca marca informada.
-     * @param modelo modelo informado.
-     * @param ano ano informado.
-     * @param cor cor opcional.
-     * @param observacoes observacoes opcionais.
-     * @return veiculo atualizado.
-     */
-    @Transactional
-    public Veiculo executar(UUID id,
-                            String placaRaw,
-                            String marca,
-                            String modelo,
-                            int ano,
-                            String cor,
-                            String observacoes) {
-        Veiculo veiculo = veiculoRepository.buscarPorId(id, true)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
+	/**
+	 * Executa a atualizacao de um veiculo existente.
+	 * @param id identificador do veiculo.
+	 * @param placaRaw placa informada.
+	 * @param marca marca informada.
+	 * @param modelo modelo informado.
+	 * @param ano ano informado.
+	 * @param cor cor opcional.
+	 * @param observacoes observacoes opcionais.
+	 * @return veiculo atualizado.
+	 */
+	@Transactional
+	public Veiculo executar(UUID id, String placaRaw, String marca, String modelo, int ano, String cor,
+			String observacoes) {
+		Veiculo veiculo = veiculoRepository.buscarPorId(id, true)
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
 
-        try {
-            Placa placa = new Placa(placaRaw);
+		try {
+			Placa placa = new Placa(placaRaw);
 
-            if (veiculoRepository.existePlacaAtiva(placa.getValor(), id)) {
-                throw new RegraDeNegocioException("Ja existe um veiculo ativo cadastrado com a placa informada.");
-            }
+			if (veiculoRepository.existePlacaAtiva(placa.getValor(), id)) {
+				throw new RegraDeNegocioException("Ja existe um veiculo ativo cadastrado com a placa informada.");
+			}
 
-            veiculo.atualizarDados(
-                    placa,
-                    marca,
-                    modelo,
-                    ano,
-                    cor,
-                    observacoes
-            );
+			veiculo.atualizarDados(placa, marca, modelo, ano, cor, observacoes);
 
-            return veiculoRepository.salvar(veiculo);
-        } catch (RegraDeNegocioException ex) {
-            throw ex;
-        } catch (IllegalArgumentException ex) {
-            throw new RegraDeNegocioException(ex.getMessage());
-        }
-    }
+			return veiculoRepository.salvar(veiculo);
+		}
+		catch (RegraDeNegocioException ex) {
+			throw ex;
+		}
+		catch (IllegalArgumentException ex) {
+			throw new RegraDeNegocioException(ex.getMessage());
+		}
+	}
+
 }

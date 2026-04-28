@@ -13,27 +13,26 @@ import java.util.UUID;
 @Service
 public class RemoverVeiculoUseCase {
 
-    private final VeiculoRepository veiculoRepository;
+	private final VeiculoRepository veiculoRepository;
 
-    /**
-     * Construtor para injecao de dependencias.
-     *
-     * @param veiculoRepository repositorio de veiculos.
-     */
-    public RemoverVeiculoUseCase(VeiculoRepository veiculoRepository) {
-        this.veiculoRepository = veiculoRepository;
-    }
+	/**
+	 * Construtor para injecao de dependencias.
+	 * @param veiculoRepository repositorio de veiculos.
+	 */
+	public RemoverVeiculoUseCase(VeiculoRepository veiculoRepository) {
+		this.veiculoRepository = veiculoRepository;
+	}
 
-    /**
-     * Remove logicamente um veiculo preservando seu historico.
-     *
-     * @param id identificador do veiculo.
-     */
-    @Transactional
-    public void executar(UUID id) {
-        var veiculo = veiculoRepository.buscarPorId(id, true)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
-        veiculo.removerLogicamente();
-        veiculoRepository.salvar(veiculo);
-    }
+	/**
+	 * Remove logicamente um veiculo preservando seu historico.
+	 * @param id identificador do veiculo.
+	 */
+	@Transactional
+	public void executar(UUID id) {
+		var veiculo = veiculoRepository.buscarPorId(id, true)
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
+		veiculo.removerLogicamente();
+		veiculoRepository.salvar(veiculo);
+	}
+
 }

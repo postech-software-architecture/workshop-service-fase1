@@ -13,25 +13,24 @@ import java.util.Optional;
 @Service
 public class BuscarVeiculoPorPlacaUseCase {
 
-    private final VeiculoRepository veiculoRepository;
+	private final VeiculoRepository veiculoRepository;
 
-    /**
-     * Construtor para injecao de dependencias.
-     *
-     * @param veiculoRepository repositorio de veiculos.
-     */
-    public BuscarVeiculoPorPlacaUseCase(VeiculoRepository veiculoRepository) {
-        this.veiculoRepository = veiculoRepository;
-    }
+	/**
+	 * Construtor para injecao de dependencias.
+	 * @param veiculoRepository repositorio de veiculos.
+	 */
+	public BuscarVeiculoPorPlacaUseCase(VeiculoRepository veiculoRepository) {
+		this.veiculoRepository = veiculoRepository;
+	}
 
-    /**
-     * Busca um veiculo pela placa informada.
-     *
-     * @param placaRaw placa a ser consultada.
-     * @param incluirInativos indica se veiculos inativos devem ser considerados.
-     * @return veiculo encontrado, se existir.
-     */
-    public Optional<Veiculo> executar(String placaRaw, boolean incluirInativos) {
-        return veiculoRepository.buscarPorPlaca(new Placa(placaRaw).getValor(), incluirInativos);
-    }
+	/**
+	 * Busca um veiculo pela placa informada.
+	 * @param placaRaw placa a ser consultada.
+	 * @param incluirInativos indica se veiculos inativos devem ser considerados.
+	 * @return veiculo encontrado, se existir.
+	 */
+	public Optional<Veiculo> executar(String placaRaw, boolean incluirInativos) {
+		return veiculoRepository.buscarPorPlaca(new Placa(placaRaw).getValor(), incluirInativos);
+	}
+
 }

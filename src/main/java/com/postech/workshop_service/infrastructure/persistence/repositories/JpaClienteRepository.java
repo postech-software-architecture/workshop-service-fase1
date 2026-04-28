@@ -9,6 +9,9 @@ import java.util.UUID;
 
 @Repository
 public interface JpaClienteRepository extends JpaRepository<ClienteJpaEntity, UUID> {
-    Optional<ClienteJpaEntity> findByDocumento(String documento);
-    boolean existsByDocumento(String documento);
+
+	Optional<ClienteJpaEntity> findByDocumento(String documento);
+
+	boolean existsByDocumento(String documento);
+
 }

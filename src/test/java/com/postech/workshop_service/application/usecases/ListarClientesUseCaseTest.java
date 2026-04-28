@@ -17,25 +17,26 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ListarClientesUseCaseTest {
 
-    @Mock
-    private ClienteRepository clienteRepository;
+	@Mock
+	private ClienteRepository clienteRepository;
 
-    @InjectMocks
-    private ListarClientesUseCase useCase;
+	@InjectMocks
+	private ListarClientesUseCase useCase;
 
-    @Test
-    void shouldList() {
-        List<Cliente> list = List.of(new Cliente(null, "A", new Documento("98765432100"), "a@a.com", null));
-        when(clienteRepository.listar(0, 10)).thenReturn(list);
+	@Test
+	void shouldList() {
+		List<Cliente> list = List.of(new Cliente(null, "A", new Documento("98765432100"), "a@a.com", null));
+		when(clienteRepository.listar(0, 10)).thenReturn(list);
 
-        List<Cliente> result = useCase.executar(0, 10);
+		List<Cliente> result = useCase.executar(0, 10);
 
-        assertEquals(1, result.size());
-    }
+		assertEquals(1, result.size());
+	}
 
-    @Test
-    void shouldCount() {
-        when(clienteRepository.contarTodos()).thenReturn(5L);
-        assertEquals(5L, useCase.contarTotal());
-    }
+	@Test
+	void shouldCount() {
+		when(clienteRepository.contarTodos()).thenReturn(5L);
+		assertEquals(5L, useCase.contarTotal());
+	}
+
 }

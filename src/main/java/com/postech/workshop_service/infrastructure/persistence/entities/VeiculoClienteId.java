@@ -22,9 +22,10 @@ import java.util.UUID;
 @EqualsAndHashCode
 public class VeiculoClienteId implements Serializable {
 
-    @Column(name = "veiculo_id", nullable = false)
-    private UUID veiculoId;
+	@Column(name = "veiculo_id", nullable = false)
+	private UUID veiculoId;
 
-    @Column(name = "cliente_id", nullable = false)
-    private UUID clienteId;
+	@Column(name = "cliente_id", nullable = false)
+	private UUID clienteId;
+
 }

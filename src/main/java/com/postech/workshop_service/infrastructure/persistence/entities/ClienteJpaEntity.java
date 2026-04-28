@@ -14,34 +14,35 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClienteJpaEntity {
-    
-    @Id
-    private UUID id;
-    
-    @Column(nullable = false)
-    private String nome;
-    
-    @Column(nullable = false, unique = true, length = 20)
-    private String documento;
-    
-    @Column
-    private String email;
-    
-    @Column(length = 20)
-    private String telefone;
 
-    @Column(name = "data_nascimento_fundacao")
-    private LocalDate dataNascimentoFundacao;
+	@Id
+	private UUID id;
 
-    @Column(columnDefinition = "TEXT")
-    private String observacoes;
-    
-    @Column(name = "data_criacao", nullable = false)
-    private LocalDateTime dataCriacao;
-    
-    @Column(name = "data_ultima_atualizacao", nullable = false)
-    private LocalDateTime dataUltimaAtualizacao;
+	@Column(nullable = false)
+	private String nome;
 
-    @OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
-    private EnderecoJpaEntity endereco;
+	@Column(nullable = false, unique = true, length = 20)
+	private String documento;
+
+	@Column
+	private String email;
+
+	@Column(length = 20)
+	private String telefone;
+
+	@Column(name = "data_nascimento_fundacao")
+	private LocalDate dataNascimentoFundacao;
+
+	@Column(columnDefinition = "TEXT")
+	private String observacoes;
+
+	@Column(name = "data_criacao", nullable = false)
+	private LocalDateTime dataCriacao;
+
+	@Column(name = "data_ultima_atualizacao", nullable = false)
+	private LocalDateTime dataUltimaAtualizacao;
+
+	@OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+	private EnderecoJpaEntity endereco;
+
 }

@@ -19,21 +19,22 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BuscarClientePorIdUseCaseTest {
 
-    @Mock
-    private ClienteRepository clienteRepository;
+	@Mock
+	private ClienteRepository clienteRepository;
 
-    @InjectMocks
-    private BuscarClientePorIdUseCase useCase;
+	@InjectMocks
+	private BuscarClientePorIdUseCase useCase;
 
-    @Test
-    void shouldFindById() {
-        UUID id = UUID.randomUUID();
-        Cliente cliente = new Cliente(id, "Nome", new Documento("98765432100"), "e@e.com", null);
-        when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(cliente));
+	@Test
+	void shouldFindById() {
+		UUID id = UUID.randomUUID();
+		Cliente cliente = new Cliente(id, "Nome", new Documento("98765432100"), "e@e.com", null);
+		when(clienteRepository.buscarPorId(id)).thenReturn(Optional.of(cliente));
 
-        Optional<Cliente> result = useCase.executar(id);
+		Optional<Cliente> result = useCase.executar(id);
 
-        assertTrue(result.isPresent());
-        assertEquals("Nome", result.get().getNome());
-    }
+		assertTrue(result.isPresent());
+		assertEquals("Nome", result.get().getNome());
+	}
+
 }

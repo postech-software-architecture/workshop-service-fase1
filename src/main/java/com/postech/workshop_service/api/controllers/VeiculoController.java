@@ -47,244 +47,229 @@ import java.util.UUID;
 @Tag(name = "Veiculos", description = "Gerenciamento de veiculos da oficina")
 public class VeiculoController {
 
-    private final CriarVeiculoUseCase criarVeiculoUseCase;
-    private final AtualizarVeiculoUseCase atualizarVeiculoUseCase;
-    private final BuscarVeiculoPorIdUseCase buscarVeiculoPorIdUseCase;
-    private final BuscarVeiculoPorPlacaUseCase buscarVeiculoPorPlacaUseCase;
-    private final ListarVeiculosUseCase listarVeiculosUseCase;
-    private final ListarVeiculosPorClienteUseCase listarVeiculosPorClienteUseCase;
-    private final RemoverVeiculoUseCase removerVeiculoUseCase;
-    private final VincularClienteVeiculoUseCase vincularClienteVeiculoUseCase;
-    private final DesvincularClienteVeiculoUseCase desvincularClienteVeiculoUseCase;
-    private final BuscarClientePorIdUseCase buscarClientePorIdUseCase;
+	private final CriarVeiculoUseCase criarVeiculoUseCase;
 
-    /**
-     * Construtor para injecao de dependencias.
-     *
-     * @param criarVeiculoUseCase caso de uso de criacao.
-     * @param atualizarVeiculoUseCase caso de uso de atualizacao.
-     * @param buscarVeiculoPorIdUseCase caso de uso de busca por identificador.
-     * @param buscarVeiculoPorPlacaUseCase caso de uso de busca por placa.
-     * @param listarVeiculosUseCase caso de uso de listagem paginada.
-     * @param listarVeiculosPorClienteUseCase caso de uso de listagem por cliente.
-     * @param removerVeiculoUseCase caso de uso de remocao logica.
-     * @param vincularClienteVeiculoUseCase caso de uso de vinculo de cliente.
-     * @param desvincularClienteVeiculoUseCase caso de uso de desvinculo de cliente.
-     * @param buscarClientePorIdUseCase caso de uso de busca de cliente para montar resposta.
-     */
-    public VeiculoController(CriarVeiculoUseCase criarVeiculoUseCase,
-                             AtualizarVeiculoUseCase atualizarVeiculoUseCase,
-                             BuscarVeiculoPorIdUseCase buscarVeiculoPorIdUseCase,
-                             BuscarVeiculoPorPlacaUseCase buscarVeiculoPorPlacaUseCase,
-                             ListarVeiculosUseCase listarVeiculosUseCase,
-                             ListarVeiculosPorClienteUseCase listarVeiculosPorClienteUseCase,
-                             RemoverVeiculoUseCase removerVeiculoUseCase,
-                             VincularClienteVeiculoUseCase vincularClienteVeiculoUseCase,
-                             DesvincularClienteVeiculoUseCase desvincularClienteVeiculoUseCase,
-                             BuscarClientePorIdUseCase buscarClientePorIdUseCase) {
-        this.criarVeiculoUseCase = criarVeiculoUseCase;
-        this.atualizarVeiculoUseCase = atualizarVeiculoUseCase;
-        this.buscarVeiculoPorIdUseCase = buscarVeiculoPorIdUseCase;
-        this.buscarVeiculoPorPlacaUseCase = buscarVeiculoPorPlacaUseCase;
-        this.listarVeiculosUseCase = listarVeiculosUseCase;
-        this.listarVeiculosPorClienteUseCase = listarVeiculosPorClienteUseCase;
-        this.removerVeiculoUseCase = removerVeiculoUseCase;
-        this.vincularClienteVeiculoUseCase = vincularClienteVeiculoUseCase;
-        this.desvincularClienteVeiculoUseCase = desvincularClienteVeiculoUseCase;
-        this.buscarClientePorIdUseCase = buscarClientePorIdUseCase;
-    }
+	private final AtualizarVeiculoUseCase atualizarVeiculoUseCase;
 
-    /**
-     * Cadastra um novo veiculo.
-     *
-     * @param request payload do novo veiculo.
-     * @return veiculo persistido.
-     */
-    @PostMapping
-    @Operation(summary = "Cadastrar veiculo")
-    public ResponseEntity<VeiculoResponse> criar(@RequestBody @Valid CadastroVeiculoRequest request) {
-        Veiculo veiculo = criarVeiculoUseCase.executar(
-                request.getPlaca(),
-                request.getMarca(),
-                request.getModelo(),
-                request.getAno(),
-                request.getCor(),
-                request.getObservacoes(),
-                request.getClientesIds()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(veiculo));
-    }
+	private final BuscarVeiculoPorIdUseCase buscarVeiculoPorIdUseCase;
 
-    /**
-     * Atualiza um veiculo existente.
-     *
-     * @param id identificador do veiculo.
-     * @param request payload de atualizacao.
-     * @return veiculo atualizado.
-     */
-    @PutMapping("/{id}")
-    @Operation(summary = "Atualizar veiculo")
-    public ResponseEntity<VeiculoResponse> atualizar(@PathVariable UUID id, @RequestBody @Valid AtualizarVeiculoRequest request) {
-        Veiculo veiculo = atualizarVeiculoUseCase.executar(
-                id,
-                request.getPlaca(),
-                request.getMarca(),
-                request.getModelo(),
-                request.getAno(),
-                request.getCor(),
-                request.getObservacoes()
-        );
-        return ResponseEntity.ok(toResponse(veiculo));
-    }
+	private final BuscarVeiculoPorPlacaUseCase buscarVeiculoPorPlacaUseCase;
 
-    /**
-     * Vincula um novo cliente a um veiculo existente.
-     *
-     * @param id identificador do veiculo.
-     * @param clienteId identificador do cliente.
-     * @return veiculo atualizado.
-     */
-    @PostMapping("/{id}/clientes/{clienteId}")
-    @Operation(summary = "Vincular cliente ao veiculo")
-    public ResponseEntity<VeiculoResponse> vincularCliente(@PathVariable UUID id, @PathVariable UUID clienteId) {
-        Veiculo veiculo = vincularClienteVeiculoUseCase.executar(id, clienteId);
-        return ResponseEntity.ok(toResponse(veiculo));
-    }
+	private final ListarVeiculosUseCase listarVeiculosUseCase;
 
-    /**
-     * Desvincula um cliente de um veiculo existente.
-     *
-     * @param id identificador do veiculo.
-     * @param clienteId identificador do cliente.
-     * @return veiculo atualizado.
-     */
-    @DeleteMapping("/{id}/clientes/{clienteId}")
-    @Operation(summary = "Desvincular cliente do veiculo")
-    public ResponseEntity<VeiculoResponse> desvincularCliente(@PathVariable UUID id, @PathVariable UUID clienteId) {
-        Veiculo veiculo = desvincularClienteVeiculoUseCase.executar(id, clienteId);
-        return ResponseEntity.ok(toResponse(veiculo));
-    }
+	private final ListarVeiculosPorClienteUseCase listarVeiculosPorClienteUseCase;
 
-    /**
-     * Busca um veiculo pelo identificador.
-     *
-     * @param id identificador do veiculo.
-     * @param incluirInativos indica se veiculos inativos devem ser considerados.
-     * @return veiculo encontrado.
-     */
-    @GetMapping("/{id}")
-    @Operation(summary = "Buscar veiculo por identificador")
-    public ResponseEntity<VeiculoResponse> buscarPorId(@PathVariable UUID id,
-                                                       @RequestParam(defaultValue = "false")
-                                                       @Parameter(description = "Indica se veiculos inativos devem ser considerados")
-                                                       boolean incluirInativos) {
-        Veiculo veiculo = buscarVeiculoPorIdUseCase.executar(id, incluirInativos)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
-        return ResponseEntity.ok(toResponse(veiculo));
-    }
+	private final RemoverVeiculoUseCase removerVeiculoUseCase;
 
-    /**
-     * Busca um veiculo pela placa.
-     *
-     * @param placa placa informada.
-     * @param incluirInativos indica se veiculos inativos devem ser considerados.
-     * @return veiculo encontrado.
-     */
-    @GetMapping("/placa/{placa}")
-    @Operation(summary = "Buscar veiculo por placa")
-    public ResponseEntity<VeiculoResponse> buscarPorPlaca(@PathVariable String placa,
-                                                          @RequestParam(defaultValue = "false")
-                                                          @Parameter(description = "Indica se veiculos inativos devem ser considerados")
-                                                          boolean incluirInativos) {
-        Veiculo veiculo = buscarVeiculoPorPlacaUseCase.executar(placa, incluirInativos)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com a placa informada."));
-        return ResponseEntity.ok(toResponse(veiculo));
-    }
+	private final VincularClienteVeiculoUseCase vincularClienteVeiculoUseCase;
 
-    /**
-     * Lista todos os veiculos com filtros opcionais.
-     *
-     * @param pagina pagina solicitada.
-     * @param tamanho tamanho solicitado.
-     * @param placa placa opcional.
-     * @param clienteId cliente opcional.
-     * @param incluirInativos indica se veiculos inativos devem ser considerados.
-     * @return pagina de veiculos.
-     */
-    @GetMapping
-    @Operation(summary = "Listar veiculos com paginacao e filtros")
-    public ResponseEntity<PaginaVeiculosResponse> listar(@RequestParam(defaultValue = "0") int pagina,
-                                                         @RequestParam(defaultValue = "20") int tamanho,
-                                                         @RequestParam(required = false) String placa,
-                                                         @RequestParam(required = false) UUID clienteId,
-                                                         @RequestParam(defaultValue = "false") boolean incluirInativos) {
-        PaginaResultado<Veiculo> resultado = listarVeiculosUseCase.executar(pagina, tamanho, placa, clienteId, incluirInativos);
-        return ResponseEntity.ok(PaginaVeiculosResponse.builder()
-                .conteudo(resultado.itens().stream().map(this::toResponse).toList())
-                .pagina(resultado.pagina())
-                .tamanho(resultado.tamanho())
-                .totalElementos(resultado.totalElementos())
-                .totalPaginas(resultado.totalPaginas())
-                .build());
-    }
+	private final DesvincularClienteVeiculoUseCase desvincularClienteVeiculoUseCase;
 
-    /**
-     * Lista todos os veiculos vinculados a um cliente.
-     *
-     * @param clienteId identificador do cliente.
-     * @param incluirInativos indica se veiculos inativos devem ser considerados.
-     * @return lista de veiculos encontrados.
-     */
-    @GetMapping("/cliente/{clienteId}")
-    @Operation(summary = "Listar veiculos por cliente")
-    public ResponseEntity<List<VeiculoResponse>> listarPorCliente(@PathVariable UUID clienteId,
-                                                                  @RequestParam(defaultValue = "false") boolean incluirInativos) {
-        List<VeiculoResponse> respostas = listarVeiculosPorClienteUseCase.executar(clienteId, incluirInativos)
-                .stream()
-                .map(this::toResponse)
-                .toList();
-        return ResponseEntity.ok(respostas);
-    }
+	private final BuscarClientePorIdUseCase buscarClientePorIdUseCase;
 
-    /**
-     * Remove logicamente um veiculo.
-     *
-     * @param id identificador do veiculo.
-     */
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Remover veiculo logicamente")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void remover(@PathVariable UUID id) {
-        removerVeiculoUseCase.executar(id);
-    }
+	/**
+	 * Construtor para injecao de dependencias.
+	 * @param criarVeiculoUseCase caso de uso de criacao.
+	 * @param atualizarVeiculoUseCase caso de uso de atualizacao.
+	 * @param buscarVeiculoPorIdUseCase caso de uso de busca por identificador.
+	 * @param buscarVeiculoPorPlacaUseCase caso de uso de busca por placa.
+	 * @param listarVeiculosUseCase caso de uso de listagem paginada.
+	 * @param listarVeiculosPorClienteUseCase caso de uso de listagem por cliente.
+	 * @param removerVeiculoUseCase caso de uso de remocao logica.
+	 * @param vincularClienteVeiculoUseCase caso de uso de vinculo de cliente.
+	 * @param desvincularClienteVeiculoUseCase caso de uso de desvinculo de cliente.
+	 * @param buscarClientePorIdUseCase caso de uso de busca de cliente para montar
+	 * resposta.
+	 */
+	public VeiculoController(CriarVeiculoUseCase criarVeiculoUseCase, AtualizarVeiculoUseCase atualizarVeiculoUseCase,
+			BuscarVeiculoPorIdUseCase buscarVeiculoPorIdUseCase,
+			BuscarVeiculoPorPlacaUseCase buscarVeiculoPorPlacaUseCase, ListarVeiculosUseCase listarVeiculosUseCase,
+			ListarVeiculosPorClienteUseCase listarVeiculosPorClienteUseCase,
+			RemoverVeiculoUseCase removerVeiculoUseCase, VincularClienteVeiculoUseCase vincularClienteVeiculoUseCase,
+			DesvincularClienteVeiculoUseCase desvincularClienteVeiculoUseCase,
+			BuscarClientePorIdUseCase buscarClientePorIdUseCase) {
+		this.criarVeiculoUseCase = criarVeiculoUseCase;
+		this.atualizarVeiculoUseCase = atualizarVeiculoUseCase;
+		this.buscarVeiculoPorIdUseCase = buscarVeiculoPorIdUseCase;
+		this.buscarVeiculoPorPlacaUseCase = buscarVeiculoPorPlacaUseCase;
+		this.listarVeiculosUseCase = listarVeiculosUseCase;
+		this.listarVeiculosPorClienteUseCase = listarVeiculosPorClienteUseCase;
+		this.removerVeiculoUseCase = removerVeiculoUseCase;
+		this.vincularClienteVeiculoUseCase = vincularClienteVeiculoUseCase;
+		this.desvincularClienteVeiculoUseCase = desvincularClienteVeiculoUseCase;
+		this.buscarClientePorIdUseCase = buscarClientePorIdUseCase;
+	}
 
-    private VeiculoResponse toResponse(Veiculo veiculo) {
-        return VeiculoResponse.builder()
-                .id(veiculo.getId())
-                .placa(veiculo.getPlaca().getValor())
-                .marca(veiculo.getMarca())
-                .modelo(veiculo.getModelo())
-                .ano(veiculo.getAno())
-                .cor(veiculo.getCor())
-                .observacoes(veiculo.getObservacoes())
-                .clientes(montarClientes(veiculo))
-                .ativo(veiculo.isAtivo())
-                .dataCriacao(veiculo.getDataCriacao())
-                .dataUltimaAtualizacao(veiculo.getDataUltimaAtualizacao())
-                .dataRemocao(veiculo.getDataRemocao())
-                .build();
-    }
+	/**
+	 * Cadastra um novo veiculo.
+	 * @param request payload do novo veiculo.
+	 * @return veiculo persistido.
+	 */
+	@PostMapping
+	@Operation(summary = "Cadastrar veiculo")
+	public ResponseEntity<VeiculoResponse> criar(@RequestBody @Valid CadastroVeiculoRequest request) {
+		Veiculo veiculo = criarVeiculoUseCase.executar(request.getPlaca(), request.getMarca(), request.getModelo(),
+				request.getAno(), request.getCor(), request.getObservacoes(), request.getClientesIds());
+		return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(veiculo));
+	}
 
-    private List<ClienteVinculadoResponse> montarClientes(Veiculo veiculo) {
-        return veiculo.getClientesVinculados().stream()
-                .map(clienteId -> buscarClientePorIdUseCase.executar(clienteId)
-                        .map(cliente -> ClienteVinculadoResponse.builder()
-                                .id(cliente.getId())
-                                .nome(cliente.getNome())
-                                .documentoMascarado(cliente.getDocumento().mascarado())
-                                .build())
-                        .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente vinculado nao encontrado para o veiculo.")))
-                .sorted(Comparator.comparing(ClienteVinculadoResponse::getNome))
-                .toList();
-    }
+	/**
+	 * Atualiza um veiculo existente.
+	 * @param id identificador do veiculo.
+	 * @param request payload de atualizacao.
+	 * @return veiculo atualizado.
+	 */
+	@PutMapping("/{id}")
+	@Operation(summary = "Atualizar veiculo")
+	public ResponseEntity<VeiculoResponse> atualizar(@PathVariable UUID id,
+			@RequestBody @Valid AtualizarVeiculoRequest request) {
+		Veiculo veiculo = atualizarVeiculoUseCase.executar(id, request.getPlaca(), request.getMarca(),
+				request.getModelo(), request.getAno(), request.getCor(), request.getObservacoes());
+		return ResponseEntity.ok(toResponse(veiculo));
+	}
+
+	/**
+	 * Vincula um novo cliente a um veiculo existente.
+	 * @param id identificador do veiculo.
+	 * @param clienteId identificador do cliente.
+	 * @return veiculo atualizado.
+	 */
+	@PostMapping("/{id}/clientes/{clienteId}")
+	@Operation(summary = "Vincular cliente ao veiculo")
+	public ResponseEntity<VeiculoResponse> vincularCliente(@PathVariable UUID id, @PathVariable UUID clienteId) {
+		Veiculo veiculo = vincularClienteVeiculoUseCase.executar(id, clienteId);
+		return ResponseEntity.ok(toResponse(veiculo));
+	}
+
+	/**
+	 * Desvincula um cliente de um veiculo existente.
+	 * @param id identificador do veiculo.
+	 * @param clienteId identificador do cliente.
+	 * @return veiculo atualizado.
+	 */
+	@DeleteMapping("/{id}/clientes/{clienteId}")
+	@Operation(summary = "Desvincular cliente do veiculo")
+	public ResponseEntity<VeiculoResponse> desvincularCliente(@PathVariable UUID id, @PathVariable UUID clienteId) {
+		Veiculo veiculo = desvincularClienteVeiculoUseCase.executar(id, clienteId);
+		return ResponseEntity.ok(toResponse(veiculo));
+	}
+
+	/**
+	 * Busca um veiculo pelo identificador.
+	 * @param id identificador do veiculo.
+	 * @param incluirInativos indica se veiculos inativos devem ser considerados.
+	 * @return veiculo encontrado.
+	 */
+	@GetMapping("/{id}")
+	@Operation(summary = "Buscar veiculo por identificador")
+	public ResponseEntity<VeiculoResponse> buscarPorId(@PathVariable UUID id,
+			@RequestParam(defaultValue = "false") @Parameter(
+					description = "Indica se veiculos inativos devem ser considerados") boolean incluirInativos) {
+		Veiculo veiculo = buscarVeiculoPorIdUseCase.executar(id, incluirInativos)
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
+		return ResponseEntity.ok(toResponse(veiculo));
+	}
+
+	/**
+	 * Busca um veiculo pela placa.
+	 * @param placa placa informada.
+	 * @param incluirInativos indica se veiculos inativos devem ser considerados.
+	 * @return veiculo encontrado.
+	 */
+	@GetMapping("/placa/{placa}")
+	@Operation(summary = "Buscar veiculo por placa")
+	public ResponseEntity<VeiculoResponse> buscarPorPlaca(@PathVariable String placa,
+			@RequestParam(defaultValue = "false") @Parameter(
+					description = "Indica se veiculos inativos devem ser considerados") boolean incluirInativos) {
+		Veiculo veiculo = buscarVeiculoPorPlacaUseCase.executar(placa, incluirInativos)
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com a placa informada."));
+		return ResponseEntity.ok(toResponse(veiculo));
+	}
+
+	/**
+	 * Lista todos os veiculos com filtros opcionais.
+	 * @param pagina pagina solicitada.
+	 * @param tamanho tamanho solicitado.
+	 * @param placa placa opcional.
+	 * @param clienteId cliente opcional.
+	 * @param incluirInativos indica se veiculos inativos devem ser considerados.
+	 * @return pagina de veiculos.
+	 */
+	@GetMapping
+	@Operation(summary = "Listar veiculos com paginacao e filtros")
+	public ResponseEntity<PaginaVeiculosResponse> listar(@RequestParam(defaultValue = "0") int pagina,
+			@RequestParam(defaultValue = "20") int tamanho, @RequestParam(required = false) String placa,
+			@RequestParam(required = false) UUID clienteId,
+			@RequestParam(defaultValue = "false") boolean incluirInativos) {
+		PaginaResultado<Veiculo> resultado = listarVeiculosUseCase.executar(pagina, tamanho, placa, clienteId,
+				incluirInativos);
+		return ResponseEntity.ok(PaginaVeiculosResponse.builder()
+			.conteudo(resultado.itens().stream().map(this::toResponse).toList())
+			.pagina(resultado.pagina())
+			.tamanho(resultado.tamanho())
+			.totalElementos(resultado.totalElementos())
+			.totalPaginas(resultado.totalPaginas())
+			.build());
+	}
+
+	/**
+	 * Lista todos os veiculos vinculados a um cliente.
+	 * @param clienteId identificador do cliente.
+	 * @param incluirInativos indica se veiculos inativos devem ser considerados.
+	 * @return lista de veiculos encontrados.
+	 */
+	@GetMapping("/cliente/{clienteId}")
+	@Operation(summary = "Listar veiculos por cliente")
+	public ResponseEntity<List<VeiculoResponse>> listarPorCliente(@PathVariable UUID clienteId,
+			@RequestParam(defaultValue = "false") boolean incluirInativos) {
+		List<VeiculoResponse> respostas = listarVeiculosPorClienteUseCase.executar(clienteId, incluirInativos)
+			.stream()
+			.map(this::toResponse)
+			.toList();
+		return ResponseEntity.ok(respostas);
+	}
+
+	/**
+	 * Remove logicamente um veiculo.
+	 * @param id identificador do veiculo.
+	 */
+	@DeleteMapping("/{id}")
+	@Operation(summary = "Remover veiculo logicamente")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void remover(@PathVariable UUID id) {
+		removerVeiculoUseCase.executar(id);
+	}
+
+	private VeiculoResponse toResponse(Veiculo veiculo) {
+		return VeiculoResponse.builder()
+			.id(veiculo.getId())
+			.placa(veiculo.getPlaca().getValor())
+			.marca(veiculo.getMarca())
+			.modelo(veiculo.getModelo())
+			.ano(veiculo.getAno())
+			.cor(veiculo.getCor())
+			.observacoes(veiculo.getObservacoes())
+			.clientes(montarClientes(veiculo))
+			.ativo(veiculo.isAtivo())
+			.dataCriacao(veiculo.getDataCriacao())
+			.dataUltimaAtualizacao(veiculo.getDataUltimaAtualizacao())
+			.dataRemocao(veiculo.getDataRemocao())
+			.build();
+	}
+
+	private List<ClienteVinculadoResponse> montarClientes(Veiculo veiculo) {
+		return veiculo.getClientesVinculados()
+			.stream()
+			.map(clienteId -> buscarClientePorIdUseCase.executar(clienteId)
+				.map(cliente -> ClienteVinculadoResponse.builder()
+					.id(cliente.getId())
+					.nome(cliente.getNome())
+					.documentoMascarado(cliente.getDocumento().mascarado())
+					.build())
+				.orElseThrow(
+						() -> new RecursoNaoEncontradoException("Cliente vinculado nao encontrado para o veiculo.")))
+			.sorted(Comparator.comparing(ClienteVinculadoResponse::getNome))
+			.toList();
+	}
+
 }

@@ -22,28 +22,29 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ListarVeiculosPorClienteUseCaseTest {
 
-    @Mock
-    private VeiculoRepository veiculoRepository;
+	@Mock
+	private VeiculoRepository veiculoRepository;
 
-    @Mock
-    private ClienteRepository clienteRepository;
+	@Mock
+	private ClienteRepository clienteRepository;
 
-    @InjectMocks
-    private ListarVeiculosPorClienteUseCase listarVeiculosPorClienteUseCase;
+	@InjectMocks
+	private ListarVeiculosPorClienteUseCase listarVeiculosPorClienteUseCase;
 
-    @Test
-    void shouldThrowWhenClientDoesNotExist() {
-        assertThrows(RecursoNaoEncontradoException.class, () ->
-                listarVeiculosPorClienteUseCase.executar(UUID.randomUUID(), false));
-    }
+	@Test
+	void shouldThrowWhenClientDoesNotExist() {
+		assertThrows(RecursoNaoEncontradoException.class,
+				() -> listarVeiculosPorClienteUseCase.executar(UUID.randomUUID(), false));
+	}
 
-    @Test
-    void shouldReturnVehiclesWhenClientExists() {
-        UUID clienteId = UUID.randomUUID();
-        when(clienteRepository.buscarPorId(clienteId)).thenReturn(Optional.of(
-                new Cliente(clienteId, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
-        when(veiculoRepository.listarPorCliente(clienteId, false)).thenReturn(List.of());
+	@Test
+	void shouldReturnVehiclesWhenClientExists() {
+		UUID clienteId = UUID.randomUUID();
+		when(clienteRepository.buscarPorId(clienteId)).thenReturn(
+				Optional.of(new Cliente(clienteId, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
+		when(veiculoRepository.listarPorCliente(clienteId, false)).thenReturn(List.of());
 
-        assertEquals(0, listarVeiculosPorClienteUseCase.executar(clienteId, false).size());
-    }
+		assertEquals(0, listarVeiculosPorClienteUseCase.executar(clienteId, false).size());
+	}
+
 }

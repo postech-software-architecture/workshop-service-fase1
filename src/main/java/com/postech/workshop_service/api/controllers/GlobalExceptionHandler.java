@@ -21,119 +21,116 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Trata erros de regra de negocio.
-     *
-     * @param ex excecao capturada.
-     * @param request requisicao corrente.
-     * @return payload padronizado de erro HTTP 400.
-     */
-    @ExceptionHandler(RegraDeNegocioException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(
-            RegraDeNegocioException ex, HttpServletRequest request) {
+	/**
+	 * Trata erros de regra de negocio.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 400.
+	 */
+	@ExceptionHandler(RegraDeNegocioException.class)
+	public ResponseEntity<ErrorResponse> handleBusinessException(RegraDeNegocioException ex,
+			HttpServletRequest request) {
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.BAD_REQUEST.value())
+			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+			.message(ex.getMessage())
+			.path(request.getRequestURI())
+			.build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+	}
 
-    /**
-     * Trata recursos nao encontrados.
-     *
-     * @param ex excecao capturada.
-     * @param request requisicao corrente.
-     * @return payload padronizado de erro HTTP 404.
-     */
-    @ExceptionHandler(RecursoNaoEncontradoException.class)
-    public ResponseEntity<ErrorResponse> handleNotFoundException(
-            RecursoNaoEncontradoException ex, HttpServletRequest request) {
+	/**
+	 * Trata recursos nao encontrados.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 404.
+	 */
+	@ExceptionHandler(RecursoNaoEncontradoException.class)
+	public ResponseEntity<ErrorResponse> handleNotFoundException(RecursoNaoEncontradoException ex,
+			HttpServletRequest request) {
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.NOT_FOUND.value())
+			.error(HttpStatus.NOT_FOUND.getReasonPhrase())
+			.message(ex.getMessage())
+			.path(request.getRequestURI())
+			.build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-    }
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+	}
 
-    /**
-     * Trata erros estruturais de validacao no payload.
-     *
-     * @param ex excecao capturada.
-     * @param request requisicao corrente.
-     * @return payload padronizado de erro HTTP 422.
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(
-            MethodArgumentNotValidException ex, HttpServletRequest request) {
+	/**
+	 * Trata erros estruturais de validacao no payload.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 422.
+	 */
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex,
+			HttpServletRequest request) {
 
-        List<ErrorResponse.FieldErrorDetail> fieldErrors = ex.getBindingResult().getAllErrors().stream()
-                .map(error -> new ErrorResponse.FieldErrorDetail(
-                        ((FieldError) error).getField(), error.getDefaultMessage()))
-                .collect(Collectors.toList());
+		List<ErrorResponse.FieldErrorDetail> fieldErrors = ex.getBindingResult()
+			.getAllErrors()
+			.stream()
+			.map(error -> new ErrorResponse.FieldErrorDetail(((FieldError) error).getField(),
+					error.getDefaultMessage()))
+			.collect(Collectors.toList());
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
-                .error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
-                .message("Erro de validacao estrutural no payload.")
-                .path(request.getRequestURI())
-                .fieldErrors(fieldErrors)
-                .build();
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+			.error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+			.message("Erro de validacao estrutural no payload.")
+			.path(request.getRequestURI())
+			.fieldErrors(fieldErrors)
+			.build();
 
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
-    }
+		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
+	}
 
-    /**
-     * Mantem compatibilidade com erros legados tratados como validacao estrutural.
-     *
-     * @param ex excecao capturada.
-     * @param request requisicao corrente.
-     * @return payload padronizado de erro HTTP 422.
-     */
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
-            IllegalArgumentException ex, HttpServletRequest request) {
+	/**
+	 * Mantem compatibilidade com erros legados tratados como validacao estrutural.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 422.
+	 */
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex,
+			HttpServletRequest request) {
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
-                .error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+			.error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+			.message(ex.getMessage())
+			.path(request.getRequestURI())
+			.build();
 
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
-    }
+		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
+	}
 
-    /**
-     * Trata erros nao previstos da aplicacao.
-     *
-     * @param ex excecao capturada.
-     * @param request requisicao corrente.
-     * @return payload padronizado de erro HTTP 500.
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(
-            Exception ex, HttpServletRequest request) {
+	/**
+	 * Trata erros nao previstos da aplicacao.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 500.
+	 */
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message("Ocorreu um erro interno no servidor.")
-                .path(request.getRequestURI())
-                .build();
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+			.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+			.message("Ocorreu um erro interno no servidor.")
+			.path(request.getRequestURI())
+			.build();
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+	}
+
 }

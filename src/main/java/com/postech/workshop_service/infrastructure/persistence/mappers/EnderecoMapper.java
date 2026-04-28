@@ -9,8 +9,9 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EnderecoMapper {
 
-    @Mapping(target = "cliente", ignore = true)
-    EnderecoJpaEntity toEntity(Endereco domain);
+	@Mapping(target = "cliente", ignore = true)
+	EnderecoJpaEntity toEntity(Endereco domain);
 
-    Endereco toDomain(EnderecoJpaEntity entity);
+	Endereco toDomain(EnderecoJpaEntity entity);
+
 }

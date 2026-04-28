@@ -23,44 +23,45 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DesvincularClienteVeiculoUseCaseTest {
 
-    @Mock
-    private VeiculoRepository veiculoRepository;
+	@Mock
+	private VeiculoRepository veiculoRepository;
 
-    @InjectMocks
-    private DesvincularClienteVeiculoUseCase desvincularClienteVeiculoUseCase;
+	@InjectMocks
+	private DesvincularClienteVeiculoUseCase desvincularClienteVeiculoUseCase;
 
-    @Test
-    void shouldUnlinkClienteFromVeiculo() {
-        UUID clienteA = UUID.randomUUID();
-        UUID clienteB = UUID.randomUUID();
-        UUID veiculoId = UUID.randomUUID();
-        Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null,
-                null, List.of(clienteA, clienteB));
+	@Test
+	void shouldUnlinkClienteFromVeiculo() {
+		UUID clienteA = UUID.randomUUID();
+		UUID clienteB = UUID.randomUUID();
+		UUID veiculoId = UUID.randomUUID();
+		Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
+				List.of(clienteA, clienteB));
 
-        when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
-        when(veiculoRepository.salvar(any(Veiculo.class))).thenAnswer(invocation -> invocation.getArgument(0));
+		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
+		when(veiculoRepository.salvar(any(Veiculo.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Veiculo atualizado = desvincularClienteVeiculoUseCase.executar(veiculoId, clienteB);
+		Veiculo atualizado = desvincularClienteVeiculoUseCase.executar(veiculoId, clienteB);
 
-        assertEquals(List.of(clienteA), atualizado.getClientesVinculados().stream().toList());
-    }
+		assertEquals(List.of(clienteA), atualizado.getClientesVinculados().stream().toList());
+	}
 
-    @Test
-    void shouldThrowWhenRemovingLastCliente() {
-        UUID clienteId = UUID.randomUUID();
-        UUID veiculoId = UUID.randomUUID();
-        Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null,
-                null, List.of(clienteId));
+	@Test
+	void shouldThrowWhenRemovingLastCliente() {
+		UUID clienteId = UUID.randomUUID();
+		UUID veiculoId = UUID.randomUUID();
+		Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
+				List.of(clienteId));
 
-        when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
+		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
 
-        assertThrows(RegraDeNegocioException.class,
-                () -> desvincularClienteVeiculoUseCase.executar(veiculoId, clienteId));
-    }
+		assertThrows(RegraDeNegocioException.class,
+				() -> desvincularClienteVeiculoUseCase.executar(veiculoId, clienteId));
+	}
 
-    @Test
-    void shouldThrowWhenVeiculoDoesNotExist() {
-        assertThrows(RecursoNaoEncontradoException.class,
-                () -> desvincularClienteVeiculoUseCase.executar(UUID.randomUUID(), UUID.randomUUID()));
-    }
+	@Test
+	void shouldThrowWhenVeiculoDoesNotExist() {
+		assertThrows(RecursoNaoEncontradoException.class,
+				() -> desvincularClienteVeiculoUseCase.executar(UUID.randomUUID(), UUID.randomUUID()));
+	}
+
 }

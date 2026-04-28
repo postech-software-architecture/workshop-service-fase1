@@ -17,63 +17,64 @@ import java.util.stream.Collectors;
 @Transactional
 public class ClienteRepositoryImpl implements ClienteRepository {
 
-    private final JpaClienteRepository jpaClienteRepository;
-    private final ClienteMapper clienteMapper;
+	private final JpaClienteRepository jpaClienteRepository;
 
-    public ClienteRepositoryImpl(JpaClienteRepository jpaClienteRepository, ClienteMapper clienteMapper) {
-        this.jpaClienteRepository = jpaClienteRepository;
-        this.clienteMapper = clienteMapper;
-    }
+	private final ClienteMapper clienteMapper;
 
-    @Override
-    public Cliente salvar(Cliente cliente) {
-        ClienteJpaEntity entity;
-        if (cliente.getId() != null) {
-            entity = jpaClienteRepository.findById(cliente.getId())
-                    .map(existing -> {
-                        clienteMapper.updateEntityFromDomain(cliente, existing);
-                        return existing;
-                    })
-                    .orElseGet(() -> clienteMapper.toEntity(cliente));
-        } else {
-            entity = clienteMapper.toEntity(cliente);
-        }
-        
-        ClienteJpaEntity saved = jpaClienteRepository.save(entity);
-        return clienteMapper.toDomain(saved);
-    }
+	public ClienteRepositoryImpl(JpaClienteRepository jpaClienteRepository, ClienteMapper clienteMapper) {
+		this.jpaClienteRepository = jpaClienteRepository;
+		this.clienteMapper = clienteMapper;
+	}
 
-    @Override
-    public Optional<Cliente> buscarPorId(UUID id) {
-        return jpaClienteRepository.findById(id).map(clienteMapper::toDomain);
-    }
+	@Override
+	public Cliente salvar(Cliente cliente) {
+		ClienteJpaEntity entity;
+		if (cliente.getId() != null) {
+			entity = jpaClienteRepository.findById(cliente.getId()).map(existing -> {
+				clienteMapper.updateEntityFromDomain(cliente, existing);
+				return existing;
+			}).orElseGet(() -> clienteMapper.toEntity(cliente));
+		}
+		else {
+			entity = clienteMapper.toEntity(cliente);
+		}
 
-    @Override
-    public Optional<Cliente> buscarPorDocumento(String documento) {
-        return jpaClienteRepository.findByDocumento(documento).map(clienteMapper::toDomain);
-    }
+		ClienteJpaEntity saved = jpaClienteRepository.save(entity);
+		return clienteMapper.toDomain(saved);
+	}
 
-    @Override
-    public List<Cliente> listar(int pagina, int tamanho) {
-        return jpaClienteRepository.findAll(PageRequest.of(pagina, tamanho))
-                .getContent()
-                .stream()
-                .map(clienteMapper::toDomain)
-                .collect(Collectors.toList());
-    }
+	@Override
+	public Optional<Cliente> buscarPorId(UUID id) {
+		return jpaClienteRepository.findById(id).map(clienteMapper::toDomain);
+	}
 
-    @Override
-    public long contarTodos() {
-        return jpaClienteRepository.count();
-    }
+	@Override
+	public Optional<Cliente> buscarPorDocumento(String documento) {
+		return jpaClienteRepository.findByDocumento(documento).map(clienteMapper::toDomain);
+	}
 
-    @Override
-    public void remover(UUID id) {
-        jpaClienteRepository.deleteById(id);
-    }
+	@Override
+	public List<Cliente> listar(int pagina, int tamanho) {
+		return jpaClienteRepository.findAll(PageRequest.of(pagina, tamanho))
+			.getContent()
+			.stream()
+			.map(clienteMapper::toDomain)
+			.collect(Collectors.toList());
+	}
 
-    @Override
-    public boolean existePorDocumento(String documento) {
-        return jpaClienteRepository.existsByDocumento(documento);
-    }
+	@Override
+	public long contarTodos() {
+		return jpaClienteRepository.count();
+	}
+
+	@Override
+	public void remover(UUID id) {
+		jpaClienteRepository.deleteById(id);
+	}
+
+	@Override
+	public boolean existePorDocumento(String documento) {
+		return jpaClienteRepository.existsByDocumento(documento);
+	}
+
 }

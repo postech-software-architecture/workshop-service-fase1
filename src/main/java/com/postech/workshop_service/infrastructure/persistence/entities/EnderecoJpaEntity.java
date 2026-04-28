@@ -13,34 +13,35 @@ import java.util.UUID;
 @AllArgsConstructor
 public class EnderecoJpaEntity {
 
-    @Id
-    private UUID id;
+	@Id
+	private UUID id;
 
-    @Column(name = "cliente_id")
-    private UUID clienteId;
+	@Column(name = "cliente_id")
+	private UUID clienteId;
 
-    @OneToOne
-    @JoinColumn(name = "cliente_id", insertable = false, updatable = false)
-    private ClienteJpaEntity cliente;
+	@OneToOne
+	@JoinColumn(name = "cliente_id", insertable = false, updatable = false)
+	private ClienteJpaEntity cliente;
 
-    @Column(nullable = false)
-    private String logradouro;
+	@Column(nullable = false)
+	private String logradouro;
 
-    @Column(length = 20)
-    private String numero;
+	@Column(length = 20)
+	private String numero;
 
-    @Column(length = 100)
-    private String complemento;
+	@Column(length = 100)
+	private String complemento;
 
-    @Column(length = 100)
-    private String bairro;
+	@Column(length = 100)
+	private String bairro;
 
-    @Column(nullable = false, length = 100)
-    private String cidade;
+	@Column(nullable = false, length = 100)
+	private String cidade;
 
-    @Column(nullable = false, length = 50)
-    private String estado;
+	@Column(nullable = false, length = 50)
+	private String estado;
 
-    @Column(length = 10)
-    private String cep;
+	@Column(length = 10)
+	private String cep;
+
 }

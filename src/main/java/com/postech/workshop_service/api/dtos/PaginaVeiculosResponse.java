@@ -17,9 +17,15 @@ import java.util.List;
 @AllArgsConstructor
 @Schema(description = "Resposta paginada contendo veiculos")
 public class PaginaVeiculosResponse {
-    private List<VeiculoResponse> conteudo;
-    private int pagina;
-    private int tamanho;
-    private long totalElementos;
-    private int totalPaginas;
+
+	private List<VeiculoResponse> conteudo;
+
+	private int pagina;
+
+	private int tamanho;
+
+	private long totalElementos;
+
+	private int totalPaginas;
+
 }

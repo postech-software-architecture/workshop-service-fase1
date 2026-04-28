@@ -11,19 +11,20 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public abstract class PostgresTestContainer {
 
-    @Container
-    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15-alpine")
-            .withDatabaseName("workshop_test")
-            .withUsername("test")
-            .withPassword("test");
+	@Container
+	public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15-alpine")
+		.withDatabaseName("workshop_test")
+		.withUsername("test")
+		.withPassword("test");
 
-    @DynamicPropertySource
-    static void registerPgProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-        registry.add("spring.flyway.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.flyway.user", postgreSQLContainer::getUsername);
-        registry.add("spring.flyway.password", postgreSQLContainer::getPassword);
-    }
+	@DynamicPropertySource
+	static void registerPgProperties(DynamicPropertyRegistry registry) {
+		registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+		registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+		registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+		registry.add("spring.flyway.url", postgreSQLContainer::getJdbcUrl);
+		registry.add("spring.flyway.user", postgreSQLContainer::getUsername);
+		registry.add("spring.flyway.password", postgreSQLContainer::getPassword);
+	}
+
 }

@@ -13,25 +13,24 @@ import java.util.UUID;
 @Service
 public class BuscarVeiculoPorIdUseCase {
 
-    private final VeiculoRepository veiculoRepository;
+	private final VeiculoRepository veiculoRepository;
 
-    /**
-     * Construtor para injecao de dependencias.
-     *
-     * @param veiculoRepository repositorio de veiculos.
-     */
-    public BuscarVeiculoPorIdUseCase(VeiculoRepository veiculoRepository) {
-        this.veiculoRepository = veiculoRepository;
-    }
+	/**
+	 * Construtor para injecao de dependencias.
+	 * @param veiculoRepository repositorio de veiculos.
+	 */
+	public BuscarVeiculoPorIdUseCase(VeiculoRepository veiculoRepository) {
+		this.veiculoRepository = veiculoRepository;
+	}
 
-    /**
-     * Busca um veiculo pelo identificador.
-     *
-     * @param id identificador do veiculo.
-     * @param incluirInativos indica se veiculos inativos devem ser considerados.
-     * @return veiculo encontrado, se existir.
-     */
-    public Optional<Veiculo> executar(UUID id, boolean incluirInativos) {
-        return veiculoRepository.buscarPorId(id, incluirInativos);
-    }
+	/**
+	 * Busca um veiculo pelo identificador.
+	 * @param id identificador do veiculo.
+	 * @param incluirInativos indica se veiculos inativos devem ser considerados.
+	 * @return veiculo encontrado, se existir.
+	 */
+	public Optional<Veiculo> executar(UUID id, boolean incluirInativos) {
+		return veiculoRepository.buscarPorId(id, incluirInativos);
+	}
+
 }
