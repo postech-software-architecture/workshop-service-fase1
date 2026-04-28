@@ -4,19 +4,18 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Entidade JPA do agregado de veiculo.
@@ -25,13 +24,11 @@ import java.util.UUID;
 @Table(name = "veiculos")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VeiculoJpaEntity {
-
-	@Id
-	private UUID id;
+@EqualsAndHashCode(callSuper = true)
+public class VeiculoJpaEntity extends BaseJpaEntity {
 
 	@Column(nullable = false, length = 7)
 	private String placa;
@@ -53,15 +50,6 @@ public class VeiculoJpaEntity {
 
 	@Column(nullable = false)
 	private Boolean ativo;
-
-	@Column(name = "data_remocao")
-	private LocalDateTime dataRemocao;
-
-	@Column(name = "data_criacao", nullable = false)
-	private LocalDateTime dataCriacao;
-
-	@Column(name = "data_ultima_atualizacao", nullable = false)
-	private LocalDateTime dataUltimaAtualizacao;
 
 	@Builder.Default
 	@OneToMany(mappedBy = "veiculo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

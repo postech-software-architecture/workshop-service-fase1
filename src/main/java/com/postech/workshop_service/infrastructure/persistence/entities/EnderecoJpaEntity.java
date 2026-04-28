@@ -1,21 +1,28 @@
 package com.postech.workshop_service.infrastructure.persistence.entities;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "enderecos")
-@Data
-@Builder
+@Getter
+@Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EnderecoJpaEntity {
-
-	@Id
-	private UUID id;
+@EqualsAndHashCode(callSuper = true)
+public class EnderecoJpaEntity extends BaseJpaEntity {
 
 	@Column(name = "cliente_id")
 	private UUID clienteId;
@@ -44,14 +51,5 @@ public class EnderecoJpaEntity {
 
 	@Column(length = 10)
 	private String cep;
-
-	@Column(name = "data_criacao", nullable = false)
-	private LocalDateTime dataCriacao;
-
-	@Column(name = "data_ultima_atualizacao", nullable = false)
-	private LocalDateTime dataUltimaAtualizacao;
-
-	@Column(name = "data_remocao")
-	private LocalDateTime dataRemocao;
 
 }
