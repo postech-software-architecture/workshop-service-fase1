@@ -90,7 +90,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void shouldReturn422WhenRequiredFieldMissing() throws Exception {
+	void shouldReturn400WhenRequiredFieldMissing() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.descricao("Descricao sem nome")
 			.valor(new BigDecimal("100.00"))
@@ -100,11 +100,11 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity());
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	void shouldReturn400WhenDuplicateName() throws Exception {
+	void shouldReturn422WhenDuplicateName() throws Exception {
 		CadastroServicoRequest primeiro = CadastroServicoRequest.builder()
 			.nome("Alinhamento")
 			.descricao("Alinhamento de rodas")
@@ -127,11 +127,11 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(duplicado)))
-			.andExpect(status().isBadRequest());
+			.andExpect(status().isUnprocessableEntity());
 	}
 
 	@Test
-	void shouldReturn422WhenInvalidValue() throws Exception {
+	void shouldReturn400WhenInvalidValue() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome("Servico invalido")
 			.descricao("Descricao")
@@ -142,7 +142,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity());
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
@@ -190,7 +190,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void shouldReturn422WhenNomeIsNull() throws Exception {
+	void shouldReturn400WhenNomeIsNull() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.descricao("Descricao valida")
 			.valor(new BigDecimal("100.00"))
@@ -200,12 +200,12 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity())
+			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.fieldErrors[?(@.field=='nome')]").exists());
 	}
 
 	@Test
-	void shouldReturn422WhenDescricaoIsBlank() throws Exception {
+	void shouldReturn400WhenDescricaoIsBlank() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome("Servico X")
 			.descricao("")
@@ -216,12 +216,12 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity())
+			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.fieldErrors[?(@.field=='descricao')]").exists());
 	}
 
 	@Test
-	void shouldReturn422WhenValorIsNull() throws Exception {
+	void shouldReturn400WhenValorIsNull() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome("Servico X")
 			.descricao("Descricao valida")
@@ -231,12 +231,12 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity())
+			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.fieldErrors[?(@.field=='valor')]").exists());
 	}
 
 	@Test
-	void shouldReturn422WhenValorIsZero() throws Exception {
+	void shouldReturn400WhenValorIsZero() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome("Servico X")
 			.descricao("Descricao valida")
@@ -247,11 +247,11 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity());
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	void shouldReturn422WhenTempoEstimadoIsNull() throws Exception {
+	void shouldReturn400WhenTempoEstimadoIsNull() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome("Servico X")
 			.descricao("Descricao valida")
@@ -261,12 +261,12 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity())
+			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.fieldErrors[?(@.field=='tempoEstimadoMinutos')]").exists());
 	}
 
 	@Test
-	void shouldReturn422WhenTempoEstimadoIsZero() throws Exception {
+	void shouldReturn400WhenTempoEstimadoIsZero() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome("Servico X")
 			.descricao("Descricao valida")
@@ -277,11 +277,11 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity());
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	void shouldReturn422WhenGarantiaIsNegative() throws Exception {
+	void shouldReturn400WhenGarantiaIsNegative() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome("Servico X")
 			.descricao("Descricao valida")
@@ -293,11 +293,11 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity());
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	void shouldReturn422WhenNomeExceedsMaxLength() throws Exception {
+	void shouldReturn400WhenNomeExceedsMaxLength() throws Exception {
 		String longName = "a".repeat(101);
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome(longName)
@@ -309,23 +309,21 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity());
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	void shouldReturn500WhenJsonIsMalformed() throws Exception {
-		// HttpMessageNotReadableException cai no handler generico (500). Tratamento
-		// dedicado (400) sera adicionado junto com a inversao de status codes.
+	void shouldReturn400WhenJsonIsMalformed() throws Exception {
 		mockMvc.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON).content("{nome: 'sem aspas'}"))
-			.andExpect(status().isInternalServerError());
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	void shouldReturn500WhenCategoriaEnumIsInvalid() throws Exception {
+	void shouldReturn400WhenCategoriaEnumIsInvalid() throws Exception {
 		String payload = "{\"nome\":\"Servico X\",\"descricao\":\"D\",\"valor\":100.00,"
 				+ "\"tempoEstimadoMinutos\":60,\"categoria\":\"NAO_EXISTE\"}";
 		mockMvc.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON).content(payload))
-			.andExpect(status().isInternalServerError());
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
@@ -350,9 +348,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 
 	@Test
 	void shouldReturn400WhenIdInPathIsNotUuid() throws Exception {
-		mockMvc.perform(get("/api/v1/servicos/{id}", "not-a-uuid"))
-			.andExpect(status()
-				.is(org.hamcrest.Matchers.anyOf(org.hamcrest.Matchers.is(400), org.hamcrest.Matchers.is(500))));
+		mockMvc.perform(get("/api/v1/servicos/{id}", "not-a-uuid")).andExpect(status().isBadRequest());
 	}
 
 	@Test
@@ -387,7 +383,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void shouldReturn400WhenUpdatingWithDuplicateNameInActiveRecord() throws Exception {
+	void shouldReturn422WhenUpdatingWithDuplicateNameInActiveRecord() throws Exception {
 		CadastroServicoRequest first = CadastroServicoRequest.builder()
 			.nome("Lavagem completa")
 			.descricao("Lavagem externa e interna")
@@ -425,7 +421,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(put("/api/v1/servicos/{id}", secondId).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(atualizar)))
-			.andExpect(status().isBadRequest());
+			.andExpect(status().isUnprocessableEntity());
 	}
 
 }

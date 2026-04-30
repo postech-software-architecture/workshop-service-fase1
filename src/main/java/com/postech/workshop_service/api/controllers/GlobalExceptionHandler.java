@@ -6,10 +6,12 @@ import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoE
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,10 +24,10 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
 	/**
-	 * Trata erros de regra de negocio.
+	 * Trata violacoes de regra de negocio.
 	 * @param ex excecao capturada.
 	 * @param request requisicao corrente.
-	 * @return payload padronizado de erro HTTP 400.
+	 * @return payload padronizado de erro HTTP 422.
 	 */
 	@ExceptionHandler(RegraDeNegocioException.class)
 	public ResponseEntity<ErrorResponse> handleBusinessException(RegraDeNegocioException ex,
@@ -33,13 +35,13 @@ public class GlobalExceptionHandler {
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
 			.timestamp(LocalDateTime.now())
-			.status(HttpStatus.BAD_REQUEST.value())
-			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+			.status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+			.error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
 			.message(ex.getMessage())
 			.path(request.getRequestURI())
 			.build();
 
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
 	}
 
 	/**
@@ -64,10 +66,10 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
-	 * Trata erros estruturais de validacao no payload.
+	 * Trata erros de Bean Validation no payload de entrada.
 	 * @param ex excecao capturada.
 	 * @param request requisicao corrente.
-	 * @return payload padronizado de erro HTTP 422.
+	 * @return payload padronizado de erro HTTP 400.
 	 */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex,
@@ -82,21 +84,22 @@ public class GlobalExceptionHandler {
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
 			.timestamp(LocalDateTime.now())
-			.status(HttpStatus.UNPROCESSABLE_ENTITY.value())
-			.error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+			.status(HttpStatus.BAD_REQUEST.value())
+			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
 			.message("Erro de validacao estrutural no payload.")
 			.path(request.getRequestURI())
 			.fieldErrors(fieldErrors)
 			.build();
 
-		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 	}
 
 	/**
-	 * Mantem compatibilidade com erros legados tratados como validacao estrutural.
+	 * Trata argumentos invalidos vindos do dominio (ex.: invariante violada na construcao
+	 * de um value object).
 	 * @param ex excecao capturada.
 	 * @param request requisicao corrente.
-	 * @return payload padronizado de erro HTTP 422.
+	 * @return payload padronizado de erro HTTP 400.
 	 */
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex,
@@ -104,13 +107,56 @@ public class GlobalExceptionHandler {
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
 			.timestamp(LocalDateTime.now())
-			.status(HttpStatus.UNPROCESSABLE_ENTITY.value())
-			.error(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
+			.status(HttpStatus.BAD_REQUEST.value())
+			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
 			.message(ex.getMessage())
 			.path(request.getRequestURI())
 			.build();
 
-		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+	}
+
+	/**
+	 * Trata payloads JSON malformados, valores incompativeis com o tipo declarado e enums
+	 * invalidos recebidos pelo Jackson.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 400.
+	 */
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+			HttpServletRequest request) {
+
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.BAD_REQUEST.value())
+			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+			.message("Payload invalido ou mal formado.")
+			.path(request.getRequestURI())
+			.build();
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+	}
+
+	/**
+	 * Trata path/query parameters com tipo invalido (ex.: UUID malformado).
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 400.
+	 */
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
+			HttpServletRequest request) {
+
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.BAD_REQUEST.value())
+			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+			.message("Parametro '" + ex.getName() + "' tem formato invalido.")
+			.path(request.getRequestURI())
+			.build();
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 	}
 
 	/**

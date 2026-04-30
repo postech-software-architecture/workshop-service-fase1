@@ -88,10 +88,12 @@ responses:
 **Mapeamento atual do `GlobalExceptionHandler`** (verificar antes de cada update):
 | Exception | Status HTTP |
 |---|---|
-| `RegraDeNegocioException` | 400 |
+| `RegraDeNegocioException` | 422 |
 | `RecursoNaoEncontradoException` | 404 |
-| `MethodArgumentNotValidException` (Bean Validation) | 422 |
-| `IllegalArgumentException` | 422 |
+| `MethodArgumentNotValidException` (Bean Validation) | 400 |
+| `IllegalArgumentException` | 400 |
+| `HttpMessageNotReadableException` (JSON malformado, enum invalido) | 400 |
+| `MethodArgumentTypeMismatchException` (UUID malformado em path/query) | 400 |
 | `Exception` (fallback) | 500 |
 
 Se algum dia esses mapeamentos mudarem em `GlobalExceptionHandler.java`, este agente é responsável por refletir a mudança no `openapi.yaml` no mesmo PR.
