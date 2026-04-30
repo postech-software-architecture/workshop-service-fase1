@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: Workshop Service API - Clientes
+  version: 1.0.0
+  description: API de back-office para gestão de cadastros básicos.
+servers:
+  - url: http://localhost:8080/api/v1
+paths:
+  /clientes:
+    post:
+      summary: Cadastra um novo cliente
+      description: Cria um novo registro de cliente. Este endpoint é público no MVP inicial e o payload deve conter pelo menos o documento único (CPF ou CNPJ validado matematicamente) e uma forma de contato (email ou telefone).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroClienteRequest'
+      responses:
+        '201':
+          description: Cliente criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '400':
+          description: Erro de Regra de Negócio (ex. documento já cadastrado)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Erro de Validação Estrutural (Unprocessable Entity) (ex. documento inválido ou ausência de campos obrigatórios)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CadastroClienteRequest:
+      type: object
+      required:
+        - nome
+        - documento
+      properties:
+        nome:
+          type: string
+          example: "João Silva"
+        documento:
+          type: string
+          description: "CPF ou CNPJ com ou sem formatação"
+          example: "123.456.789-00"
+        email:
+          type: string
+          format: email
+          example: "joao@example.com"
+        telefone:
+          type: string
+          example: "(11) 98765-4321"
+
+    ClienteResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        nome:
+          type: string
+          example: "João Silva"
+        documentoMascarado:
+          type: string
+          description: "O documento sempre é retornado ofuscado para proteção de dados."
+          example: "***.***.789-**"
+        email:
+          type: string
+          example: "joao@example.com"
+        telefone:
+          type: string
+          example: "(11) 98765-4321"
+        dataCadastro:
+          type: string
+          format: date-time
+          example: "2026-04-24T10:00:00Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
