@@ -5,11 +5,11 @@ package com.postech.workshop_service.domain.entities;
  */
 public enum StatusOrdemServico {
 
-	RECEBIDA,
+	EM_COMPOSICAO,
 
-	AGUARDANDO_APROVACAO_ORCAMENTO,
+	AGUARDANDO_RESPOSTA_CLIENTE,
 
-	EM_EXECUCAO,
+	AGUARDANDO_EXECUCAO,
 
 	CANCELADA,
 

@@ -4,6 +4,9 @@ import com.postech.workshop_service.application.exceptions.RegraDeNegocioExcepti
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -18,6 +21,8 @@ public class OrdemServico extends EntidadeBase {
 
 	private StatusOrdemServico status;
 
+	private final List<ItemComposicaoTecnica> itensComposicao;
+
 	/**
 	 * Cria uma nova ordem de servico com os vinculos obrigatorios.
 	 * @param id identificador tecnico da ordem de servico.
@@ -28,7 +33,8 @@ public class OrdemServico extends EntidadeBase {
 		super(id != null ? id : UUID.randomUUID());
 		this.idCliente = validarIdentificador(idCliente, "O identificador do cliente e obrigatorio.");
 		this.idVeiculo = validarIdentificador(idVeiculo, "O identificador do veiculo e obrigatorio.");
-		this.status = StatusOrdemServico.RECEBIDA;
+		this.status = StatusOrdemServico.EM_COMPOSICAO;
+		this.itensComposicao = List.of();
 	}
 
 	/**
@@ -42,21 +48,56 @@ public class OrdemServico extends EntidadeBase {
 	 * @param dataRemocao data da remocao logica.
 	 */
 	@Default
-	public OrdemServico(UUID id, UUID idCliente, UUID idVeiculo, StatusOrdemServico status, LocalDateTime dataCriacao,
+	public OrdemServico(UUID id, UUID idCliente, UUID idVeiculo, StatusOrdemServico status,
+			Collection<ItemComposicaoTecnica> itensComposicao, LocalDateTime dataCriacao,
 			LocalDateTime dataUltimaAtualizacao, LocalDateTime dataRemocao) {
 		super(id, dataCriacao, dataUltimaAtualizacao, dataRemocao);
 		this.idCliente = validarIdentificador(idCliente, "O identificador do cliente e obrigatorio.");
 		this.idVeiculo = validarIdentificador(idVeiculo, "O identificador do veiculo e obrigatorio.");
 		this.status = validarStatus(status);
+		this.itensComposicao = validarItensComposicao(itensComposicao);
 	}
 
 	/**
-	 * Indica se a ordem de servico pode ser cancelada no estado atual.
-	 * @return {@code true} quando o cancelamento e permitido.
+	 * Encerra a composicao tecnica quando houver pelo menos um item cadastrado.
 	 */
-	public boolean podeSerCancelada() {
-		return this.status == StatusOrdemServico.RECEBIDA
-				|| this.status == StatusOrdemServico.AGUARDANDO_APROVACAO_ORCAMENTO;
+	public void encerrarComposicao() {
+		if (this.status != StatusOrdemServico.EM_COMPOSICAO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido encerrar a composicao tecnica de uma ordem de servico com status " + this.status
+							+ ".");
+		}
+		if (this.itensComposicao.isEmpty()) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido encerrar a composicao tecnica de uma ordem de servico sem itens.");
+		}
+		this.status = StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE;
+		atualizarDataUltimaAtualizacao();
+	}
+
+	/**
+	 * Retorna a ordem de servico para a fase de composicao tecnica.
+	 */
+	public void voltarParaComposicao() {
+		if (this.status != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido voltar para composicao uma ordem de servico com status " + this.status + ".");
+		}
+		this.status = StatusOrdemServico.EM_COMPOSICAO;
+		atualizarDataUltimaAtualizacao();
+	}
+
+	/**
+	 * Marca a ordem como aguardando execucao apos aprovacao do orcamento.
+	 */
+	public void marcarComoAguardandoExecucao() {
+		if (this.status != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido marcar como aguardando execucao uma ordem de servico com status " + this.status
+							+ ".");
+		}
+		this.status = StatusOrdemServico.AGUARDANDO_EXECUCAO;
+		atualizarDataUltimaAtualizacao();
 	}
 
 	/**
@@ -64,7 +105,7 @@ public class OrdemServico extends EntidadeBase {
 	 * @throws RegraDeNegocioException quando a ordem de servico nao pode ser cancelada.
 	 */
 	public void cancelar() {
-		if (!podeSerCancelada()) {
+		if (this.status != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
 			throw new RegraDeNegocioException(
 					"Nao e permitido cancelar uma ordem de servico com status " + this.status + ".");
 		}
@@ -73,18 +114,11 @@ public class OrdemServico extends EntidadeBase {
 	}
 
 	/**
-	 * Avanca a ordem de servico para o estado de execucao.
-	 * @throws RegraDeNegocioException quando a ordem de servico nao puder entrar em
-	 * execucao.
+	 * Indica se a ordem possui ao menos um item de composicao tecnica.
+	 * @return {@code true} quando houver itens cadastrados.
 	 */
-	public void iniciarExecucao() {
-		if (this.status != StatusOrdemServico.RECEBIDA
-				&& this.status != StatusOrdemServico.AGUARDANDO_APROVACAO_ORCAMENTO) {
-			throw new RegraDeNegocioException(
-					"Nao e permitido iniciar a execucao de uma ordem de servico com status " + this.status + ".");
-		}
-		this.status = StatusOrdemServico.EM_EXECUCAO;
-		atualizarDataUltimaAtualizacao();
+	public boolean possuiItensComposicao() {
+		return !this.itensComposicao.isEmpty();
 	}
 
 	private UUID validarIdentificador(UUID identificador, String mensagem) {
@@ -99,6 +133,21 @@ public class OrdemServico extends EntidadeBase {
 			throw new IllegalArgumentException("O status da ordem de servico e obrigatorio.");
 		}
 		return status;
+	}
+
+	private List<ItemComposicaoTecnica> validarItensComposicao(Collection<ItemComposicaoTecnica> itensComposicao) {
+		if (itensComposicao == null) {
+			return List.of();
+		}
+
+		List<ItemComposicaoTecnica> itensValidados = new ArrayList<>();
+		for (ItemComposicaoTecnica item : itensComposicao) {
+			if (item == null) {
+				throw new IllegalArgumentException("Nao e permitido informar item nulo na ordem de servico.");
+			}
+			itensValidados.add(item);
+		}
+		return List.copyOf(itensValidados);
 	}
 
 }

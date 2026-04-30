@@ -82,22 +82,14 @@ public class Orcamento extends EntidadeBase {
 	}
 
 	/**
-	 * Aprova o orcamento e, quando original, avanca a ordem vinculada para execucao.
-	 * @param ordemServico ordem de servico vinculada ao orcamento.
+	 * Aprova o orcamento pendente de aprovacao.
 	 * @throws RegraDeNegocioException quando o orcamento nao estiver pendente de
 	 * aprovacao.
 	 */
-	public void aprovar(OrdemServico ordemServico) {
+	public void aprovar() {
 		if (this.status != StatusOrcamento.PENDENTE_APROVACAO) {
 			throw new RegraDeNegocioException("Nao e permitido aprovar um orcamento com status " + this.status + ".");
 		}
-
-		validarOrdemServicoVinculada(ordemServico);
-
-		if (this.tipo == TipoOrcamento.SERVICO_ORIGINAL) {
-			ordemServico.iniciarExecucao();
-		}
-
 		this.status = StatusOrcamento.APROVADO;
 		atualizarDataUltimaAtualizacao();
 	}
@@ -116,29 +108,15 @@ public class Orcamento extends EntidadeBase {
 	}
 
 	/**
-	 * Cancela o orcamento e, quando aplicavel, tenta cancelar a ordem de servico
-	 * vinculada.
-	 * @param ordemServico ordem de servico vinculada ao orcamento.
+	 * Cancela o orcamento pendente de aprovacao.
 	 * @throws RegraDeNegocioException quando o orcamento nao puder ser cancelado.
 	 */
-	public void cancelar(OrdemServico ordemServico) {
-		if (!podeSerCancelado()) {
+	public void cancelar() {
+		if (this.status != StatusOrcamento.PENDENTE_APROVACAO) {
 			throw new RegraDeNegocioException("Nao e permitido cancelar um orcamento com status " + this.status + ".");
 		}
-
-		validarOrdemServicoVinculada(ordemServico);
-
 		this.status = StatusOrcamento.CANCELADO;
 		atualizarDataUltimaAtualizacao();
-
-		if (this.tipo == TipoOrcamento.SERVICO_ORIGINAL && ordemServico.podeSerCancelada()) {
-			ordemServico.cancelar();
-		}
-	}
-
-	private boolean podeSerCancelado() {
-		return this.status == StatusOrcamento.CRIADO || this.status == StatusOrcamento.PENDENTE_APROVACAO
-				|| this.status == StatusOrcamento.APROVADO;
 	}
 
 	private UUID validarIdentificador(UUID idOrdemServico) {
@@ -183,15 +161,6 @@ public class Orcamento extends EntidadeBase {
 			throw new IllegalArgumentException("O status do orcamento e obrigatorio.");
 		}
 		return status;
-	}
-
-	private void validarOrdemServicoVinculada(OrdemServico ordemServico) {
-		if (ordemServico == null) {
-			throw new IllegalArgumentException("A ordem de servico vinculada e obrigatoria.");
-		}
-		if (!this.idOrdemServico.equals(ordemServico.getId())) {
-			throw new IllegalArgumentException("A ordem de servico informada nao corresponde ao orcamento.");
-		}
 	}
 
 }

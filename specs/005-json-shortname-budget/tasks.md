@@ -17,9 +17,9 @@
 
 **Purpose**: Preparar os artefatos base da feature para persistencia, mapeamento e validacao automatizada
 
-- [ ] T001 Revisar e alinhar o contexto da feature em specs/005-json-shortname-budget/plan.md, specs/005-json-shortname-budget/data-model.md e specs/005-json-shortname-budget/quickstart.md antes da implementacao
-- [ ] T002 Criar a migration base da ordem de servico em src/main/resources/db/migration/V0.20260429100000__create_table_ordens_servico.sql
-- [ ] T003 [P] Criar a migration base do orcamento em src/main/resources/db/migration/V0.20260429101000__create_table_orcamentos.sql
+- [X] T001 Revisar e alinhar o contexto da feature em specs/005-json-shortname-budget/plan.md, specs/005-json-shortname-budget/data-model.md e specs/005-json-shortname-budget/quickstart.md antes da implementacao
+- [X] T002 Criar a migration base da ordem de servico em src/main/resources/db/migration/V0.20260429100000__create_table_ordens_servico.sql
+- [X] T003 [P] Criar a migration base do orcamento em src/main/resources/db/migration/V0.20260429101000__create_table_orcamentos.sql
 
 ---
 
@@ -29,20 +29,20 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Atualizar os enums de estados em src/main/java/com/postech/workshop_service/domain/entities/StatusOrdemServico.java e src/main/java/com/postech/workshop_service/domain/entities/StatusOrcamento.java para refletir o fluxo do MVP
-- [ ] T005 [P] Criar o enum de classificacao dos itens tecnicos em src/main/java/com/postech/workshop_service/domain/entities/TipoItemComposicaoTecnica.java
-- [ ] T006 [P] Criar o objeto de dominio de item de composicao em src/main/java/com/postech/workshop_service/domain/entities/ItemComposicaoTecnica.java
-- [ ] T007 Evoluir o agregado da ordem para suportar itens e transicoes do novo fluxo em src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java
-- [ ] T008 Evoluir o agregado do orcamento para fotografia de itens e transicoes alinhadas ao MVP em src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java e src/main/java/com/postech/workshop_service/domain/entities/ItemOrcamento.java
-- [ ] T009 [P] Criar os contratos de repositorio do dominio em src/main/java/com/postech/workshop_service/domain/repositories/OrdemServicoRepository.java e src/main/java/com/postech/workshop_service/domain/repositories/OrcamentoRepository.java
-- [ ] T010 [P] Criar os contratos de notificacao em src/main/java/com/postech/workshop_service/application/usecases/ClienteNotificationService.java e src/main/java/com/postech/workshop_service/application/usecases/MecanicoNotificationService.java
-- [ ] T011 [P] Criar as implementacoes de notificacao por log em src/main/java/com/postech/workshop_service/application/usecases/LogClienteNotificationService.java e src/main/java/com/postech/workshop_service/application/usecases/LogMecanicoNotificationService.java
-- [ ] T012 [P] Criar as entidades JPA de ordem e itens da ordem em src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/OrdemServicoJpaEntity.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/ItemComposicaoTecnicaJpaEntity.java
-- [ ] T013 [P] Criar as entidades JPA de orcamento e itens do orcamento em src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/OrcamentoJpaEntity.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/ItemOrcamentoJpaEntity.java
-- [ ] T014 [P] Criar os repositorios Spring Data em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaOrdemServicoRepository.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaOrcamentoRepository.java
-- [ ] T015 [P] Criar os mapeadores MapStruct da feature em src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrdemServicoMapper.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrcamentoMapper.java
-- [ ] T016 Implementar as adaptacoes de persistencia do dominio em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/OrdemServicoRepositoryImpl.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/OrcamentoRepositoryImpl.java
-- [ ] T017 Atualizar os testes de dominio compartilhados para o novo modelo em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java e src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java
+- [X] T004 Atualizar os enums de estados em src/main/java/com/postech/workshop_service/domain/entities/StatusOrdemServico.java e src/main/java/com/postech/workshop_service/domain/entities/StatusOrcamento.java para refletir o fluxo do MVP
+- [X] T005 [P] Criar o enum de classificacao dos itens tecnicos em src/main/java/com/postech/workshop_service/domain/entities/TipoItemComposicaoTecnica.java
+- [X] T006 [P] Criar o objeto de dominio de item de composicao em src/main/java/com/postech/workshop_service/domain/entities/ItemComposicaoTecnica.java
+- [X] T007 Evoluir o agregado da ordem para suportar itens e transicoes do novo fluxo em src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java
+- [X] T008 Evoluir o agregado do orcamento para fotografia de itens e transicoes alinhadas ao MVP em src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java e src/main/java/com/postech/workshop_service/domain/entities/ItemOrcamento.java
+- [X] T009 [P] Criar os contratos de repositorio do dominio em src/main/java/com/postech/workshop_service/domain/repositories/OrdemServicoRepository.java e src/main/java/com/postech/workshop_service/domain/repositories/OrcamentoRepository.java
+- [X] T010 [P] Criar os contratos de notificacao em src/main/java/com/postech/workshop_service/application/usecases/ClienteNotificationService.java e src/main/java/com/postech/workshop_service/application/usecases/MecanicoNotificationService.java
+- [X] T011 [P] Criar as implementacoes de notificacao por log em src/main/java/com/postech/workshop_service/application/usecases/LogClienteNotificationService.java e src/main/java/com/postech/workshop_service/application/usecases/LogMecanicoNotificationService.java
+- [X] T012 [P] Criar as entidades JPA de ordem e itens da ordem em src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/OrdemServicoJpaEntity.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/ItemComposicaoTecnicaJpaEntity.java
+- [X] T013 [P] Criar as entidades JPA de orcamento e itens do orcamento em src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/OrcamentoJpaEntity.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/ItemOrcamentoJpaEntity.java
+- [X] T014 [P] Criar os repositorios Spring Data em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaOrdemServicoRepository.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaOrcamentoRepository.java
+- [X] T015 [P] Criar os mapeadores MapStruct da feature em src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrdemServicoMapper.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrcamentoMapper.java
+- [X] T016 Implementar as adaptacoes de persistencia do dominio em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/OrdemServicoRepositoryImpl.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/OrcamentoRepositoryImpl.java
+- [X] T017 Atualizar os testes de dominio compartilhados para o novo modelo em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java e src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -56,16 +56,16 @@
 
 ### Tests for User Story 1
 
-- [ ] T018 [P] [US1] Criar testes do caso de uso de encerramento da composicao em src/test/java/com/postech/workshop_service/application/usecases/EncerrarComposicaoTecnicaUseCaseTest.java
-- [ ] T019 [P] [US1] Expandir os testes de dominio da ordem para validar bloqueio sem itens e encerramento valido em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
-- [ ] T020 [P] [US1] Expandir os testes de dominio do orcamento para validar envio para aprovacao e preservacao da fotografia em src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java
+- [X] T018 [P] [US1] Criar testes do caso de uso de encerramento da composicao em src/test/java/com/postech/workshop_service/application/usecases/EncerrarComposicaoTecnicaUseCaseTest.java
+- [X] T019 [P] [US1] Expandir os testes de dominio da ordem para validar bloqueio sem itens e encerramento valido em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
+- [X] T020 [P] [US1] Expandir os testes de dominio do orcamento para validar envio para aprovacao e preservacao da fotografia em src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java
 
 ### Implementation for User Story 1
 
-- [ ] T021 [US1] Implementar o caso de uso de encerramento da composicao em src/main/java/com/postech/workshop_service/application/usecases/EncerrarComposicaoTecnicaUseCase.java
-- [ ] T022 [US1] Adicionar a consulta de orcamento pendente por ordem em src/main/java/com/postech/workshop_service/domain/repositories/OrcamentoRepository.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/OrcamentoRepositoryImpl.java
-- [ ] T023 [US1] Implementar a restricao de unicidade de orcamento pendente no repositorio Spring Data em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaOrcamentoRepository.java
-- [ ] T024 [US1] Finalizar o mapeamento de itens da ordem e fotografia do orcamento em src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrdemServicoMapper.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrcamentoMapper.java
+- [X] T021 [US1] Implementar o caso de uso de encerramento da composicao em src/main/java/com/postech/workshop_service/application/usecases/EncerrarComposicaoTecnicaUseCase.java
+- [X] T022 [US1] Adicionar a consulta de orcamento pendente por ordem em src/main/java/com/postech/workshop_service/domain/repositories/OrcamentoRepository.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/OrcamentoRepositoryImpl.java
+- [X] T023 [US1] Implementar a restricao de unicidade de orcamento pendente no repositorio Spring Data em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaOrcamentoRepository.java
+- [X] T024 [US1] Finalizar o mapeamento de itens da ordem e fotografia do orcamento em src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrdemServicoMapper.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrcamentoMapper.java
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -79,16 +79,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Criar testes do caso de uso de aprovacao em src/test/java/com/postech/workshop_service/application/usecases/AprovarOrcamentoUseCaseTest.java
-- [ ] T026 [P] [US2] Criar testes do caso de uso de rejeicao em src/test/java/com/postech/workshop_service/application/usecases/RejeitarOrcamentoUseCaseTest.java
-- [ ] T027 [P] [US2] Ajustar os testes de dominio da ordem para retorno a composicao e ida para aguardando execucao em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
-- [ ] T028 [P] [US2] Ajustar os testes de dominio do orcamento para aprovacao e rejeicao apenas a partir de pendente em src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java
+- [X] T025 [P] [US2] Criar testes do caso de uso de aprovacao em src/test/java/com/postech/workshop_service/application/usecases/AprovarOrcamentoUseCaseTest.java
+- [X] T026 [P] [US2] Criar testes do caso de uso de rejeicao em src/test/java/com/postech/workshop_service/application/usecases/RejeitarOrcamentoUseCaseTest.java
+- [X] T027 [P] [US2] Ajustar os testes de dominio da ordem para retorno a composicao e ida para aguardando execucao em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
+- [X] T028 [P] [US2] Ajustar os testes de dominio do orcamento para aprovacao e rejeicao apenas a partir de pendente em src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java
 
 ### Implementation for User Story 2
 
-- [ ] T029 [US2] Implementar o caso de uso de aprovacao do orcamento em src/main/java/com/postech/workshop_service/application/usecases/AprovarOrcamentoUseCase.java
-- [ ] T030 [US2] Implementar o caso de uso de rejeicao do orcamento em src/main/java/com/postech/workshop_service/application/usecases/RejeitarOrcamentoUseCase.java
-- [ ] T031 [US2] Ajustar o dominio da ordem e do orcamento para suportar aprovacao e rejeicao do novo fluxo em src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java e src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java
+- [X] T029 [US2] Implementar o caso de uso de aprovacao do orcamento em src/main/java/com/postech/workshop_service/application/usecases/AprovarOrcamentoUseCase.java
+- [X] T030 [US2] Implementar o caso de uso de rejeicao do orcamento em src/main/java/com/postech/workshop_service/application/usecases/RejeitarOrcamentoUseCase.java
+- [X] T031 [US2] Ajustar o dominio da ordem e do orcamento para suportar aprovacao e rejeicao do novo fluxo em src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java e src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -102,14 +102,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T032 [P] [US3] Criar testes do caso de uso de cancelamento em src/test/java/com/postech/workshop_service/application/usecases/CancelarOrcamentoUseCaseTest.java
-- [ ] T033 [P] [US3] Ajustar os testes de dominio da ordem para cancelamento apenas em aguardando resposta do cliente em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
-- [ ] T034 [P] [US3] Ajustar os testes de dominio do orcamento para cancelamento apenas a partir de pendente em src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java
+- [X] T032 [P] [US3] Criar testes do caso de uso de cancelamento em src/test/java/com/postech/workshop_service/application/usecases/CancelarOrcamentoUseCaseTest.java
+- [X] T033 [P] [US3] Ajustar os testes de dominio da ordem para cancelamento apenas em aguardando resposta do cliente em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
+- [X] T034 [P] [US3] Ajustar os testes de dominio do orcamento para cancelamento apenas a partir de pendente em src/test/java/com/postech/workshop_service/domain/entities/OrcamentoTest.java
 
 ### Implementation for User Story 3
 
-- [ ] T035 [US3] Implementar o caso de uso de cancelamento do orcamento em src/main/java/com/postech/workshop_service/application/usecases/CancelarOrcamentoUseCase.java
-- [ ] T036 [US3] Ajustar o comportamento de cancelamento no dominio em src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java e src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java
+- [X] T035 [US3] Implementar o caso de uso de cancelamento do orcamento em src/main/java/com/postech/workshop_service/application/usecases/CancelarOrcamentoUseCase.java
+- [X] T036 [US3] Ajustar o comportamento de cancelamento no dominio em src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java e src/main/java/com/postech/workshop_service/domain/entities/Orcamento.java
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -119,8 +119,8 @@
 
 **Purpose**: Consolidar consistencia, cobertura e validacao final da feature
 
-- [ ] T037 [P] Atualizar a documentacao de contratos internos da feature em specs/005-json-shortname-budget/contracts/README.md
-- [ ] T038 Validar o fluxo completo descrito em specs/005-json-shortname-budget/quickstart.md e ajustar o texto se necessario
+- [X] T037 [P] Atualizar a documentacao de contratos internos da feature em specs/005-json-shortname-budget/contracts/README.md
+- [X] T038 Validar o fluxo completo descrito em specs/005-json-shortname-budget/quickstart.md e ajustar o texto se necessario
 - [ ] T039 Executar a suite de testes da feature e registrar os resultados esperados com mvn test a partir de specs/005-json-shortname-budget/quickstart.md
 
 ---

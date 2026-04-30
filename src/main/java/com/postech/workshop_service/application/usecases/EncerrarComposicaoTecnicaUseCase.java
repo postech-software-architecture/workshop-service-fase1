@@ -1,0 +1,87 @@
+package com.postech.workshop_service.application.usecases;
+
+import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
+import com.postech.workshop_service.domain.entities.ItemOrcamento;
+import com.postech.workshop_service.domain.entities.Orcamento;
+import com.postech.workshop_service.domain.entities.OrdemServico;
+import com.postech.workshop_service.domain.entities.TipoOrcamento;
+import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
+import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Caso de uso responsavel por encerrar a composicao tecnica da ordem e gerar um orcamento
+ * pendente de aprovacao.
+ */
+@Service
+public class EncerrarComposicaoTecnicaUseCase {
+
+	private final OrdemServicoRepository ordemServicoRepository;
+
+	private final OrcamentoRepository orcamentoRepository;
+
+	private final ClienteNotificationService clienteNotificationService;
+
+	/**
+	 * Construtor para injecao das dependencias do caso de uso.
+	 * @param ordemServicoRepository repositorio de ordens de servico.
+	 * @param orcamentoRepository repositorio de orcamentos.
+	 * @param clienteNotificationService service de notificacao do cliente.
+	 */
+	public EncerrarComposicaoTecnicaUseCase(OrdemServicoRepository ordemServicoRepository,
+			OrcamentoRepository orcamentoRepository, ClienteNotificationService clienteNotificationService) {
+		this.ordemServicoRepository = ordemServicoRepository;
+		this.orcamentoRepository = orcamentoRepository;
+		this.clienteNotificationService = clienteNotificationService;
+	}
+
+	/**
+	 * Encerra a composicao tecnica da ordem e cria um orcamento pendente de aprovacao.
+	 * @param idOrdemServico identificador da ordem de servico.
+	 * @return orcamento gerado para a ordem.
+	 */
+	@Transactional
+	public Orcamento executar(UUID idOrdemServico) {
+		OrdemServico ordemServico = ordemServicoRepository.buscarPorId(idOrdemServico)
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de servico nao encontrada."));
+
+		if (!ordemServico.possuiItensComposicao()) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido encerrar a composicao tecnica de uma ordem de servico sem itens.");
+		}
+		if (orcamentoRepository.existePendenteAprovacaoPorOrdemServico(idOrdemServico)) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido gerar um novo orcamento quando ja existe outro pendente de aprovacao.");
+		}
+
+		List<ItemOrcamento> itensFotografados = ordemServico.getItensComposicao()
+			.stream()
+			.map(this::copiarItem)
+			.toList();
+		BigDecimal valorTotal = itensFotografados.stream()
+			.map(ItemOrcamento::getValor)
+			.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		Orcamento orcamento = new Orcamento(null, ordemServico.getId(), valorTotal, itensFotografados,
+				TipoOrcamento.SERVICO_ORIGINAL);
+		orcamento.enviarParaAprovacao();
+		ordemServico.encerrarComposicao();
+
+		ordemServicoRepository.salvar(ordemServico);
+		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);
+		clienteNotificationService.notificarOrcamentoPendente(ordemServico, orcamentoPersistido);
+		return orcamentoPersistido;
+	}
+
+	private ItemOrcamento copiarItem(ItemComposicaoTecnica itemComposicaoTecnica) {
+		return new ItemOrcamento(itemComposicaoTecnica.getDescricao(), itemComposicaoTecnica.getValor());
+	}
+
+}

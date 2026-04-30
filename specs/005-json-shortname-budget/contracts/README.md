@@ -8,6 +8,16 @@ O escopo desta feature e interno a aplicacao e compreende:
 - contratos de repositorio de dominio para ordem de servico e orcamento;
 - services de notificacao por log para cliente e mecanico.
 
+Classes principais implementadas nesta fase:
+
+- `EncerrarComposicaoTecnicaUseCase`
+- `AprovarOrcamentoUseCase`
+- `RejeitarOrcamentoUseCase`
+- `CancelarOrcamentoUseCase`
+- `ClienteNotificationService` com implementacao `LogClienteNotificationService`
+- `MecanicoNotificationService` com implementacao `LogMecanicoNotificationService`
+- `OrdemServicoRepository` e `OrcamentoRepository` com adaptadores JPA
+
 Como nao ha controller nem endpoint solicitados nesta etapa:
 
 - nenhum `openapi.yaml` novo sera criado agora;

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -99,7 +98,7 @@ class OrcamentoTest {
 
 	@Test
 	void shouldRejectSendForApprovalWhenStatusIsInvalid() {
-		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.APROVADO, TipoOrcamento.SERVICO_ORIGINAL);
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.APROVADO);
 		LocalDateTime atualizacaoAnterior = orcamento.getDataUltimaAtualizacao();
 
 		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class, orcamento::enviarParaAprovacao);
@@ -110,51 +109,26 @@ class OrcamentoTest {
 	}
 
 	@Test
-	void shouldApproveOriginalBudgetAndStartOrderExecution() {
-		OrdemServico ordemServico = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
-		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO,
-				TipoOrcamento.SERVICO_ORIGINAL, ordemServico.getId());
+	void shouldApprovePendingBudget() {
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
 
-		orcamento.aprovar(ordemServico);
+		orcamento.aprovar();
 
 		assertEquals(StatusOrcamento.APROVADO, orcamento.getStatus());
-		assertEquals(StatusOrdemServico.EM_EXECUCAO, ordemServico.getStatus());
-		assertFalse(ordemServico.podeSerCancelada());
 	}
 
 	@Test
-	void shouldApproveAdditionalBudgetWithoutChangingOrderStatus() {
-		OrdemServico ordemServico = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
-		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO,
-				TipoOrcamento.ADICAO_SERVICO, ordemServico.getId());
+	void shouldRejectApprovalWhenStatusIsInvalid() {
+		Orcamento orcamento = criarOrcamentoServicoOriginal();
 
-		orcamento.aprovar(ordemServico);
+		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class, orcamento::aprovar);
 
-		assertEquals(StatusOrcamento.APROVADO, orcamento.getStatus());
-		assertEquals(StatusOrdemServico.RECEBIDA, ordemServico.getStatus());
-	}
-
-	@Test
-	void shouldRejectApprovalWhenStatusIsInvalidOrOrderDoesNotMatch() {
-		OrdemServico ordemServico = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
-		Orcamento orcamentoCriado = criarOrcamentoServicoOriginal(ordemServico.getId());
-		Orcamento orcamentoPendente = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO,
-				TipoOrcamento.SERVICO_ORIGINAL);
-
-		RegraDeNegocioException statusException = assertThrows(RegraDeNegocioException.class,
-				() -> orcamentoCriado.aprovar(ordemServico));
-		IllegalArgumentException vinculoException = assertThrows(IllegalArgumentException.class,
-				() -> orcamentoPendente.aprovar(ordemServico));
-
-		assertEquals("Nao e permitido aprovar um orcamento com status CRIADO.", statusException.getMessage());
-		assertEquals("A ordem de servico informada nao corresponde ao orcamento.", vinculoException.getMessage());
+		assertEquals("Nao e permitido aprovar um orcamento com status CRIADO.", exception.getMessage());
 	}
 
 	@Test
 	void shouldRejectPendingBudget() {
-		OrdemServico ordemServico = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
-		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO,
-				TipoOrcamento.SERVICO_ORIGINAL, ordemServico.getId());
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
 
 		orcamento.rejeitar();
 
@@ -174,79 +148,34 @@ class OrcamentoTest {
 	}
 
 	@Test
-	void shouldCancelOriginalBudgetAndOrderWhenBothAllowIt() {
-		OrdemServico ordemServico = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
-		Orcamento orcamento = criarOrcamentoServicoOriginal(ordemServico.getId());
+	void shouldCancelPendingBudget() {
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
 
-		orcamento.cancelar(ordemServico);
+		orcamento.cancelar();
 
 		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
-		assertEquals(StatusOrdemServico.CANCELADA, ordemServico.getStatus());
 	}
 
 	@Test
-	void shouldCancelAdditionalBudgetWithoutChangingOrder() {
-		OrdemServico ordemServico = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
-		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.APROVADO, TipoOrcamento.ADICAO_SERVICO,
-				ordemServico.getId());
+	void shouldRejectCancelWhenStatusIsInvalid() {
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.REJEITADO);
 
-		orcamento.cancelar(ordemServico);
+		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class, orcamento::cancelar);
 
-		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
-		assertEquals(StatusOrdemServico.RECEBIDA, ordemServico.getStatus());
-	}
-
-	@Test
-	void shouldCancelOriginalBudgetWithoutChangingOrderWhenOrderIsNotCancelable() {
-		UUID ordemServicoId = UUID.randomUUID();
-		LocalDateTime agora = LocalDateTime.now();
-		OrdemServico ordemServico = new OrdemServico(ordemServicoId, UUID.randomUUID(), UUID.randomUUID(),
-				StatusOrdemServico.EM_EXECUCAO, agora, agora, null);
-		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.APROVADO, TipoOrcamento.SERVICO_ORIGINAL,
-				ordemServicoId);
-
-		orcamento.cancelar(ordemServico);
-
-		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
-		assertEquals(StatusOrdemServico.EM_EXECUCAO, ordemServico.getStatus());
-	}
-
-	@Test
-	void shouldRejectCancelWhenStatusIsInvalidOrOrderDoesNotMatch() {
-		OrdemServico ordemServico = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
-		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.REJEITADO, TipoOrcamento.SERVICO_ORIGINAL,
-				ordemServico.getId());
-		Orcamento orcamentoPendente = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO,
-				TipoOrcamento.SERVICO_ORIGINAL);
-
-		RegraDeNegocioException statusException = assertThrows(RegraDeNegocioException.class,
-				() -> orcamento.cancelar(ordemServico));
-		IllegalArgumentException vinculoException = assertThrows(IllegalArgumentException.class,
-				() -> orcamentoPendente.cancelar(ordemServico));
-
-		assertEquals("Nao e permitido cancelar um orcamento com status REJEITADO.", statusException.getMessage());
-		assertEquals("A ordem de servico informada nao corresponde ao orcamento.", vinculoException.getMessage());
+		assertEquals("Nao e permitido cancelar um orcamento com status REJEITADO.", exception.getMessage());
 	}
 
 	private Orcamento criarOrcamentoServicoOriginal() {
-		return criarOrcamentoServicoOriginal(UUID.randomUUID());
-	}
-
-	private Orcamento criarOrcamentoServicoOriginal(UUID ordemServicoId) {
-		return new Orcamento(null, ordemServicoId, new BigDecimal("120.00"),
+		return new Orcamento(null, UUID.randomUUID(), new BigDecimal("120.00"),
 				List.of(new ItemOrcamento("Troca de oleo", new BigDecimal("120.00"))), TipoOrcamento.SERVICO_ORIGINAL);
 	}
 
-	private Orcamento criarOrcamentoReconstituido(StatusOrcamento status, TipoOrcamento tipo) {
-		return criarOrcamentoReconstituido(status, tipo, UUID.randomUUID());
-	}
-
-	private Orcamento criarOrcamentoReconstituido(StatusOrcamento status, TipoOrcamento tipo, UUID ordemServicoId) {
+	private Orcamento criarOrcamentoReconstituido(StatusOrcamento status) {
 		LocalDateTime criacao = LocalDateTime.now().minusDays(2);
 		LocalDateTime atualizacao = LocalDateTime.now().minusDays(1);
-		return new Orcamento(UUID.randomUUID(), ordemServicoId, new BigDecimal("120.00"),
-				List.of(new ItemOrcamento("Troca de oleo", new BigDecimal("120.00"))), tipo, status, criacao,
-				atualizacao, null);
+		return new Orcamento(UUID.randomUUID(), UUID.randomUUID(), new BigDecimal("120.00"),
+				List.of(new ItemOrcamento("Troca de oleo", new BigDecimal("120.00"))), TipoOrcamento.SERVICO_ORIGINAL,
+				status, criacao, atualizacao, null);
 	}
 
 }

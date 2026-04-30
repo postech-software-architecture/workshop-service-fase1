@@ -40,7 +40,8 @@ Implementar os casos de uso de encerramento da composicao tecnica da ordem e de 
 ## Validacao
 
 1. Executar `mvn test`.
-2. Confirmar que as entidades de dominio continuam sem setters genericos para status.
-3. Confirmar que existe validacao dupla para orcamento pendente unico: caso de uso/repositorio e banco.
-4. Confirmar que os services de notificacao apenas registram logs e nao disparam integracao externa.
-5. Confirmar que nao foram adicionados endpoints, PDF, pagamento, aprovacao parcial ou estoque nesta etapa.
+2. Caso o ambiente nao tenha Docker disponivel para os testes de integracao existentes do projeto, executar ao menos `mvn clean "-Dtest=EncerrarComposicaoTecnicaUseCaseTest,AprovarOrcamentoUseCaseTest,RejeitarOrcamentoUseCaseTest,CancelarOrcamentoUseCaseTest,OrdemServicoTest,OrcamentoTest" test` para validar o fluxo desta feature.
+3. Confirmar que as entidades de dominio continuam sem setters genericos para status.
+4. Confirmar que existe validacao dupla para orcamento pendente unico: caso de uso/repositorio e banco.
+5. Confirmar que os services de notificacao apenas registram logs e nao disparam integracao externa.
+6. Confirmar que nao foram adicionados endpoints, PDF, pagamento, aprovacao parcial ou estoque nesta etapa.
