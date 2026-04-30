@@ -2,6 +2,7 @@
 
 **Feature**: 003-parts-inventory-management  
 **Date**: 2026-04-29
+**Updated**: 2026-04-29 (nova estrutura de dados com entidade Estoques)
 
 ## Research Topics
 
@@ -18,17 +19,20 @@
 - Categoria como entidade separada com CRUD: rejeitado por simplicidade do MVP
 - SKU como chave primaria: rejeitado para manter UUID como padrao do projeto
 
-### 2. Estrutura de Dados para MovimentacaoEstoque
+### 2. Estrutura de Dados para Estoque e MovimentacaoEstoque
 
-**Decision**: Entidade filha de PecaInsumo com tipo (entrada/saida/ajuste), quantidade, motivo/justificativa e data/hora.
+**Decision**: Tres entidades em cascata: PecaInsumo (1) → (N) Estoque → (N) MovimentacaoEstoque.
 
 **Rationale**:
-- Relacionamento 1:N (uma peca tem muitas movimentacoes)
-- TipoMovimentacao como enumeracao
-- Ajuste como valor absoluto que substitui estoque atual
+- PecaInsumo nao armazena quantidade total (delegado a Estoques)
+- Estoque representa quantidade em uma localizacao especifica
+- Permite multiplas localizacoes por peca
+- MovimentacaoEstoque registra alteracoes em um estoque especifico
+- Ajuste como valor absoluto que substitui quantidade do estoque
 - Sem campo "responsavel" no MVP (sem autenticacao)
 
 **Alternatives Considered**:
+- Quantidade em PecaInsumo: rejeitado para suportar multiplas localizacoes
 - Ajuste como delta (+/-): rejeitado; valor absoluto e mais comum para inventarios
 - Campo responsavel: rejeitado para MVP, sera adicionado com autenticacao
 
@@ -101,7 +105,19 @@
 - Consistente com endpoints de clientes e veiculos
 - URLs em kebab-case, parametros em camelCase
 
-### 8. Unidade de Medida
+### 8. Nome de Tabelas no Banco de Dados
+
+**Decision**: Nomes no plural, seguindo padrao existente do projeto.
+
+**Rationale**:
+- Consistente com tabelas existentes: `clientes`, `veiculos`, `veiculos_clientes`
+- Padrao amplamente adotado em bancos de dados relacionais
+- Facilita leitura e compreensao do schema
+
+**Alternatives Considered**:
+- Nomes no singular: rejeitado por quebrar padrao do projeto
+
+### 9. Unidade de Medida
 
 **Decision**: Enumeracao com valores: UN, L, KG, M, ML, CX, PC.
 
@@ -126,4 +142,4 @@
 
 ## Open Questions
 
-Nenhuma. Todas as duvidas foram resolvidas na sessao de clarificacao.
+Nenhuma. Todas as duvidas foram resolvidas nas sessoes de clarificacao.

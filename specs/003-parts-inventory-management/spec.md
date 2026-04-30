@@ -18,6 +18,9 @@
 - Q: Como registrar o responsavel pela movimentacao sem autenticacao no MVP? → A: Nao registrar responsavel no MVP; adicionar quando autenticacao existir.
 - Q: O alerta de validade e necessario? → A: Nao, remover alerta de validade e campo data de validade do escopo.
 - Q: Ajuste de estoque e delta (+/-) ou valor absoluto? → A: Ajuste como valor absoluto, substituindo o estoque atual.
+- Q: Estrutura de dados para estoque - quantidade na peca ou entidade separada? → A: Criar entidade Estoques: PecaInsumo (1) → (N) Estoques → (N) Movimentacoes.
+- Q: Atributos da entidade Estoques? → A: peca_insumo_id (FK), localizacao (texto), quantidade (decimal), ativo (boolean), campos de auditoria.
+- Q: Nome de tabelas no banco? → A: Plural, seguindo padrao existente (clientes, veiculos, etc).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -156,8 +159,9 @@ Como gestor da oficina, quero desativar pecas descontinuadas para que nao aparec
 
 ### Key Entities *(include if feature involves data)*
 
-- **PecaInsumo**: Item utilizado nos servicos da oficina, identificado por SKU unico, com dados de nome, quantidade em estoque, valor unitario, estoque minimo, unidade de medida e campos opcionais de rastreabilidade. Controle de concurrencia via optimistic locking.
-- **MovimentacaoEstoque**: Registro de alteracao na quantidade de uma peca, contendo tipo (entrada/saida/ajuste), quantidade, motivo/justificativa e data/hora.
+- **PecaInsumo**: Item utilizado nos servicos da oficina, identificado por SKU unico, com dados de nome, valor unitario, estoque minimo, unidade de medida e campos opcionais de rastreabilidade. Controle de concurrencia via optimistic locking. Nao armazena quantidade total (delegado a Estoques).
+- **Estoque**: Registro de quantidade de uma peca em uma localizacao especifica. Permite multiplas localizacoes por peca.
+- **MovimentacaoEstoque**: Registro de alteracao na quantidade de um estoque especifico, contendo tipo (entrada/saida/ajuste), quantidade, motivo/justificativa e data/hora.
 
 ## Success Criteria *(mandatory)*
 

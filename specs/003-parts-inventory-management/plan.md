@@ -5,7 +5,7 @@
 
 ## Summary
 
-Adicionar um modulo de gestao de pecas e insumos com cadastro, atualizacao, consulta paginada, busca por SKU, controle de movimentacoes de estoque (entrada, saida, ajuste), historico de movimentacoes, alertas de estoque baixo e remocao logica, utilizando optimistic locking para concurrencia e mantendo rastreabilidade completa das operacoes.
+Adicionar um modulo de gestao de pecas e insumos com cadastro, atualizacao, consulta paginada, busca por SKU, controle de movimentacoes de estoque (entrada, saida, ajuste) por localizacao, historico de movimentacoes, alertas de estoque baixo e remocao logica, utilizando optimistic locking para concurrencia e mantendo rastreabilidade completa das operacoes. O modelo suporta multiplas localizacoes de estoque por peca atraves da entidade Estoque.
 
 ## Technical Context
 
@@ -60,6 +60,7 @@ src/
 │   │   │       ├── CadastroPecaRequest.java
 │   │   │       ├── AtualizarPecaRequest.java
 │   │   │       ├── PecaResponse.java
+│   │   │       ├── EstoqueResponse.java
 │   │   │       ├── MovimentacaoRequest.java
 │   │   │       └── MovimentacaoResponse.java
 │   │   ├── application/usecases/
@@ -69,15 +70,18 @@ src/
 │   │   │   ├── BuscarPecaPorSkuUseCase.java
 │   │   │   ├── ListarPecasUseCase.java
 │   │   │   ├── RemoverPecaUseCase.java
+│   │   │   ├── CriarEstoqueUseCase.java
 │   │   │   ├── RegistrarMovimentacaoUseCase.java
 │   │   │   ├── ListarHistoricoMovimentacoesUseCase.java
 │   │   │   └── ListarPecasEstoqueBaixoUseCase.java
 │   │   ├── domain/
 │   │   │   ├── entities/
 │   │   │   │   ├── PecaInsumo.java
+│   │   │   │   ├── Estoque.java
 │   │   │   │   └── MovimentacaoEstoque.java
 │   │   │   ├── repositories/
 │   │   │   │   ├── PecaInsumoRepository.java
+│   │   │   │   ├── EstoqueRepository.java
 │   │   │   │   └── MovimentacaoEstoqueRepository.java
 │   │   │   └── valueobjects/
 │   │   │       ├── TipoMovimentacao.java
@@ -87,16 +91,19 @@ src/
 │   │       └── persistence/
 │   │           ├── entities/
 │   │           │   ├── PecaInsumoJpaEntity.java
+│   │           │   ├── EstoqueJpaEntity.java
 │   │           │   └── MovimentacaoEstoqueJpaEntity.java
 │   │           ├── mappers/
 │   │           │   ├── PecaInsumoMapper.java
+│   │           │   ├── EstoqueMapper.java
 │   │           │   └── MovimentacaoEstoqueMapper.java
 │   │           └── repositories/
 │   │               ├── PecaInsumoJpaRepository.java
+│   │               ├── EstoqueJpaRepository.java
 │   │               └── MovimentacaoEstoqueJpaRepository.java
 │   └── resources/
 │       └── db/migration/
-│           └── V0.20260429220000__create_table_pecas_movimentacoes.sql
+│           └── V0.20260429220000__create_table_pecas_estoques_movimentacoes.sql
 └── test/
     └── java/com/postech/workshop_service/
         ├── api/controllers/
@@ -130,4 +137,4 @@ As decisoes de pesquisa foram consolidadas em [research.md](./research.md), reso
 - [x] **Documentacao**: OpenAPI cobre endpoints, filtros e payloads do MVP; Javadocs continuarao obrigatorios para todos os metodos publicos relevantes.
 - [x] **Testes**: O quickstart exige cobertura unitaria e de integracao para todas as operacoes publicas da feature.
 - [x] **Validacao e Padroes de Erro**: O contrato distingue 422 (estrutura) de 400 (negocio) e preserva 404 para recursos inexistentes.
-- [x] **Banco de Dados**: O modelo inclui tabelas `pecas_insumos` e `movimentacoes_estoque` com auditoria, FKs nomeadas, indices otimizados e suporte a remocao logica.
+- [x] **Banco de Dados**: O modelo inclui tabelas `pecas_insumos`, `estoques` e `movimentacoes_estoque` com auditoria, FKs nomeadas, indices otimizados e suporte a remocao logica. Quantidade total de uma peca e calculada pela soma de seus estoques.
