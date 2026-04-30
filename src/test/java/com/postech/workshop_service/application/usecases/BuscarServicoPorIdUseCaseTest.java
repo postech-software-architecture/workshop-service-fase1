@@ -28,17 +28,17 @@ class BuscarServicoPorIdUseCaseTest {
 	void shouldReturnServicoWhenFound() {
 		UUID id = UUID.randomUUID();
 		Servico servico = criarServico(id, "Troca de oleo", "Descricao", new BigDecimal("100.00"), 60);
-		when(servicoRepository.buscarPorId(id)).thenReturn(Optional.of(servico));
+		when(servicoRepository.buscarPorId(id, false)).thenReturn(Optional.of(servico));
 
-		assertTrue(buscarServicoPorIdUseCase.executar(id).isPresent());
+		assertTrue(buscarServicoPorIdUseCase.executar(id, false).isPresent());
 	}
 
 	@Test
 	void shouldReturnEmptyWhenNotFound() {
 		UUID id = UUID.randomUUID();
-		when(servicoRepository.buscarPorId(id)).thenReturn(Optional.empty());
+		when(servicoRepository.buscarPorId(id, false)).thenReturn(Optional.empty());
 
-		assertTrue(buscarServicoPorIdUseCase.executar(id).isEmpty());
+		assertTrue(buscarServicoPorIdUseCase.executar(id, false).isEmpty());
 	}
 
 	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos) {

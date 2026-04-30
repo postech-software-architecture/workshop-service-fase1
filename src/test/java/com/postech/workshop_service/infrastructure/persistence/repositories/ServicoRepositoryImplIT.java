@@ -30,7 +30,7 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 
 		assertNotNull(salvo.getId());
 
-		Optional<Servico> encontrado = servicoRepository.buscarPorId(salvo.getId());
+		Optional<Servico> encontrado = servicoRepository.buscarPorId(salvo.getId(), false);
 		assertTrue(encontrado.isPresent());
 		assertEquals("Troca de oleo", encontrado.get().getNome());
 		assertEquals(new BigDecimal("150.00"), encontrado.get().getValor());
@@ -82,10 +82,92 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 		salvo.removerLogicamente();
 		servicoRepository.salvar(salvo);
 
-		Optional<Servico> encontrado = servicoRepository.buscarPorId(salvo.getId());
+		Optional<Servico> encontrado = servicoRepository.buscarPorId(salvo.getId(), true);
 		assertTrue(encontrado.isPresent());
 		assertFalse(encontrado.get().isAtivo());
 		assertNotNull(encontrado.get().getDataRemocao());
+	}
+
+	@Test
+	void shouldFilterByPartialName() {
+		servicoRepository.salvar(criarServico("Troca de oleo", "Substituicao do oleo", new BigDecimal("100.00"), 60,
+				CategoriaServico.PREVENTIVA));
+		servicoRepository.salvar(criarServico("Alinhamento", "Alinhamento de rodas", new BigDecimal("80.00"), 30,
+				CategoriaServico.MECANICA));
+
+		PaginaResultado<Servico> resultado = servicoRepository.listar(0, 10, "oleo", null, false);
+
+		assertEquals(1, resultado.totalElementos());
+		assertEquals("Troca de oleo", resultado.itens().get(0).getNome());
+	}
+
+	@Test
+	void shouldFilterByCategoria() {
+		servicoRepository.salvar(
+				criarServico("Servico mecanico", "Reparo", new BigDecimal("200.00"), 90, CategoriaServico.MECANICA));
+		servicoRepository.salvar(criarServico("Servico eletrico", "Diagnostico", new BigDecimal("150.00"), 60,
+				CategoriaServico.ELETRICA));
+
+		PaginaResultado<Servico> resultado = servicoRepository.listar(0, 10, null, CategoriaServico.MECANICA, false);
+
+		assertEquals(1, resultado.totalElementos());
+		assertEquals(CategoriaServico.MECANICA, resultado.itens().get(0).getCategoria());
+	}
+
+	@Test
+	void shouldIncludeInactivesWhenFlagOn() {
+		Servico ativo = servicoRepository
+			.salvar(criarServico("Ativo", "Servico ativo", new BigDecimal("50.00"), 30, null));
+		Servico inativo = servicoRepository
+			.salvar(criarServico("Inativo", "Servico a remover", new BigDecimal("75.00"), 45, null));
+		inativo.removerLogicamente();
+		servicoRepository.salvar(inativo);
+
+		PaginaResultado<Servico> comFlag = servicoRepository.listar(0, 10, null, null, true);
+		PaginaResultado<Servico> semFlag = servicoRepository.listar(0, 10, null, null, false);
+
+		assertEquals(2, comFlag.totalElementos());
+		assertEquals(1, semFlag.totalElementos());
+		assertEquals(ativo.getId(), semFlag.itens().get(0).getId());
+	}
+
+	@Test
+	void shouldListByCategoriaIncludingInactivesWhenFlagOn() {
+		Servico ativo = servicoRepository
+			.salvar(criarServico("Mecanica ativo", "X", new BigDecimal("100.00"), 60, CategoriaServico.MECANICA));
+		Servico inativo = servicoRepository
+			.salvar(criarServico("Mecanica inativo", "Y", new BigDecimal("100.00"), 60, CategoriaServico.MECANICA));
+		inativo.removerLogicamente();
+		servicoRepository.salvar(inativo);
+
+		assertEquals(1, servicoRepository.listarPorCategoria(CategoriaServico.MECANICA, false).size());
+		assertEquals(2, servicoRepository.listarPorCategoria(CategoriaServico.MECANICA, true).size());
+		assertTrue(servicoRepository.listarPorCategoria(CategoriaServico.MECANICA, false)
+			.stream()
+			.allMatch(s -> s.getId().equals(ativo.getId())));
+	}
+
+	@Test
+	void shouldAllowReusingNameAfterSoftDelete() {
+		Servico original = servicoRepository
+			.salvar(criarServico("Servico unico", "X", new BigDecimal("100.00"), 60, null));
+		original.removerLogicamente();
+		servicoRepository.salvar(original);
+
+		assertFalse(servicoRepository.existeNomeAtivo("Servico unico", null));
+
+		Servico novo = servicoRepository.salvar(criarServico("Servico unico", "Y", new BigDecimal("120.00"), 75, null));
+		assertNotNull(novo.getId());
+	}
+
+	@Test
+	void shouldReturnEmptyForInactiveBuscarPorIdWithoutFlag() {
+		Servico salvo = servicoRepository.salvar(criarServico("Para remover", "X", new BigDecimal("100.00"), 60, null));
+		salvo.removerLogicamente();
+		servicoRepository.salvar(salvo);
+
+		assertTrue(servicoRepository.buscarPorId(salvo.getId(), false).isEmpty());
+		assertTrue(servicoRepository.buscarPorId(salvo.getId(), true).isPresent());
 	}
 
 	private Servico criarServico(String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos,

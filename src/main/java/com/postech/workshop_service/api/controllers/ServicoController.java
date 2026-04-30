@@ -132,7 +132,7 @@ public class ServicoController {
 	public ResponseEntity<ServicoResponse> buscarPorId(@PathVariable UUID id,
 			@RequestParam(defaultValue = "false") @Parameter(
 					description = "Indica se servicos inativos devem ser considerados") boolean incluirInativos) {
-		Servico servico = buscarServicoPorIdUseCase.executar(id)
+		Servico servico = buscarServicoPorIdUseCase.executar(id, incluirInativos)
 			.orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado com o ID informado."));
 		return ResponseEntity.ok(toResponse(servico));
 	}
@@ -190,7 +190,7 @@ public class ServicoController {
 	@GetMapping("/{id}/tempo-medio")
 	@Operation(summary = "Buscar tempo medio de execucao do servico")
 	public ResponseEntity<TempoMedioServicoResponse> buscarTempoMedio(@PathVariable UUID id) {
-		Servico servico = buscarServicoPorIdUseCase.executar(id)
+		Servico servico = buscarServicoPorIdUseCase.executar(id, false)
 			.orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado com o ID informado."));
 		return ResponseEntity.ok(TempoMedioServicoResponse.builder()
 			.servicoId(servico.getId())

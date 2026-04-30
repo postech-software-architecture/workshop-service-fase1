@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +36,15 @@ class ListarServicosPorCategoriaUseCaseTest {
 
 		assertEquals(1, resultado.size());
 		assertEquals(CategoriaServico.PREVENTIVA, resultado.get(0).getCategoria());
+	}
+
+	@Test
+	void shouldIncludeInactivesWhenRequested() {
+		when(servicoRepository.listarPorCategoria(CategoriaServico.MECANICA, true)).thenReturn(List.of());
+
+		List<Servico> resultado = listarServicosPorCategoriaUseCase.executar(CategoriaServico.MECANICA, true);
+
+		assertTrue(resultado.isEmpty());
 	}
 
 	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos,

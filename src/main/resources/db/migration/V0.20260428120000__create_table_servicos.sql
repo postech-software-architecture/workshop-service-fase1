@@ -1,11 +1,11 @@
 CREATE TABLE servicos (
     id UUID PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
+    nome VARCHAR(120) NOT NULL,
     descricao TEXT NOT NULL,
     valor NUMERIC(10,2) NOT NULL,
     tempo_estimado_minutos INTEGER NOT NULL,
-    categoria VARCHAR(20),
-    nivel_complexidade VARCHAR(10),
+    categoria VARCHAR(30),
+    nivel_complexidade VARCHAR(20),
     garantia_dias INTEGER,
     observacoes_tecnicas TEXT,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
@@ -14,7 +14,7 @@ CREATE TABLE servicos (
     data_remocao TIMESTAMP,
     CONSTRAINT ck_servicos_valor_positivo CHECK (valor > 0),
     CONSTRAINT ck_servicos_tempo_estimado_positivo CHECK (tempo_estimado_minutos > 0),
-    CONSTRAINT ck_servicos_garantia_dias_positivo CHECK (garantia_dias > 0)
+    CONSTRAINT ck_servicos_garantia_dias_positivo CHECK (garantia_dias IS NULL OR garantia_dias > 0)
 );
 
 CREATE UNIQUE INDEX ux_servicos_nome_ativo ON servicos (nome) WHERE ativo = TRUE;

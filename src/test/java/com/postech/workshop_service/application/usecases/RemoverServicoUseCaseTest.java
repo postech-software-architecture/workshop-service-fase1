@@ -31,7 +31,7 @@ class RemoverServicoUseCaseTest {
 	void shouldRemoveServico() {
 		UUID id = UUID.randomUUID();
 		Servico servico = criarServico(id, "Troca de oleo", "Descricao", new BigDecimal("100.00"), 60);
-		when(servicoRepository.buscarPorId(id)).thenReturn(Optional.of(servico));
+		when(servicoRepository.buscarPorId(id, true)).thenReturn(Optional.of(servico));
 		when(servicoRepository.salvar(any(Servico.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		removerServicoUseCase.executar(id);

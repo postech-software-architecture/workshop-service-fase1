@@ -22,9 +22,11 @@ public interface ServicoRepository {
 	/**
 	 * Busca um servico pelo seu identificador tecnico.
 	 * @param id identificador do servico.
+	 * @param incluirInativos indica se servicos logicamente removidos devem ser
+	 * considerados.
 	 * @return servico encontrado, se existir.
 	 */
-	Optional<Servico> buscarPorId(UUID id);
+	Optional<Servico> buscarPorId(UUID id, boolean incluirInativos);
 
 	/**
 	 * Lista servicos com filtros opcionais e paginacao.

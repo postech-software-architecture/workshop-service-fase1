@@ -26,10 +26,12 @@ public class BuscarServicoPorIdUseCase {
 	/**
 	 * Busca um servico pelo seu identificador tecnico.
 	 * @param id identificador do servico.
+	 * @param incluirInativos indica se servicos logicamente removidos devem ser
+	 * considerados.
 	 * @return servico encontrado, se existir.
 	 */
-	public Optional<Servico> executar(UUID id) {
-		return servicoRepository.buscarPorId(id);
+	public Optional<Servico> executar(UUID id, boolean incluirInativos) {
+		return servicoRepository.buscarPorId(id, incluirInativos);
 	}
 
 }

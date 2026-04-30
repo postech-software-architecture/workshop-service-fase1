@@ -45,7 +45,7 @@ public class AtualizarServicoUseCase {
 	public Servico executar(UUID id, String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos,
 			CategoriaServico categoria, NivelComplexidade nivelComplexidade, Integer garantiaDias,
 			String observacoesTecnicas) {
-		Servico servico = servicoRepository.buscarPorId(id)
+		Servico servico = servicoRepository.buscarPorId(id, true)
 			.orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado com o ID informado."));
 
 		try {

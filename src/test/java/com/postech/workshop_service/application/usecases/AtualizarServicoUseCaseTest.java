@@ -35,7 +35,7 @@ class AtualizarServicoUseCaseTest {
 		UUID id = UUID.randomUUID();
 		Servico servico = criarServico(id, "Nome original", "Descricao original", new BigDecimal("100.00"), 60);
 
-		when(servicoRepository.buscarPorId(id)).thenReturn(Optional.of(servico));
+		when(servicoRepository.buscarPorId(id, true)).thenReturn(Optional.of(servico));
 		when(servicoRepository.existeNomeAtivo("Nome atualizado", id)).thenReturn(false);
 		when(servicoRepository.salvar(any(Servico.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -50,7 +50,7 @@ class AtualizarServicoUseCaseTest {
 	@Test
 	void shouldThrowWhenServicoNotFound() {
 		UUID id = UUID.randomUUID();
-		when(servicoRepository.buscarPorId(id)).thenReturn(Optional.empty());
+		when(servicoRepository.buscarPorId(id, true)).thenReturn(Optional.empty());
 
 		assertThrows(RecursoNaoEncontradoException.class, () -> atualizarServicoUseCase.executar(id, "Nome",
 				"Descricao", new BigDecimal("100.00"), 60, null, null, null, null));
@@ -61,7 +61,7 @@ class AtualizarServicoUseCaseTest {
 		UUID id = UUID.randomUUID();
 		Servico servico = criarServico(id, "Nome original", "Descricao", new BigDecimal("100.00"), 60);
 
-		when(servicoRepository.buscarPorId(id)).thenReturn(Optional.of(servico));
+		when(servicoRepository.buscarPorId(id, true)).thenReturn(Optional.of(servico));
 		when(servicoRepository.existeNomeAtivo("Nome duplicado", id)).thenReturn(true);
 
 		assertThrows(RegraDeNegocioException.class, () -> atualizarServicoUseCase.executar(id, "Nome duplicado",

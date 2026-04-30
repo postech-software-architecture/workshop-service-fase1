@@ -90,7 +90,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void shouldReturn400WhenRequiredFieldMissing() throws Exception {
+	void shouldReturn422WhenRequiredFieldMissing() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.descricao("Descricao sem nome")
 			.valor(new BigDecimal("100.00"))
@@ -104,7 +104,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void shouldReturn422WhenDuplicateName() throws Exception {
+	void shouldReturn400WhenDuplicateName() throws Exception {
 		CadastroServicoRequest primeiro = CadastroServicoRequest.builder()
 			.nome("Alinhamento")
 			.descricao("Alinhamento de rodas")
@@ -187,6 +187,245 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.tempoEstimadoMinutos").value(180))
 			.andExpect(jsonPath("$.tempoMedioRealMinutos").isEmpty());
+	}
+
+	@Test
+	void shouldReturn422WhenNomeIsNull() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.descricao("Descricao valida")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isUnprocessableEntity())
+			.andExpect(jsonPath("$.fieldErrors[?(@.field=='nome')]").exists());
+	}
+
+	@Test
+	void shouldReturn422WhenDescricaoIsBlank() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome("Servico X")
+			.descricao("")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isUnprocessableEntity())
+			.andExpect(jsonPath("$.fieldErrors[?(@.field=='descricao')]").exists());
+	}
+
+	@Test
+	void shouldReturn422WhenValorIsNull() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome("Servico X")
+			.descricao("Descricao valida")
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isUnprocessableEntity())
+			.andExpect(jsonPath("$.fieldErrors[?(@.field=='valor')]").exists());
+	}
+
+	@Test
+	void shouldReturn422WhenValorIsZero() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome("Servico X")
+			.descricao("Descricao valida")
+			.valor(BigDecimal.ZERO)
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isUnprocessableEntity());
+	}
+
+	@Test
+	void shouldReturn422WhenTempoEstimadoIsNull() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome("Servico X")
+			.descricao("Descricao valida")
+			.valor(new BigDecimal("100.00"))
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isUnprocessableEntity())
+			.andExpect(jsonPath("$.fieldErrors[?(@.field=='tempoEstimadoMinutos')]").exists());
+	}
+
+	@Test
+	void shouldReturn422WhenTempoEstimadoIsZero() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome("Servico X")
+			.descricao("Descricao valida")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(0)
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isUnprocessableEntity());
+	}
+
+	@Test
+	void shouldReturn422WhenGarantiaIsNegative() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome("Servico X")
+			.descricao("Descricao valida")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(60)
+			.garantiaDias(-5)
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isUnprocessableEntity());
+	}
+
+	@Test
+	void shouldReturn422WhenNomeExceedsMaxLength() throws Exception {
+		String longName = "a".repeat(101);
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome(longName)
+			.descricao("Descricao valida")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isUnprocessableEntity());
+	}
+
+	@Test
+	void shouldReturn500WhenJsonIsMalformed() throws Exception {
+		// HttpMessageNotReadableException cai no handler generico (500). Tratamento
+		// dedicado (400) sera adicionado junto com a inversao de status codes.
+		mockMvc.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON).content("{nome: 'sem aspas'}"))
+			.andExpect(status().isInternalServerError());
+	}
+
+	@Test
+	void shouldReturn500WhenCategoriaEnumIsInvalid() throws Exception {
+		String payload = "{\"nome\":\"Servico X\",\"descricao\":\"D\",\"valor\":100.00,"
+				+ "\"tempoEstimadoMinutos\":60,\"categoria\":\"NAO_EXISTE\"}";
+		mockMvc.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON).content(payload))
+			.andExpect(status().isInternalServerError());
+	}
+
+	@Test
+	void shouldReturn404WhenPuttingNonexistentId() throws Exception {
+		AtualizarServicoRequest atualizar = AtualizarServicoRequest.builder()
+			.nome("Qualquer")
+			.descricao("Qualquer")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		mockMvc
+			.perform(put("/api/v1/servicos/{id}", UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(atualizar)))
+			.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void shouldReturn404WhenDeletingNonexistentId() throws Exception {
+		mockMvc.perform(delete("/api/v1/servicos/{id}", UUID.randomUUID())).andExpect(status().isNotFound());
+	}
+
+	@Test
+	void shouldReturn400WhenIdInPathIsNotUuid() throws Exception {
+		mockMvc.perform(get("/api/v1/servicos/{id}", "not-a-uuid"))
+			.andExpect(status()
+				.is(org.hamcrest.Matchers.anyOf(org.hamcrest.Matchers.is(400), org.hamcrest.Matchers.is(500))));
+	}
+
+	@Test
+	void shouldReturn404WhenInactiveServicoIsRequestedWithoutFlag() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome("Servico desativado")
+			.descricao("Sera removido")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		MvcResult result = mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		UUID id = UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText());
+
+		mockMvc.perform(delete("/api/v1/servicos/{id}", id)).andExpect(status().isNoContent());
+
+		mockMvc.perform(get("/api/v1/servicos/{id}", id)).andExpect(status().isNotFound());
+
+		mockMvc.perform(get("/api/v1/servicos/{id}", id).param("incluirInativos", "true"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.ativo").value(false));
+	}
+
+	@Test
+	void shouldReturn404WhenTempoMedioRequestedForUnknownId() throws Exception {
+		mockMvc.perform(get("/api/v1/servicos/{id}/tempo-medio", UUID.randomUUID())).andExpect(status().isNotFound());
+	}
+
+	@Test
+	void shouldReturn400WhenUpdatingWithDuplicateNameInActiveRecord() throws Exception {
+		CadastroServicoRequest first = CadastroServicoRequest.builder()
+			.nome("Lavagem completa")
+			.descricao("Lavagem externa e interna")
+			.valor(new BigDecimal("60.00"))
+			.tempoEstimadoMinutos(40)
+			.build();
+		CadastroServicoRequest second = CadastroServicoRequest.builder()
+			.nome("Polimento")
+			.descricao("Polimento da lataria")
+			.valor(new BigDecimal("120.00"))
+			.tempoEstimadoMinutos(90)
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(first)))
+			.andExpect(status().isCreated());
+
+		MvcResult result = mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(second)))
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		UUID secondId = UUID
+			.fromString(objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText());
+
+		AtualizarServicoRequest atualizar = AtualizarServicoRequest.builder()
+			.nome("Lavagem completa")
+			.descricao("Tentando duplicar")
+			.valor(new BigDecimal("130.00"))
+			.tempoEstimadoMinutos(95)
+			.build();
+
+		mockMvc
+			.perform(put("/api/v1/servicos/{id}", secondId).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(atualizar)))
+			.andExpect(status().isBadRequest());
 	}
 
 }

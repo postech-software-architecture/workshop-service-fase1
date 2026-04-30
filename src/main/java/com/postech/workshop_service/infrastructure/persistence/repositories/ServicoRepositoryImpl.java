@@ -55,8 +55,10 @@ public class ServicoRepositoryImpl implements ServicoRepository {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<Servico> buscarPorId(UUID id) {
-		return jpaServicoRepository.findById(id).map(servicoMapper::toDomain);
+	public Optional<Servico> buscarPorId(UUID id, boolean incluirInativos) {
+		return jpaServicoRepository.findById(id)
+			.filter(entity -> incluirInativos || Boolean.TRUE.equals(entity.getAtivo()))
+			.map(servicoMapper::toDomain);
 	}
 
 	/**
