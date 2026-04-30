@@ -557,6 +557,31 @@ paths:
         '500':
           $ref: '#/components/responses/Response500InternalServerError'
 
+  /api/v1/servicos/{id}/reativar:
+    parameters:
+      - $ref: '#/components/parameters/idPath'
+    post:
+      tags: [Servicos]
+      operationId: servicosReativar
+      summary: Reativar servico previamente removido
+      description: |
+        Reativa logicamente um servico que havia sido removido (soft delete).
+        Operacao idempotente: se o servico ja estiver ativo, retorna 200 com o estado atual.
+        Falha com 422 se outro servico ativo estiver usando o mesmo nome.
+      responses:
+        '200':
+          description: Servico reativado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicoResponse'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
 components:
   parameters:
     idPath:
@@ -1073,15 +1098,9 @@ components:
           exclusiveMinimum: 0
           example: 60
         categoria:
-          oneOf:
-            - $ref: '#/components/schemas/CategoriaServico'
-            - type: 'null'
-          example: PREVENTIVA
+          $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
-          oneOf:
-            - $ref: '#/components/schemas/NivelComplexidade'
-            - type: 'null'
-          example: BAIXA
+          $ref: '#/components/schemas/NivelComplexidade'
         garantiaDias:
           type:
             - integer
@@ -1116,13 +1135,9 @@ components:
           exclusiveMinimum: 0
           example: 60
         categoria:
-          oneOf:
-            - $ref: '#/components/schemas/CategoriaServico'
-            - type: 'null'
+          $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
-          oneOf:
-            - $ref: '#/components/schemas/NivelComplexidade'
-            - type: 'null'
+          $ref: '#/components/schemas/NivelComplexidade'
         garantiaDias:
           type:
             - integer
@@ -1151,13 +1166,9 @@ components:
           type: integer
           example: 60
         categoria:
-          oneOf:
-            - $ref: '#/components/schemas/CategoriaServico'
-            - type: 'null'
+          $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
-          oneOf:
-            - $ref: '#/components/schemas/NivelComplexidade'
-            - type: 'null'
+          $ref: '#/components/schemas/NivelComplexidade'
         garantiaDias:
           type:
             - integer

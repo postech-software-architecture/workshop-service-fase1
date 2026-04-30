@@ -61,6 +61,37 @@ class ServicoTest {
 	}
 
 	@Test
+	void shouldReativarServicoLogicamenteRemovido() throws InterruptedException {
+		Servico servico = criarServico("Lavagem", "Descricao", new BigDecimal("70.00"), 30, null, null, null, null);
+
+		servico.removerLogicamente();
+		assertFalse(servico.isAtivo());
+		assertNotNull(servico.getDataRemocao());
+
+		LocalDateTime atualizacaoAposRemocao = servico.getDataUltimaAtualizacao();
+		Thread.sleep(2);
+
+		servico.reativar();
+
+		assertTrue(servico.isAtivo());
+		assertNull(servico.getDataRemocao());
+		assertTrue(servico.getDataUltimaAtualizacao().isAfter(atualizacaoAposRemocao));
+	}
+
+	@Test
+	void shouldBeIdempotentWhenReativarOnAlreadyActive() throws InterruptedException {
+		Servico servico = criarServico("Polimento", "Descricao", new BigDecimal("120.00"), 60, null, null, null, null);
+		LocalDateTime atualizacaoOriginal = servico.getDataUltimaAtualizacao();
+		Thread.sleep(2);
+
+		servico.reativar();
+
+		assertTrue(servico.isAtivo());
+		assertEquals(atualizacaoOriginal, servico.getDataUltimaAtualizacao());
+		assertNull(servico.getDataRemocao());
+	}
+
+	@Test
 	void shouldRejectNullNome() {
 		assertThrows(IllegalArgumentException.class,
 				() -> criarServico(null, "Descricao", new BigDecimal("100.00"), 60, null, null, null, null));

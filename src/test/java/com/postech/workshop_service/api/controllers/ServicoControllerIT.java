@@ -383,6 +383,98 @@ class ServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
+	void shouldReativarPreviouslyDeletedServico() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome("Servico para reativar")
+			.descricao("Descricao do servico")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		MvcResult result = mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		UUID id = UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText());
+
+		mockMvc.perform(delete("/api/v1/servicos/{id}", id)).andExpect(status().isNoContent());
+
+		mockMvc.perform(post("/api/v1/servicos/{id}/reativar", id))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(id.toString()))
+			.andExpect(jsonPath("$.ativo").value(true))
+			.andExpect(jsonPath("$.dataRemocao").doesNotExist());
+
+		mockMvc.perform(get("/api/v1/servicos/{id}", id))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.ativo").value(true));
+	}
+
+	@Test
+	void shouldReturn200WhenReativarAlreadyActive() throws Exception {
+		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
+			.nome("Servico ja ativo")
+			.descricao("Descricao")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		MvcResult result = mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(cadastro)))
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		UUID id = UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText());
+
+		mockMvc.perform(post("/api/v1/servicos/{id}/reativar", id))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.ativo").value(true));
+	}
+
+	@Test
+	void shouldReturn404WhenReativarNonexistentId() throws Exception {
+		mockMvc.perform(post("/api/v1/servicos/{id}/reativar", UUID.randomUUID())).andExpect(status().isNotFound());
+	}
+
+	@Test
+	void shouldReturn422WhenReativarConflictsWithActiveName() throws Exception {
+		CadastroServicoRequest primeiro = CadastroServicoRequest.builder()
+			.nome("Servico A")
+			.descricao("Primeiro servico")
+			.valor(new BigDecimal("100.00"))
+			.tempoEstimadoMinutos(60)
+			.build();
+
+		MvcResult primeiroResult = mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(primeiro)))
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		UUID primeiroId = UUID
+			.fromString(objectMapper.readTree(primeiroResult.getResponse().getContentAsString()).get("id").asText());
+
+		mockMvc.perform(delete("/api/v1/servicos/{id}", primeiroId)).andExpect(status().isNoContent());
+
+		CadastroServicoRequest segundo = CadastroServicoRequest.builder()
+			.nome("Servico A")
+			.descricao("Segundo servico com mesmo nome")
+			.valor(new BigDecimal("110.00"))
+			.tempoEstimadoMinutos(70)
+			.build();
+
+		mockMvc
+			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(segundo)))
+			.andExpect(status().isCreated());
+
+		mockMvc.perform(post("/api/v1/servicos/{id}/reativar", primeiroId)).andExpect(status().isUnprocessableEntity());
+	}
+
+	@Test
 	void shouldReturn422WhenUpdatingWithDuplicateNameInActiveRecord() throws Exception {
 		CadastroServicoRequest first = CadastroServicoRequest.builder()
 			.nome("Lavagem completa")

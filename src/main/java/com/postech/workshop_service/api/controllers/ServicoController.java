@@ -11,6 +11,7 @@ import com.postech.workshop_service.application.usecases.BuscarServicoPorIdUseCa
 import com.postech.workshop_service.application.usecases.CriarServicoUseCase;
 import com.postech.workshop_service.application.usecases.ListarServicosPorCategoriaUseCase;
 import com.postech.workshop_service.application.usecases.ListarServicosUseCase;
+import com.postech.workshop_service.application.usecases.ReativarServicoUseCase;
 import com.postech.workshop_service.application.usecases.RemoverServicoUseCase;
 import com.postech.workshop_service.domain.entities.Servico;
 import com.postech.workshop_service.domain.enums.CategoriaServico;
@@ -55,6 +56,8 @@ public class ServicoController {
 
 	private final RemoverServicoUseCase removerServicoUseCase;
 
+	private final ReativarServicoUseCase reativarServicoUseCase;
+
 	/**
 	 * Construtor para injecao de dependencias.
 	 * @param criarServicoUseCase caso de uso de criacao.
@@ -63,17 +66,19 @@ public class ServicoController {
 	 * @param listarServicosUseCase caso de uso de listagem paginada.
 	 * @param listarServicosPorCategoriaUseCase caso de uso de listagem por categoria.
 	 * @param removerServicoUseCase caso de uso de remocao logica.
+	 * @param reativarServicoUseCase caso de uso de reativacao logica.
 	 */
 	public ServicoController(CriarServicoUseCase criarServicoUseCase, AtualizarServicoUseCase atualizarServicoUseCase,
 			BuscarServicoPorIdUseCase buscarServicoPorIdUseCase, ListarServicosUseCase listarServicosUseCase,
 			ListarServicosPorCategoriaUseCase listarServicosPorCategoriaUseCase,
-			RemoverServicoUseCase removerServicoUseCase) {
+			RemoverServicoUseCase removerServicoUseCase, ReativarServicoUseCase reativarServicoUseCase) {
 		this.criarServicoUseCase = criarServicoUseCase;
 		this.atualizarServicoUseCase = atualizarServicoUseCase;
 		this.buscarServicoPorIdUseCase = buscarServicoPorIdUseCase;
 		this.listarServicosUseCase = listarServicosUseCase;
 		this.listarServicosPorCategoriaUseCase = listarServicosPorCategoriaUseCase;
 		this.removerServicoUseCase = removerServicoUseCase;
+		this.reativarServicoUseCase = reativarServicoUseCase;
 	}
 
 	/**
@@ -180,6 +185,18 @@ public class ServicoController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void remover(@PathVariable UUID id) {
 		removerServicoUseCase.executar(id);
+	}
+
+	/**
+	 * Reativa logicamente um servico previamente removido.
+	 * @param id identificador do servico.
+	 * @return servico reativado.
+	 */
+	@PostMapping("/{id}/reativar")
+	@Operation(summary = "Reativar servico previamente removido")
+	public ResponseEntity<ServicoResponse> reativar(@PathVariable UUID id) {
+		Servico servico = reativarServicoUseCase.executar(id);
+		return ResponseEntity.ok(toResponse(servico));
 	}
 
 	/**

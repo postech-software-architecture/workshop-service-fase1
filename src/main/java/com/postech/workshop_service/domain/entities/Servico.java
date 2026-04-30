@@ -111,6 +111,18 @@ public class Servico extends EntidadeBase {
 		registrarRemocaoLogica();
 	}
 
+	/**
+	 * Reativa logicamente o servico, restaurando-o ao catalogo ativo. A operacao e
+	 * idempotente: chamadas sucessivas sobre um servico ja ativo nao produzem efeito.
+	 */
+	public void reativar() {
+		if (this.ativo) {
+			return;
+		}
+		this.ativo = true;
+		reverterRemocaoLogica();
+	}
+
 	private void aplicarDados(String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos,
 			CategoriaServico categoria, NivelComplexidade nivelComplexidade, Integer garantiaDias,
 			String observacoesTecnicas) {

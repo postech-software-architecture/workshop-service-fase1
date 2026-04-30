@@ -47,4 +47,9 @@ public abstract class EntidadeBase {
 		this.dataUltimaAtualizacao = this.dataRemocao;
 	}
 
+	protected void reverterRemocaoLogica() {
+		this.dataRemocao = null;
+		atualizarDataUltimaAtualizacao();
+	}
+
 }
