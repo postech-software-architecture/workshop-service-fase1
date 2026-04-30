@@ -1,0 +1,529 @@
+openapi: 3.0.3
+info:
+  title: Workshop Service API - Pecas e Insumos
+  description: Endpoints para gerenciamento de pecas, insumos e controle de estoque.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local
+
+security: []
+
+paths:
+  /api/v1/pecas:
+    post:
+      tags: [Pecas]
+      summary: Cadastrar peca ou insumo
+      operationId: criarPeca
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroPecaRequest'
+      responses:
+        '201':
+          description: Peca cadastrada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '400':
+          description: Erro de regra de negocio (SKU duplicado, valor invalido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Erro de validacao estrutural no payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags: [Pecas]
+      summary: Listar pecas com paginacao e filtros
+      operationId: listarPecas
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: categoria
+          in: query
+          schema:
+            type: string
+        - name: nome
+          in: query
+          schema:
+            type: string
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Lista de pecas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PecaResponse'
+
+  /api/v1/pecas/{id}:
+    get:
+      tags: [Pecas]
+      summary: Buscar peca por ID
+      operationId: buscarPecaPorId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Peca encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '404':
+          description: Peca nao encontrada
+
+    put:
+      tags: [Pecas]
+      summary: Atualizar dados de uma peca
+      operationId: atualizarPeca
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarPecaRequest'
+      responses:
+        '200':
+          description: Peca atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '400':
+          description: Erro de regra de negocio (conflito de versao)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Peca nao encontrada
+        '422':
+          description: Erro de validacao estrutural no payload
+
+    delete:
+      tags: [Pecas]
+      summary: Remover peca do catalogo (soft delete)
+      operationId: removerPeca
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Peca removida logicamente
+        '404':
+          description: Peca nao encontrada
+
+  /api/v1/pecas/sku/{sku}:
+    get:
+      tags: [Pecas]
+      summary: Buscar peca por SKU
+      operationId: buscarPecaPorSku
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Peca encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '404':
+          description: Peca nao encontrada
+
+  /api/v1/pecas/estoque-baixo:
+    get:
+      tags: [Pecas]
+      summary: Listar pecas com estoque abaixo do minimo
+      operationId: listarPecasEstoqueBaixo
+      responses:
+        '200':
+          description: Lista de pecas com estoque baixo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PecaEstoqueBaixoResponse'
+
+  /api/v1/pecas/{id}/movimentacoes:
+    post:
+      tags: [Movimentacoes]
+      summary: Registrar movimentacao de estoque
+      operationId: registrarMovimentacao
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovimentacaoRequest'
+      responses:
+        '200':
+          description: Movimentacao registrada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovimentacaoResponse'
+        '400':
+          description: Erro de regra de negocio (estoque insuficiente, conflito de versao)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Peca nao encontrada
+        '422':
+          description: Erro de validacao estrutural no payload
+
+    get:
+      tags: [Movimentacoes]
+      summary: Consultar historico de movimentacoes
+      operationId: listarHistoricoMovimentacoes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tipo
+          in: query
+          schema:
+            type: string
+            enum: [ENTRADA, SAIDA, AJUSTE]
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Historico de movimentacoes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovimentacaoResponse'
+        '404':
+          description: Peca nao encontrada
+
+components:
+  schemas:
+    CadastroPecaRequest:
+      type: object
+      required:
+        - sku
+        - nome
+        - quantidadeEstoque
+        - valorUnitario
+        - estoqueMinimo
+        - unidadeMedida
+      properties:
+        sku:
+          type: string
+          maxLength: 50
+          example: "FILT-001"
+        nome:
+          type: string
+          maxLength: 200
+          example: "Filtro de oleo Honda Civic"
+        quantidadeEstoque:
+          type: number
+          format: decimal
+          minimum: 0
+          example: 10
+        valorUnitario:
+          type: number
+          format: decimal
+          exclusiveMinimum: 0
+          example: 45.90
+        estoqueMinimo:
+          type: number
+          format: decimal
+          minimum: 0
+          example: 5
+        unidadeMedida:
+          type: string
+          enum: [UN, L, KG, M, ML, CX, PC]
+          example: "UN"
+        fornecedor:
+          type: string
+          maxLength: 200
+          example: "Filtros Brasil Ltda"
+        codigoBarras:
+          type: string
+          maxLength: 50
+          example: "7891234567890"
+        localizacao:
+          type: string
+          maxLength: 100
+          example: "Prateleira A2"
+        marca:
+          type: string
+          maxLength: 100
+          example: "TechFil"
+        categoria:
+          type: string
+          maxLength: 100
+          example: "Filtros"
+        aplicacao:
+          type: string
+          maxLength: 500
+          example: "Honda Civic 2015-2020, Honda Fit 2014-2020"
+        observacoes:
+          type: string
+          example: "Filtro original de alta qualidade"
+
+    AtualizarPecaRequest:
+      type: object
+      properties:
+        nome:
+          type: string
+          maxLength: 200
+        valorUnitario:
+          type: number
+          format: decimal
+          exclusiveMinimum: 0
+        estoqueMinimo:
+          type: number
+          format: decimal
+          minimum: 0
+        fornecedor:
+          type: string
+          maxLength: 200
+        codigoBarras:
+          type: string
+          maxLength: 50
+        localizacao:
+          type: string
+          maxLength: 100
+        marca:
+          type: string
+          maxLength: 100
+        categoria:
+          type: string
+          maxLength: 100
+        aplicacao:
+          type: string
+          maxLength: 500
+        observacoes:
+          type: string
+        versao:
+          type: integer
+          description: Versao atual para optimistic locking
+
+    PecaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        nome:
+          type: string
+        quantidadeEstoque:
+          type: number
+          format: decimal
+        valorUnitario:
+          type: number
+          format: decimal
+        estoqueMinimo:
+          type: number
+          format: decimal
+        unidadeMedida:
+          type: string
+        fornecedor:
+          type: string
+        codigoBarras:
+          type: string
+        localizacao:
+          type: string
+        marca:
+          type: string
+        categoria:
+          type: string
+        aplicacao:
+          type: string
+        observacoes:
+          type: string
+        ativo:
+          type: boolean
+        versao:
+          type: integer
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+
+    PecaEstoqueBaixoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        nome:
+          type: string
+        quantidadeEstoque:
+          type: number
+          format: decimal
+        estoqueMinimo:
+          type: number
+          format: decimal
+        estoqueZerado:
+          type: boolean
+
+    MovimentacaoRequest:
+      type: object
+      required:
+        - tipo
+        - quantidade
+      properties:
+        tipo:
+          type: string
+          enum: [ENTRADA, SAIDA, AJUSTE]
+          example: "ENTRADA"
+        quantidade:
+          type: number
+          format: decimal
+          description: |
+            Para ENTRADA/SAIDA: quantidade a incrementar/decrementar.
+            Para AJUSTE: novo valor absoluto do estoque.
+          example: 5
+        motivo:
+          type: string
+          maxLength: 500
+          description: Obrigatorio para AJUSTE
+          example: "Ajuste apos contagem fisica"
+        versao:
+          type: integer
+          description: Versao atual da peca para optimistic locking
+
+    MovimentacaoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          enum: [ENTRADA, SAIDA, AJUSTE]
+        quantidade:
+          type: number
+          format: decimal
+        quantidadeAnterior:
+          type: number
+          format: decimal
+        quantidadePosterior:
+          type: number
+          format: decimal
+        motivo:
+          type: string
+        dataMovimentacao:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
