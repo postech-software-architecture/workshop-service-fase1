@@ -31,6 +31,7 @@
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<maven.compiler.release>21</maven.compiler.release>
+		<testcontainers.version>2.0.4</testcontainers.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -93,14 +94,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<version>1.20.4</version>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>1.20.4</version>
+			<artifactId>testcontainers-postgresql</artifactId>
+			<version>${testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -233,8 +234,11 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
+							<argLine>@{argLine} -Dtc.host=${docker.host} -DDOCKER_HOST=${docker.host}</argLine>
 							<environmentVariables>
 								<DOCKER_HOST>${docker.host}</DOCKER_HOST>
+								<DOCKER_API_VERSION></DOCKER_API_VERSION>
+								<TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>/var/run/docker.sock</TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>
 								<TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
 							</environmentVariables>
 						</configuration>
@@ -243,8 +247,11 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<configuration>
+							<argLine>@{argLine} -Dtc.host=${docker.host} -DDOCKER_HOST=${docker.host}</argLine>
 							<environmentVariables>
 								<DOCKER_HOST>${docker.host}</DOCKER_HOST>
+								<DOCKER_API_VERSION></DOCKER_API_VERSION>
+								<TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>/var/run/docker.sock</TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>
 								<TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
 							</environmentVariables>
 						</configuration>
