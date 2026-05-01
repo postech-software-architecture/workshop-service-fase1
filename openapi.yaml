@@ -15,8 +15,10 @@ info:
     - `204 No Content` — soft delete bem-sucedido.
     - `400 Bad Request` — payload inválido, JSON malformado, parâmetro inválido (Bean Validation).
     - `404 Not Found` — recurso não encontrado.
+    - `405 Method Not Allowed` — verbo HTTP não suportado pelo recurso.
     - `422 Unprocessable Entity` — violação de regra de negócio (ex.: duplicação de nome único).
     - `500 Internal Server Error` — falha não prevista.
+    - `503 Service Unavailable` — falha de acesso ao banco de dados.
   version: 0.0.1-SNAPSHOT
   contact:
     name: postech-software-architecture
@@ -655,6 +657,22 @@ components:
                 message: 'Já existe um serviço ativo cadastrado com o nome informado.'
                 path: /api/v1/servicos
 
+    Response405MethodNotAllowed:
+      description: Método HTTP não suportado pelo recurso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            metodoNaoPermitido:
+              summary: Verbo HTTP não suportado
+              value:
+                timestamp: '2026-04-29T22:00:00Z'
+                status: 405
+                error: Method Not Allowed
+                message: 'Método PATCH não suportado neste recurso. Métodos permitidos: [GET, PUT, DELETE].'
+                path: /api/v1/servicos/00000000-0000-0000-0000-000000000000
+
     Response500InternalServerError:
       description: Erro interno não previsto
       content:
@@ -669,6 +687,22 @@ components:
                 status: 500
                 error: Internal Server Error
                 message: 'Ocorreu um erro interno no servidor.'
+                path: /api/v1/servicos
+
+    Response503ServiceUnavailable:
+      description: 'Serviço temporariamente indisponível (ex.: banco de dados fora do ar)'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            bancoIndisponivel:
+              summary: Falha de acesso ao banco de dados
+              value:
+                timestamp: '2026-04-29T22:00:00Z'
+                status: 503
+                error: Service Unavailable
+                message: 'Serviço de banco de dados temporariamente indisponível. Tente novamente em alguns instantes.'
                 path: /api/v1/servicos
 
   schemas:
@@ -1101,9 +1135,10 @@ components:
           minLength: 1
           example: Substituicao do oleo do motor e filtro de oleo
         valor:
-          type: string
-          pattern: '^\d+(\.\d{1,2})?$'
-          example: '150.00'
+          type: number
+          multipleOf: 0.01
+          exclusiveMinimum: 0
+          example: 150.00
         categoria:
           $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
