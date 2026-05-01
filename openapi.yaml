@@ -1066,10 +1066,11 @@ components:
           minLength: 1
           example: Substituicao do oleo do motor e filtro de oleo
         valor:
-          type: string
-          pattern: '^\d+(\.\d{1,2})?$'
-          description: Valor monetário maior que zero (BigDecimal serializado como string para preservar precisão)
-          example: '150.00'
+          type: number
+          multipleOf: 0.01
+          exclusiveMinimum: 0
+          description: Valor monetário decimal maior que zero
+          example: 150.00
         categoria:
           $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
