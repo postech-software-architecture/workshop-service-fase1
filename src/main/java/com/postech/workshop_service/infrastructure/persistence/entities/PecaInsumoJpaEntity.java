@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class PecaInsumoJpaEntity extends BaseJpaEntity {
 
-	@Column(nullable = false, length = 50, unique = true)
+	@Column(nullable = false, length = 50)
 	private String sku;
 
 	@Column(nullable = false, length = 200)
