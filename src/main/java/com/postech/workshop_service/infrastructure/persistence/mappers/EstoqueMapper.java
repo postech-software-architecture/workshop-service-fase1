@@ -28,6 +28,7 @@ public interface EstoqueMapper {
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "pecaInsumoId", ignore = true)
 	@Mapping(target = "dataCriacao", ignore = true)
+	@Mapping(target = "versao", ignore = true)
 	void updateEntityFromDomain(Estoque domain, @MappingTarget EstoqueJpaEntity entity);
 
 }
