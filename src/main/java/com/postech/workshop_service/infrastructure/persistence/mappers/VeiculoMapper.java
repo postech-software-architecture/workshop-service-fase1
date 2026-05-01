@@ -1,7 +1,6 @@
 package com.postech.workshop_service.infrastructure.persistence.mappers;
 
 import com.postech.workshop_service.domain.entities.Veiculo;
-import com.postech.workshop_service.domain.valueobjects.Placa;
 import com.postech.workshop_service.infrastructure.persistence.entities.VeiculoClienteId;
 import com.postech.workshop_service.infrastructure.persistence.entities.VeiculoClienteJpaEntity;
 import com.postech.workshop_service.infrastructure.persistence.entities.VeiculoJpaEntity;
@@ -33,14 +32,9 @@ public interface VeiculoMapper {
 			.stream()
 			.map(VeiculoClienteJpaEntity::getClienteId)
 			.collect(Collectors.toCollection(LinkedHashSet::new));
-		return new Veiculo(entity.getId(), new Placa(entity.getPlaca()), entity.getMarca(), entity.getModelo(),
-				entity.getAno(), entity.getCor(), entity.getObservacoes(), clientesIds,
-				Boolean.TRUE.equals(entity.getAtivo()), entity.getDataCriacao(), entity.getDataUltimaAtualizacao(),
-				entity.getDataRemocao());
-	}
-
-	default Placa map(String valor) {
-		return valor != null ? new Placa(valor) : null;
+		return new Veiculo(entity.getId(), entity.getPlaca(), entity.getMarca(), entity.getModelo(), entity.getAno(),
+				entity.getCor(), entity.getObservacoes(), clientesIds, Boolean.TRUE.equals(entity.getAtivo()),
+				entity.getDataCriacao(), entity.getDataUltimaAtualizacao(), entity.getDataRemocao());
 	}
 
 	@AfterMapping

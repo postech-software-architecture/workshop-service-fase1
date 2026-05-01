@@ -243,7 +243,7 @@ public class VeiculoController {
 	private VeiculoResponse toResponse(Veiculo veiculo) {
 		return VeiculoResponse.builder()
 			.id(veiculo.getId())
-			.placa(veiculo.getPlaca().getValor())
+			.placa(veiculo.getPlaca().mascarada())
 			.marca(veiculo.getMarca())
 			.modelo(veiculo.getModelo())
 			.ano(veiculo.getAno())

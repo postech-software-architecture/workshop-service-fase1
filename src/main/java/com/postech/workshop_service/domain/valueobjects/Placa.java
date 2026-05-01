@@ -22,6 +22,10 @@ public final class Placa {
 	 * @param valorOriginal valor bruto informado pelo usuario.
 	 */
 	public Placa(String valorOriginal) {
+		this.valor = normalizar(valorOriginal);
+	}
+
+	public static String normalizar(String valorOriginal) {
 		if (valorOriginal == null || valorOriginal.trim().isEmpty()) {
 			throw new IllegalArgumentException("A placa do veículo é obrigatória.");
 		}
@@ -31,7 +35,11 @@ public final class Placa {
 			throw new IllegalArgumentException("A placa informada nao corresponde aos formatos aceitos.");
 		}
 
-		this.valor = normalizada;
+		return normalizada;
+	}
+
+	public String mascarada() {
+		return "***" + valor.substring(3, 5) + "**";
 	}
 
 }

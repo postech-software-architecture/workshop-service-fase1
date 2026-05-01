@@ -55,7 +55,7 @@ class VeiculoControllerIT extends PostgresTestContainer {
 			.perform(post("/api/v1/veiculos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("$.placa").value("BRA1D23"))
+			.andExpect(jsonPath("$.placa").value("***1D**"))
 			.andExpect(jsonPath("$.clientes.length()").value(2))
 			.andReturn();
 
@@ -68,7 +68,7 @@ class VeiculoControllerIT extends PostgresTestContainer {
 
 		mockMvc.perform(get("/api/v1/veiculos/placa/{placa}", "bra-1d23"))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.placa").value("BRA1D23"));
+			.andExpect(jsonPath("$.placa").value("***1D**"));
 
 		mockMvc.perform(get("/api/v1/veiculos").param("pagina", "0").param("tamanho", "10"))
 			.andExpect(status().isOk())
@@ -89,7 +89,7 @@ class VeiculoControllerIT extends PostgresTestContainer {
 			.perform(put("/api/v1/veiculos/{id}", veiculoId).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(atualizar)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.placa").value("ABC1234"))
+			.andExpect(jsonPath("$.placa").value("***12**"))
 			.andExpect(jsonPath("$.clientes.length()").value(2));
 
 		mockMvc.perform(delete("/api/v1/veiculos/{id}/clientes/{clienteId}", veiculoId, clienteB))

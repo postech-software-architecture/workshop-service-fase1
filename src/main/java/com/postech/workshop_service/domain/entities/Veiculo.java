@@ -35,8 +35,7 @@ public class Veiculo extends EntidadeBase {
 
 	/**
 	 * Cria um novo veiculo com os dados operacionais obrigatorios.
-	 * @param id identificador tecnico do veiculo.
-	 * @param placa placa do veiculo.
+	 * @param placaRaw placa do veiculo.
 	 * @param marca marca do veiculo.
 	 * @param modelo modelo do veiculo.
 	 * @param ano ano do veiculo.
@@ -44,20 +43,26 @@ public class Veiculo extends EntidadeBase {
 	 * @param observacoes observacoes opcionais.
 	 * @param clientesVinculados clientes associados ao veiculo.
 	 */
-	public Veiculo(UUID id, Placa placa, String marca, String modelo, int ano, String cor, String observacoes,
+	public Veiculo(String placaRaw, String marca, String modelo, int ano, String cor, String observacoes,
 			Collection<UUID> clientesVinculados) {
-		super(id != null ? id : UUID.randomUUID());
+		super(UUID.randomUUID());
 		this.clientesVinculados = new LinkedHashSet<>();
 		this.ativo = true;
 
-		aplicarDados(placa, marca, modelo, ano, cor, observacoes);
+		validarAno(ano);
+		this.placa = new Placa(placaRaw);
+		this.marca = sanitizarObrigatorio(marca, "A marca do veículo é obrigatória.");
+		this.modelo = sanitizarObrigatorio(modelo, "O modelo do veículo é obrigatório.");
+		this.ano = ano;
+		this.cor = sanitizarOpcional(cor);
+		this.observacoes = sanitizarOpcional(observacoes);
 		definirClientesIniciais(clientesVinculados);
 	}
 
 	/**
 	 * Reconstroi um veiculo previamente persistido.
 	 * @param id identificador tecnico do veiculo.
-	 * @param placa placa do veiculo.
+	 * @param placaRaw placa do veiculo.
 	 * @param marca marca do veiculo.
 	 * @param modelo modelo do veiculo.
 	 * @param ano ano do veiculo.
@@ -70,28 +75,40 @@ public class Veiculo extends EntidadeBase {
 	 * @param dataRemocao data da remocao logica.
 	 */
 	@Default
-	public Veiculo(UUID id, Placa placa, String marca, String modelo, int ano, String cor, String observacoes,
+	public Veiculo(UUID id, String placaRaw, String marca, String modelo, int ano, String cor, String observacoes,
 			Collection<UUID> clientesVinculados, boolean ativo, LocalDateTime dataCriacao,
 			LocalDateTime dataUltimaAtualizacao, LocalDateTime dataRemocao) {
 		super(id, dataCriacao, dataUltimaAtualizacao, dataRemocao);
 		this.clientesVinculados = new LinkedHashSet<>();
 		this.ativo = ativo;
 
-		aplicarDados(placa, marca, modelo, ano, cor, observacoes);
+		validarAno(ano);
+		this.placa = new Placa(placaRaw);
+		this.marca = sanitizarObrigatorio(marca, "A marca do veículo é obrigatória.");
+		this.modelo = sanitizarObrigatorio(modelo, "O modelo do veículo é obrigatório.");
+		this.ano = ano;
+		this.cor = sanitizarOpcional(cor);
+		this.observacoes = sanitizarOpcional(observacoes);
 		definirClientesIniciais(clientesVinculados);
 	}
 
 	/**
 	 * Atualiza apenas os dados cadastrais do veiculo sem alterar os clientes vinculados.
-	 * @param placa nova placa.
+	 * @param placaRaw nova placa.
 	 * @param marca nova marca.
 	 * @param modelo novo modelo.
 	 * @param ano novo ano.
 	 * @param cor nova cor.
 	 * @param observacoes novas observacoes.
 	 */
-	public void atualizarDados(Placa placa, String marca, String modelo, int ano, String cor, String observacoes) {
-		aplicarDados(placa, marca, modelo, ano, cor, observacoes);
+	public void atualizarDados(String placaRaw, String marca, String modelo, int ano, String cor, String observacoes) {
+		validarAno(ano);
+		this.placa = new Placa(placaRaw);
+		this.marca = sanitizarObrigatorio(marca, "A marca do veículo é obrigatória.");
+		this.modelo = sanitizarObrigatorio(modelo, "O modelo do veículo é obrigatório.");
+		this.ano = ano;
+		this.cor = sanitizarOpcional(cor);
+		this.observacoes = sanitizarOpcional(observacoes);
 		atualizarDataUltimaAtualizacao();
 	}
 
@@ -134,19 +151,10 @@ public class Veiculo extends EntidadeBase {
 		registrarRemocaoLogica();
 	}
 
-	private void aplicarDados(Placa placa, String marca, String modelo, int ano, String cor, String observacoes) {
-		if (placa == null) {
-			throw new IllegalArgumentException("A placa do veículo é obrigatória.");
-		}
+	private void validarAno(int ano) {
 		if (ano < ANO_MINIMO || ano > LocalDateTime.now().getYear()) {
 			throw new IllegalArgumentException("O ano do veículo está fora da faixa permitida.");
 		}
-		this.placa = placa;
-		this.marca = sanitizarObrigatorio(marca, "A marca do veículo é obrigatória.");
-		this.modelo = sanitizarObrigatorio(modelo, "O modelo do veículo é obrigatório.");
-		this.ano = ano;
-		this.cor = sanitizarOpcional(cor);
-		this.observacoes = sanitizarOpcional(observacoes);
 	}
 
 	private String sanitizarObrigatorio(String valor, String mensagem) {

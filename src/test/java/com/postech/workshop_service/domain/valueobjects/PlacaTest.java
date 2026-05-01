@@ -20,6 +20,12 @@ class PlacaTest {
 	}
 
 	@Test
+	void shouldMaskNormalizedPlate() {
+		assertEquals("***1D**", new Placa("BRA1D23").mascarada());
+		assertEquals("***12**", new Placa("ABC1234").mascarada());
+	}
+
+	@Test
 	void shouldRejectInvalidPlate() {
 		assertThrows(IllegalArgumentException.class, () -> new Placa("1234ABC"));
 	}

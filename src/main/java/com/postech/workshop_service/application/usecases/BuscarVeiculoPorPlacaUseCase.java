@@ -30,7 +30,7 @@ public class BuscarVeiculoPorPlacaUseCase {
 	 * @return veiculo encontrado, se existir.
 	 */
 	public Optional<Veiculo> executar(String placaRaw, boolean incluirInativos) {
-		return veiculoRepository.buscarPorPlaca(new Placa(placaRaw).getValor(), incluirInativos);
+		return veiculoRepository.buscarPorPlaca(Placa.normalizar(placaRaw), incluirInativos);
 	}
 
 }

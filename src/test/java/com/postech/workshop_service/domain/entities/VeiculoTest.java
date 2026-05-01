@@ -1,6 +1,5 @@
 package com.postech.workshop_service.domain.entities;
 
-import com.postech.workshop_service.domain.valueobjects.Placa;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -20,8 +19,7 @@ class VeiculoTest {
 	@Test
 	void shouldCreateVeiculoWithValidData() {
 		UUID clienteId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, " Prata ", " Obs ",
-				List.of(clienteId));
+		Veiculo veiculo = new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, " Prata ", " Obs ", List.of(clienteId));
 
 		assertNotNull(veiculo.getId());
 		assertEquals("BRA1D23", veiculo.getPlaca().getValor());
@@ -39,7 +37,7 @@ class VeiculoTest {
 		LocalDateTime atualizacao = LocalDateTime.now().minusDays(1);
 		LocalDateTime remocao = LocalDateTime.now();
 
-		Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, "Prata", "Obs",
+		Veiculo veiculo = new Veiculo(veiculoId, "BRA1D23", "Toyota", "Corolla", 2020, "Prata", "Obs",
 				List.of(clienteId), false, criacao, atualizacao, remocao);
 
 		assertEquals(veiculoId, veiculo.getId());
@@ -54,13 +52,13 @@ class VeiculoTest {
 		UUID clienteId = UUID.randomUUID();
 
 		assertThrows(IllegalArgumentException.class,
-				() -> new Veiculo(null, null, "Toyota", "Corolla", 2020, null, null, List.of(clienteId)));
+				() -> new Veiculo(null, "Toyota", "Corolla", 2020, null, null, List.of(clienteId)));
 		assertThrows(IllegalArgumentException.class,
-				() -> new Veiculo(null, new Placa("BRA1D23"), " ", "Corolla", 2020, null, null, List.of(clienteId)));
+				() -> new Veiculo("BRA1D23", " ", "Corolla", 2020, null, null, List.of(clienteId)));
 		assertThrows(IllegalArgumentException.class,
-				() -> new Veiculo(null, new Placa("BRA1D23"), "Toyota", " ", 2020, null, null, List.of(clienteId)));
-		assertThrows(IllegalArgumentException.class, () -> new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla",
-				1899, null, null, List.of(clienteId)));
+				() -> new Veiculo("BRA1D23", "Toyota", " ", 2020, null, null, List.of(clienteId)));
+		assertThrows(IllegalArgumentException.class,
+				() -> new Veiculo("BRA1D23", "Toyota", "Corolla", 1899, null, null, List.of(clienteId)));
 	}
 
 	@Test
@@ -68,22 +66,21 @@ class VeiculoTest {
 		UUID clienteId = UUID.randomUUID();
 
 		assertThrows(IllegalArgumentException.class,
-				() -> new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null, List.of()));
-		assertThrows(IllegalArgumentException.class, () -> new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla",
-				2020, null, null, List.of(clienteId, clienteId)));
-		assertThrows(IllegalArgumentException.class, () -> new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla",
-				2020, null, null, Arrays.asList(clienteId, null)));
+				() -> new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of()));
+		assertThrows(IllegalArgumentException.class,
+				() -> new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId, clienteId)));
+		assertThrows(IllegalArgumentException.class,
+				() -> new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, null, null, Arrays.asList(clienteId, null)));
 	}
 
 	@Test
 	void shouldUpdateOnlyVehicleData() {
 		UUID clienteId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteId));
+		Veiculo veiculo = new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId));
 		LocalDateTime dataCriacao = veiculo.getDataCriacao();
 		LocalDateTime dataAnterior = veiculo.getDataUltimaAtualizacao();
 
-		veiculo.atualizarDados(new Placa("ABC1234"), " Ford ", " Focus ", 2018, " Azul ", " Atualizado ");
+		veiculo.atualizarDados("ABC1234", " Ford ", " Focus ", 2018, " Azul ", " Atualizado ");
 
 		assertEquals("ABC1234", veiculo.getPlaca().getValor());
 		assertEquals("Ford", veiculo.getMarca());
@@ -100,25 +97,23 @@ class VeiculoTest {
 	@Test
 	void shouldRejectInvalidDataWhenUpdatingVehicle() {
 		UUID clienteId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteId));
+		Veiculo veiculo = new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId));
 
 		assertThrows(IllegalArgumentException.class,
 				() -> veiculo.atualizarDados(null, "Ford", "Focus", 2018, null, "Obs"));
 		assertThrows(IllegalArgumentException.class,
-				() -> veiculo.atualizarDados(new Placa("ABC1234"), " ", "Focus", 2018, null, "Obs"));
+				() -> veiculo.atualizarDados("ABC1234", " ", "Focus", 2018, null, "Obs"));
 		assertThrows(IllegalArgumentException.class,
-				() -> veiculo.atualizarDados(new Placa("ABC1234"), "Ford", " ", 2018, null, "Obs"));
+				() -> veiculo.atualizarDados("ABC1234", "Ford", " ", 2018, null, "Obs"));
 		assertThrows(IllegalArgumentException.class,
-				() -> veiculo.atualizarDados(new Placa("ABC1234"), "Ford", "Focus", 1899, null, "Obs"));
+				() -> veiculo.atualizarDados("ABC1234", "Ford", "Focus", 1899, null, "Obs"));
 	}
 
 	@Test
 	void shouldManageClienteLinks() {
 		UUID clienteA = UUID.randomUUID();
 		UUID clienteB = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteA));
+		Veiculo veiculo = new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteA));
 
 		veiculo.vincularCliente(clienteB);
 		assertEquals(List.of(clienteA, clienteB), veiculo.getClientesVinculados().stream().toList());
@@ -130,8 +125,7 @@ class VeiculoTest {
 	@Test
 	void shouldRejectInvalidClienteLinkOperations() {
 		UUID clienteId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteId));
+		Veiculo veiculo = new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId));
 
 		assertThrows(IllegalArgumentException.class, () -> veiculo.vincularCliente(null));
 		assertThrows(IllegalArgumentException.class, () -> veiculo.vincularCliente(clienteId));
@@ -143,8 +137,7 @@ class VeiculoTest {
 	@Test
 	void shouldUpdateAndRemoveLogically() {
 		UUID clienteId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, "   ", "   ",
-				List.of(clienteId));
+		Veiculo veiculo = new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, "   ", "   ", List.of(clienteId));
 
 		assertNull(veiculo.getCor());
 		assertNull(veiculo.getObservacoes());
