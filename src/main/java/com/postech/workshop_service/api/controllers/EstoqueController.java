@@ -4,7 +4,6 @@ import com.postech.workshop_service.api.dtos.*;
 import com.postech.workshop_service.application.usecases.*;
 import com.postech.workshop_service.domain.entities.Estoque;
 import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
-import com.postech.workshop_service.domain.repositories.EstoqueRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,18 +20,23 @@ import java.util.stream.Collectors;
 @Tag(name = "Estoques", description = "Gerenciamento de estoques e movimentacoes")
 public class EstoqueController {
 
-	private final EstoqueRepository estoqueRepository;
+	private final BuscarEstoquePorIdUseCase buscarEstoquePorIdUseCase;
+
+	private final ListarEstoquesPorPecaUseCase listarEstoquesPorPecaUseCase;
 
 	private final RegistrarMovimentacaoUseCase registrarMovimentacaoUseCase;
 
 	/**
 	 * Construtor para injecao de dependencias.
-	 * @param estoqueRepository repositorio de estoques.
+	 * @param buscarEstoquePorIdUseCase caso de uso de busca por ID.
+	 * @param listarEstoquesPorPecaUseCase caso de uso de listagem por peca.
 	 * @param registrarMovimentacaoUseCase caso de uso de movimentacao.
 	 */
-	public EstoqueController(EstoqueRepository estoqueRepository,
+	public EstoqueController(BuscarEstoquePorIdUseCase buscarEstoquePorIdUseCase,
+			ListarEstoquesPorPecaUseCase listarEstoquesPorPecaUseCase,
 			RegistrarMovimentacaoUseCase registrarMovimentacaoUseCase) {
-		this.estoqueRepository = estoqueRepository;
+		this.buscarEstoquePorIdUseCase = buscarEstoquePorIdUseCase;
+		this.listarEstoquesPorPecaUseCase = listarEstoquesPorPecaUseCase;
 		this.registrarMovimentacaoUseCase = registrarMovimentacaoUseCase;
 	}
 
@@ -58,7 +62,7 @@ public class EstoqueController {
 	@Operation(summary = "Buscar estoque por ID")
 	public ResponseEntity<EstoqueResponse> buscarPorId(@PathVariable UUID id,
 			@RequestParam(defaultValue = "false") boolean incluirInativos) {
-		return estoqueRepository.buscarPorId(id, incluirInativos)
+		return buscarEstoquePorIdUseCase.executar(id, incluirInativos)
 			.map(estoque -> ResponseEntity.ok(toEstoqueResponse(estoque)))
 			.orElse(ResponseEntity.notFound().build());
 	}
@@ -72,7 +76,7 @@ public class EstoqueController {
 	@Operation(summary = "Listar estoques de uma peca")
 	public ResponseEntity<List<EstoqueResponse>> listarPorPeca(@PathVariable UUID pecaInsumoId,
 			@RequestParam(defaultValue = "false") boolean incluirInativos) {
-		List<EstoqueResponse> lista = estoqueRepository.listarPorPeca(pecaInsumoId, incluirInativos)
+		List<EstoqueResponse> lista = listarEstoquesPorPecaUseCase.executar(pecaInsumoId, incluirInativos)
 			.stream()
 			.map(this::toEstoqueResponse)
 			.collect(Collectors.toList());
