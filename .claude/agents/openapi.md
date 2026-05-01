@@ -94,6 +94,10 @@ responses:
 | `IllegalArgumentException` | 400 |
 | `HttpMessageNotReadableException` (JSON malformado, enum invalido) | 400 |
 | `MethodArgumentTypeMismatchException` (UUID malformado em path/query) | 400 |
+| `MissingServletRequestParameterException` (query param obrigatorio ausente) | 400 |
+| `NoResourceFoundException` (rota inexistente, path com `{id}` vazio) | 404 |
+| `HttpRequestMethodNotSupportedException` (verbo HTTP nao suportado) | 405 |
+| `DataAccessException` (banco indisponivel) | 503 |
 | `Exception` (fallback) | 500 |
 
 Se algum dia esses mapeamentos mudarem em `GlobalExceptionHandler.java`, este agente é responsável por refletir a mudança no `openapi.yaml` no mesmo PR.

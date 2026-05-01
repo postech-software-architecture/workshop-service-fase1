@@ -18,8 +18,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -514,6 +516,31 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.perform(put("/api/v1/servicos/{id}", secondId).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(atualizar)))
 			.andExpect(status().isUnprocessableEntity());
+	}
+
+	@Test
+	void shouldReturn404WhenIdPathIsEmpty() throws Exception {
+		mockMvc.perform(get("/api/v1/servicos/"))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.status").value(404))
+			.andExpect(jsonPath("$.message").value(containsString("Recurso nao encontrado")))
+			.andExpect(jsonPath("$.message").value(containsString("Verifique a URL")));
+	}
+
+	@Test
+	void shouldReturn404ForUnknownSubpath() throws Exception {
+		mockMvc.perform(get("/api/v1/servicos/{id}/inexistente", UUID.randomUUID()))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.status").value(404))
+			.andExpect(jsonPath("$.message").value(containsString("Recurso nao encontrado")));
+	}
+
+	@Test
+	void shouldReturn405WhenMethodIsNotAllowed() throws Exception {
+		mockMvc.perform(patch("/api/v1/servicos/{id}", UUID.randomUUID()))
+			.andExpect(status().isMethodNotAllowed())
+			.andExpect(jsonPath("$.status").value(405))
+			.andExpect(jsonPath("$.message").value(containsString("Metodo PATCH nao suportado")));
 	}
 
 }
