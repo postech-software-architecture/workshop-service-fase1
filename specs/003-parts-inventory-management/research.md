@@ -2,13 +2,13 @@
 
 **Feature**: 003-parts-inventory-management  
 **Date**: 2026-04-29
-**Updated**: 2026-04-29 (nova estrutura de dados com entidade Estoques)
+**Updated**: 2026-04-30 (estoque por localizacao)
 
 ## Research Topics
 
 ### 1. Estrutura de Dados para PecaInsumo
 
-**Decision**: Entidade raiz com campos obrigatorios (SKU, nome, quantidade, valor unitario, estoque minimo, unidade) e opcionais (fornecedor, codigo de barras, localizacao, marca, categoria, aplicacao, observacoes).
+**Decision**: Entidade raiz com campos obrigatorios (SKU, nome, valor unitario, estoque minimo, unidade) e opcionais (fornecedor, codigo de barras, marca, categoria, aplicacao, observacoes).
 
 **Rationale**: 
 - SKU como identificador de negocio unico entre pecas ativas
@@ -21,18 +21,19 @@
 
 ### 2. Estrutura de Dados para Estoque e MovimentacaoEstoque
 
-**Decision**: Tres entidades em cascata: PecaInsumo (1) → (N) Estoque → (N) MovimentacaoEstoque.
+**Decision**: Tres entidades em cascata: PecaInsumo (1) → (N) Estoques → (N) MovimentacaoEstoque.
 
 **Rationale**:
-- PecaInsumo nao armazena quantidade total (delegado a Estoques)
-- Estoque representa quantidade em uma localizacao especifica
-- Permite multiplas localizacoes por peca
+- PecaInsumo nao armazena quantidade diretamente (delegado a Estoque)
+- Cada Estoque representa a quantidade disponivel da peca em uma localizacao fisica
+- Permite multiplas localizacoes por peca sem perder o recorte MVP
 - MovimentacaoEstoque registra alteracoes em um estoque especifico
 - Ajuste como valor absoluto que substitui quantidade do estoque
 - Sem campo "responsavel" no MVP (sem autenticacao)
 
 **Alternatives Considered**:
-- Quantidade em PecaInsumo: rejeitado para suportar multiplas localizacoes
+- Quantidade em PecaInsumo: rejeitado para manter movimentacoes e concorrencia isoladas na entidade Estoque
+- Estoque unico por peca: rejeitado porque a oficina precisa representar localizacoes fisicas distintas
 - Ajuste como delta (+/-): rejeitado; valor absoluto e mais comum para inventarios
 - Campo responsavel: rejeitado para MVP, sera adicionado com autenticacao
 
@@ -88,18 +89,19 @@
 
 ### 7. Endpoints REST
 
-**Decision**: Seguir padrao RESTful do projeto com endpoints para CRUD, movimentacoes e consultas especiais.
+**Decision**: Seguir padrao RESTful do projeto com endpoints para CRUD, estoque e movimentacoes basicas.
 
 **Endpoints planejados**:
 - `POST /api/v1/pecas` - Cadastrar peca
 - `GET /api/v1/pecas` - Listar pecas (paginacao, filtros)
 - `GET /api/v1/pecas/{id}` - Buscar por ID
 - `GET /api/v1/pecas/sku/{sku}` - Buscar por SKU
-- `GET /api/v1/pecas/estoque-baixo` - Listar itens abaixo do minimo
 - `PUT /api/v1/pecas/{id}` - Atualizar peca
 - `DELETE /api/v1/pecas/{id}` - Remover peca (soft delete)
-- `POST /api/v1/pecas/{id}/movimentacoes` - Registrar movimentacao
-- `GET /api/v1/pecas/{id}/movimentacoes` - Historico de movimentacoes
+- `POST /api/v1/pecas/estoques` - Criar estoque da peca em uma localizacao
+- `GET /api/v1/estoques/{id}` - Buscar estoque
+- `GET /api/v1/estoques/peca/{pecaInsumoId}` - Listar estoques da peca
+- `POST /api/v1/estoques/movimentacoes` - Registrar movimentacao
 
 **Rationale**:
 - Consistente com endpoints de clientes e veiculos

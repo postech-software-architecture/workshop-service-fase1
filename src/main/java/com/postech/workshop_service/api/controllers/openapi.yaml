@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Workshop Service API
-  description: API REST para gerenciamento de clientes e veiculos da oficina.
+  description: API REST para gerenciamento de clientes, veiculos, pecas e estoques da oficina.
   version: 1.0.0
 
 servers:
@@ -408,6 +408,268 @@ paths:
         '400':
           description: Regra de negocio violada
 
+  /api/v1/pecas:
+    post:
+      tags: [Pecas e Insumos]
+      summary: Criar uma nova peca ou insumo
+      operationId: criarPeca
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroPecaRequest'
+      responses:
+        '201':
+          description: Peca criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '422':
+          description: Erro de validacao estrutural no payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags: [Pecas e Insumos]
+      summary: Listar pecas com paginacao e filtros
+      operationId: listarPecas
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: nome
+          in: query
+          schema:
+            type: string
+        - name: categoria
+          in: query
+          schema:
+            type: string
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+          '200':
+            description: Pagina de pecas
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/PaginaPecasResponse'
+
+  /api/v1/pecas/{id}:
+    get:
+      tags: [Pecas e Insumos]
+      summary: Buscar peca por ID
+      operationId: buscarPecaPorId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Peca encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '404':
+          description: Peca nao encontrada
+
+    put:
+      tags: [Pecas e Insumos]
+      summary: Atualizar dados de uma peca
+      operationId: atualizarPeca
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarPecaRequest'
+      responses:
+        '200':
+          description: Peca atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '404':
+          description: Peca nao encontrada
+        '422':
+          description: Erro de validacao estrutural no payload
+
+    delete:
+      tags: [Pecas e Insumos]
+      summary: Remover uma peca (soft delete)
+      operationId: removerPeca
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Peca removida logicamente
+
+  /api/v1/pecas/sku/{sku}:
+    get:
+      tags: [Pecas e Insumos]
+      summary: Buscar peca por SKU
+      operationId: buscarPecaPorSku
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Peca encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '404':
+          description: Peca nao encontrada
+
+  /api/v1/pecas/estoques:
+    post:
+      tags: [Pecas e Insumos]
+      summary: Criar um novo estoque para uma peca
+      operationId: criarEstoque
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriarEstoqueRequest'
+      responses:
+        '201':
+          description: Estoque criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstoqueResponse'
+        '422':
+          description: Erro de validacao estrutural no payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/estoques/movimentacoes:
+    post:
+      tags: [Estoques]
+      summary: Registrar uma movimentacao de estoque
+      operationId: registrarMovimentacao
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovimentacaoRequest'
+      responses:
+        '201':
+          description: Movimentacao registrada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovimentacaoResponse'
+        '422':
+          description: Erro de validacao estrutural no payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/estoques/{id}:
+    get:
+      tags: [Estoques]
+      summary: Buscar estoque por ID
+      operationId: buscarEstoquePorId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Estoque encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstoqueResponse'
+        '404':
+          description: Estoque nao encontrado
+
+  /api/v1/estoques/peca/{pecaInsumoId}:
+    get:
+      tags: [Estoques]
+      summary: Listar estoques de uma peca
+      operationId: listarEstoquesPorPeca
+      parameters:
+        - name: pecaInsumoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Lista de estoques da peca
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EstoqueResponse'
+
 components:
   schemas:
     CadastroClienteRequest:
@@ -800,3 +1062,367 @@ components:
       example:
         field: 'documento'
         message: 'Documento invalido'
+
+    CadastroPecaRequest:
+      type: object
+      required: [sku, nome, valorUnitario, estoqueMinimo, unidadeMedida, tipoItem]
+      properties:
+        sku:
+          type: string
+          maxLength: 50
+          example: 'FIL-001'
+        nome:
+          type: string
+          maxLength: 200
+          example: 'Filtro de oleo 5W30'
+        valorUnitario:
+          type: number
+          format: decimal
+          example: 45.90
+        estoqueMinimo:
+          type: number
+          format: decimal
+          example: 5
+        unidadeMedida:
+          type: string
+          enum: [UN, L, KG, M, ML, CX, PC]
+          example: 'UN'
+        tipoItem:
+          type: string
+          enum: [PECA, INSUMO]
+          example: 'PECA'
+        fornecedor:
+          type: string
+          maxLength: 200
+          example: 'Bosch'
+        codigoBarras:
+          type: string
+          maxLength: 50
+          example: '7891234567890'
+        marca:
+          type: string
+          maxLength: 100
+          example: 'Bosch'
+        categoria:
+          type: string
+          maxLength: 100
+          example: 'Filtros'
+        aplicacao:
+          type: string
+          maxLength: 500
+          example: 'Hatch compacto ate 2.0'
+        observacoes:
+          type: string
+          example: 'Compativel com Gol, Fox e Polo'
+      example:
+        sku: 'FIL-001'
+        nome: 'Filtro de oleo 5W30'
+        valorUnitario: 45.90
+        estoqueMinimo: 5
+        unidadeMedida: 'UN'
+        tipoItem: 'PECA'
+        fornecedor: 'Bosch'
+        marca: 'Bosch'
+        categoria: 'Filtros'
+
+    AtualizarPecaRequest:
+      type: object
+      required: [nome, valorUnitario, estoqueMinimo, unidadeMedida, tipoItem]
+      properties:
+        nome:
+          type: string
+          maxLength: 200
+          example: 'Filtro de oleo 5W30 Premium'
+        valorUnitario:
+          type: number
+          format: decimal
+          example: 49.90
+        estoqueMinimo:
+          type: number
+          format: decimal
+          example: 10
+        unidadeMedida:
+          type: string
+          enum: [UN, L, KG, M, ML, CX, PC]
+          example: 'UN'
+        tipoItem:
+          type: string
+          enum: [PECA, INSUMO]
+          example: 'PECA'
+        fornecedor:
+          type: string
+          maxLength: 200
+          example: 'Bosch'
+        codigoBarras:
+          type: string
+          maxLength: 50
+          example: '7891234567890'
+        marca:
+          type: string
+          maxLength: 100
+          example: 'Bosch'
+        categoria:
+          type: string
+          maxLength: 100
+          example: 'Filtros'
+        aplicacao:
+          type: string
+          maxLength: 500
+          example: 'Hatch compacto ate 2.0'
+        observacoes:
+          type: string
+          example: 'Compativel com Gol, Fox e Polo'
+      example:
+        nome: 'Filtro de oleo 5W30 Premium'
+        valorUnitario: 49.90
+        estoqueMinimo: 10
+        unidadeMedida: 'UN'
+        tipoItem: 'PECA'
+
+    PecaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '550e8400-e29b-41d4-a716-446655440000'
+        sku:
+          type: string
+          example: 'FIL-001'
+        nome:
+          type: string
+          example: 'Filtro de oleo 5W30'
+        valorUnitario:
+          type: number
+          format: decimal
+          example: 45.90
+        estoqueMinimo:
+          type: number
+          format: decimal
+          example: 5
+        unidadeMedida:
+          type: string
+          example: 'UN'
+        tipoItem:
+          type: string
+          example: 'PECA'
+        fornecedor:
+          type: string
+          example: 'Bosch'
+        codigoBarras:
+          type: string
+          example: '7891234567890'
+        marca:
+          type: string
+          example: 'Bosch'
+        categoria:
+          type: string
+          example: 'Filtros'
+        aplicacao:
+          type: string
+          example: 'Hatch compacto ate 2.0'
+        observacoes:
+          type: string
+          example: 'Compativel com Gol, Fox e Polo'
+        ativo:
+          type: boolean
+          example: true
+        quantidadeTotal:
+          type: number
+          format: decimal
+          description: 'Soma de todos os estoques ativos da peca'
+          example: 12.500
+        versao:
+          type: integer
+          description: 'Versao para controle de concurrencia'
+          example: 10
+        dataCriacao:
+          type: string
+          format: date-time
+          example: '2026-04-29T22:00:00'
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+          example: '2026-04-29T22:30:00'
+        dataRemocao:
+          type: string
+          format: date-time
+          nullable: true
+      example:
+        id: '550e8400-e29b-41d4-a716-446655440000'
+        sku: 'FIL-001'
+        nome: 'Filtro de oleo 5W30'
+        valorUnitario: 45.90
+        estoqueMinimo: 5
+        unidadeMedida: 'UN'
+        tipoItem: 'PECA'
+        fornecedor: 'Bosch'
+        marca: 'Bosch'
+        categoria: 'Filtros'
+        ativo: true
+        quantidadeTotal: 12.500
+        versao: 10
+        dataCriacao: '2026-04-29T22:00:00'
+        dataUltimaAtualizacao: '2026-04-29T22:30:00'
+        dataRemocao: null
+
+    PaginaPecasResponse:
+      type: object
+      properties:
+        conteudo:
+          type: array
+          items:
+            $ref: '#/components/schemas/PecaResponse'
+        pagina:
+          type: integer
+          example: 0
+        tamanho:
+          type: integer
+          example: 20
+        totalElementos:
+          type: integer
+          format: int64
+          example: 42
+        totalPaginas:
+          type: integer
+          example: 3
+
+    CriarEstoqueRequest:
+      type: object
+      required: [pecaInsumoId, localizacao, quantidade]
+      properties:
+        pecaInsumoId:
+          type: string
+          format: uuid
+          description: Identificador da peca
+          example: '550e8400-e29b-41d4-a716-446655440000'
+        localizacao:
+          type: string
+          maxLength: 100
+          description: Localizacao fisica do estoque
+          example: 'Prateleira A2'
+        quantidade:
+          type: number
+          format: decimal
+          description: Quantidade inicial em estoque
+          example: 10
+      example:
+        pecaInsumoId: '550e8400-e29b-41d4-a716-446655440000'
+        localizacao: 'Prateleira A2'
+        quantidade: 10
+
+    EstoqueResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '550e8400-e29b-41d4-a716-446655440001'
+        pecaInsumoId:
+          type: string
+          format: uuid
+          example: '550e8400-e29b-41d4-a716-446655440000'
+        localizacao:
+          type: string
+          example: 'Prateleira A2'
+        quantidade:
+          type: number
+          format: decimal
+          example: 10.500
+        ativo:
+          type: boolean
+          example: true
+        versao:
+          type: integer
+          description: Versao para controle de concurrencia
+          example: 5
+        dataCriacao:
+          type: string
+          format: date-time
+          example: '2026-04-29T22:00:00'
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+          example: '2026-04-29T22:30:00'
+      example:
+        id: '550e8400-e29b-41d4-a716-446655440001'
+        pecaInsumoId: '550e8400-e29b-41d4-a716-446655440000'
+        localizacao: 'Prateleira A2'
+        quantidade: 10.500
+        ativo: true
+        versao: 5
+        dataCriacao: '2026-04-29T22:00:00'
+        dataUltimaAtualizacao: '2026-04-29T22:30:00'
+
+    MovimentacaoRequest:
+      type: object
+      required: [estoqueId, tipo, quantidade]
+      properties:
+        estoqueId:
+          type: string
+          format: uuid
+          description: Identificador do estoque
+          example: '550e8400-e29b-41d4-a716-446655440001'
+        tipo:
+          type: string
+          enum: [ENTRADA, SAIDA, AJUSTE]
+          description: Tipo de movimentacao
+          example: 'ENTRADA'
+        quantidade:
+          type: number
+          format: decimal
+          description: Quantidade movimentada (valor absoluto para AJUSTE)
+          example: 5
+        motivo:
+          type: string
+          maxLength: 500
+          description: Motivo da movimentacao (obrigatorio para AJUSTE)
+          example: 'Compra de reposicao'
+      example:
+        estoqueId: '550e8400-e29b-41d4-a716-446655440001'
+        tipo: 'ENTRADA'
+        quantidade: 5
+        motivo: 'Compra de reposicao'
+
+    MovimentacaoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '550e8400-e29b-41d4-a716-446655440002'
+        estoqueId:
+          type: string
+          format: uuid
+          example: '550e8400-e29b-41d4-a716-446655440001'
+        tipo:
+          type: string
+          example: 'ENTRADA'
+        quantidade:
+          type: number
+          format: decimal
+          example: 5.000
+        quantidadeAnterior:
+          type: number
+          format: decimal
+          example: 10.000
+        quantidadePosterior:
+          type: number
+          format: decimal
+          example: 15.000
+        motivo:
+          type: string
+          example: 'Compra de reposicao'
+        dataMovimentacao:
+          type: string
+          format: date-time
+          example: '2026-04-29T22:00:00'
+      example:
+        id: '550e8400-e29b-41d4-a716-446655440002'
+        estoqueId: '550e8400-e29b-41d4-a716-446655440001'
+        tipo: 'ENTRADA'
+        quantidade: 5.000
+        quantidadeAnterior: 10.000
+        quantidadePosterior: 15.000
+        motivo: 'Compra de reposicao'
+        dataMovimentacao: '2026-04-29T22:00:00'

@@ -16,12 +16,13 @@
 
 ```bash
 # Criar arquivo de migration
-touch src/main/resources/db/migration/V0.20260429220000__create_table_pecas_movimentacoes.sql
+touch src/main/resources/db/migration/V0.20260429220000__create_table_pecas_estoques_movimentacoes.sql
 ```
 
 **Conteudo do migration**:
 - Tabela `pecas_insumos` com todos os campos definidos no data-model.md
-- Tabela `movimentacoes_estoque` com FK para pecas
+- Tabela `estoques` com FK para pecas e campo `localizacao`
+- Tabela `movimentacoes_estoque` com FK para estoques
 - Indices para consultas frequentes
 - Comentarios em todas as tabelas e colunas
 
@@ -35,45 +36,54 @@ touch src/main/resources/db/migration/V0.20260429220000__create_table_pecas_movi
 
 **Arquivos**:
 - `src/main/java/com/postech/workshop_service/domain/entities/PecaInsumo.java`
+- `src/main/java/com/postech/workshop_service/domain/entities/Estoque.java`
 - `src/main/java/com/postech/workshop_service/domain/entities/MovimentacaoEstoque.java`
 
 **Regras**:
 - `PecaInsumo` estende `EntidadeBase`
+- `Estoque` representa uma localizacao fisica da peca
 - Implementar metodos de dominio: `registrarEntrada()`, `registrarSaida()`, `ajustarEstoque()`, `removerLogicamente()`
-- Validar invariantes: estoque >= 0, valor > 0, SKU obrigatorio
+- Validar invariantes: estoque >= 0, valor > 0, SKU obrigatorio, localizacao obrigatoria
 
 ### 4. Criar Interfaces de Repositorio
 
 **Arquivos**:
 - `src/main/java/com/postech/workshop_service/domain/repositories/PecaInsumoRepository.java`
+- `src/main/java/com/postech/workshop_service/domain/repositories/EstoqueRepository.java`
 - `src/main/java/com/postech/workshop_service/domain/repositories/MovimentacaoEstoqueRepository.java`
 
 ### 5. Criar Entidades JPA
 
 **Arquivos**:
 - `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/PecaInsumoJpaEntity.java`
+- `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/EstoqueJpaEntity.java`
 - `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/MovimentacaoEstoqueJpaEntity.java`
 
 **Anotacoes importantes**:
 - `@Version` para optimistic locking em `PecaInsumoJpaEntity`
-- `@OneToMany(mappedBy = "pecaInsumo", cascade = CascadeType.PERSIST)` para movimentacoes
+- `@Version` para optimistic locking em `EstoqueJpaEntity`
+- `@OneToMany(mappedBy = "pecaInsumo", cascade = CascadeType.PERSIST)` para estoques
+- `@OneToMany(mappedBy = "estoque", cascade = CascadeType.PERSIST)` para movimentacoes
 
 ### 6. Criar Mappers (MapStruct)
 
 **Arquivos**:
 - `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/PecaInsumoMapper.java`
+- `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/EstoqueMapper.java`
 - `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/MovimentacaoEstoqueMapper.java`
 
 ### 7. Criar Repositorios JPA
 
 **Arquivos**:
 - `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/PecaInsumoJpaRepository.java`
+- `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/EstoqueJpaRepository.java`
 - `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/MovimentacaoEstoqueJpaRepository.java`
 
 **Metodos customizados**:
 - `Optional<PecaInsumoJpaEntity> findBySkuAndAtivoTrue(String sku)`
-- `List<PecaInsumoJpaEntity> findByAtivoTrueAndQuantidadeEstoqueLessThanEqualEstoqueMinimo()`
-- `Page<MovimentacaoEstoqueJpaEntity> findByPecaInsumoIdOrderByDataMovimentacaoDesc(UUID pecaId, Pageable pageable)`
+- `Optional<EstoqueJpaEntity> findByPecaInsumoIdAndLocalizacao(UUID pecaId, String localizacao)`
+- `List<EstoqueJpaEntity> findByPecaInsumoId(UUID pecaId)`
+- `Page<MovimentacaoEstoqueJpaEntity> findByEstoqueIdOrderByDataMovimentacaoDesc(UUID estoqueId, Pageable pageable)`
 
 ### 8. Criar DTOs
 
@@ -81,6 +91,8 @@ touch src/main/resources/db/migration/V0.20260429220000__create_table_pecas_movi
 - `src/main/java/com/postech/workshop_service/api/dtos/CadastroPecaRequest.java`
 - `src/main/java/com/postech/workshop_service/api/dtos/AtualizarPecaRequest.java`
 - `src/main/java/com/postech/workshop_service/api/dtos/PecaResponse.java`
+- `src/main/java/com/postech/workshop_service/api/dtos/CriarEstoqueRequest.java`
+- `src/main/java/com/postech/workshop_service/api/dtos/EstoqueResponse.java`
 - `src/main/java/com/postech/workshop_service/api/dtos/MovimentacaoRequest.java`
 - `src/main/java/com/postech/workshop_service/api/dtos/MovimentacaoResponse.java`
 
@@ -99,9 +111,8 @@ touch src/main/resources/db/migration/V0.20260429220000__create_table_pecas_movi
 - `BuscarPecaPorSkuUseCase.java` - Buscar por SKU
 - `ListarPecasUseCase.java` - Listar com paginacao e filtros
 - `RemoverPecaUseCase.java` - Soft delete
+- `CriarEstoqueUseCase.java` - Criar estoque por localizacao para uma peca
 - `RegistrarMovimentacaoUseCase.java` - Entrada/saida/ajuste com validacoes
-- `ListarHistoricoMovimentacoesUseCase.java` - Historico com filtros
-- `ListarPecasEstoqueBaixoUseCase.java` - Alertas de estoque baixo
 
 ### 10. Criar Controller
 
@@ -112,11 +123,12 @@ touch src/main/resources/db/migration/V0.20260429220000__create_table_pecas_movi
 - `GET /api/v1/pecas`
 - `GET /api/v1/pecas/{id}`
 - `GET /api/v1/pecas/sku/{sku}`
-- `GET /api/v1/pecas/estoque-baixo`
 - `PUT /api/v1/pecas/{id}`
 - `DELETE /api/v1/pecas/{id}`
-- `POST /api/v1/pecas/{id}/movimentacoes`
-- `GET /api/v1/pecas/{id}/movimentacoes`
+- `POST /api/v1/pecas/estoques`
+- `GET /api/v1/estoques/{id}`
+- `GET /api/v1/estoques/peca/{pecaInsumoId}`
+- `POST /api/v1/estoques/movimentacoes`
 
 ### 11. Atualizar OpenAPI Principal
 
@@ -171,7 +183,6 @@ curl -X POST http://localhost:8080/api/v1/pecas \
   -d '{
     "sku": "FILT-001",
     "nome": "Filtro de oleo",
-    "quantidadeEstoque": 10,
     "valorUnitario": 45.90,
     "estoqueMinimo": 5,
     "unidadeMedida": "UN"
@@ -181,16 +192,23 @@ curl -X POST http://localhost:8080/api/v1/pecas \
 curl http://localhost:8080/api/v1/pecas/sku/FILT-001
 
 # Registrar entrada
-curl -X POST http://localhost:8080/api/v1/pecas/{id}/movimentacoes \
+curl -X POST http://localhost:8080/api/v1/pecas/estoques \
   -H "Content-Type: application/json" \
   -d '{
+    "pecaInsumoId": "{id}",
+    "localizacao": "Prateleira A2",
+    "quantidade": 10
+  }'
+
+# Registrar entrada
+curl -X POST http://localhost:8080/api/v1/estoques/movimentacoes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "estoqueId": "{estoqueId}",
     "tipo": "ENTRADA",
     "quantidade": 5,
     "motivo": "Reposicao"
   }'
-
-# Verificar estoque baixo
-curl http://localhost:8080/api/v1/pecas/estoque-baixo
 ```
 
 ## Checklist de Conclusao

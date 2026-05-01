@@ -5,7 +5,7 @@
 
 ## Summary
 
-Adicionar um modulo de gestao de pecas e insumos com cadastro, atualizacao, consulta paginada, busca por SKU, controle de movimentacoes de estoque (entrada, saida, ajuste) por localizacao, historico de movimentacoes, alertas de estoque baixo e remocao logica, utilizando optimistic locking para concurrencia e mantendo rastreabilidade completa das operacoes. O modelo suporta multiplas localizacoes de estoque por peca atraves da entidade Estoque.
+Adicionar um modulo de gestao de pecas e insumos com cadastro, atualizacao, consulta paginada, busca por SKU, controle basico de estoque por localizacao (entrada, saida, ajuste) e remocao logica, utilizando optimistic locking para concurrencia. O modelo permite multiplos estoques por peca, um por localizacao fisica.
 
 ## Technical Context
 
@@ -26,7 +26,7 @@ Adicionar um modulo de gestao de pecas e insumos com cadastro, atualizacao, cons
 - [x] **Idioma e Plataforma**: Implementacao planejada em Java 21 e nomenclatura/documentacao em pt-BR.
 - [x] **Padroes de Codigo**: Lombok sera usado sem expor mutadores genericos no dominio; invariantes ficarao encapsuladas em entidades e value objects.
 - [x] **Arquitetura**: Fluxo controller -> use case -> dominio -> repositorio -> JPA, sem regras de negocio em controllers ou DTOs.
-- [x] **Dominio (DDD)**: `PecaInsumo` sera aggregate root com comportamento explicito para movimentacoes e remocao logica; SKU e demais campos sensiveis ficarao com validacao no dominio.
+- [x] **Dominio (DDD)**: `PecaInsumo` sera aggregate root com comportamento explicito para movimentacoes e remocao logica; SKU e demais campos sensiveis ficarao com validacao no dominio, enquanto `Estoque` representara a quantidade por localizacao.
 - [x] **Documentacao**: Endpoints documentados em OpenAPI e implementacao prevista com Javadocs para todos os metodos publicos relevantes.
 - [x] **Testes**: Planejados testes unitarios para dominio e casos de uso, alem de integracao para controller e persistencia.
 - [x] **Validacao e Padroes de Erro**: DTOs cuidarao da validacao estrutural; regras como SKU duplicado, estoque insuficiente e valor invalido retornarao HTTP 400.
@@ -60,6 +60,7 @@ src/
 │   │   │       ├── CadastroPecaRequest.java
 │   │   │       ├── AtualizarPecaRequest.java
 │   │   │       ├── PecaResponse.java
+│   │   │       ├── PaginaPecasResponse.java
 │   │   │       ├── EstoqueResponse.java
 │   │   │       ├── MovimentacaoRequest.java
 │   │   │       └── MovimentacaoResponse.java
@@ -71,9 +72,7 @@ src/
 │   │   │   ├── ListarPecasUseCase.java
 │   │   │   ├── RemoverPecaUseCase.java
 │   │   │   ├── CriarEstoqueUseCase.java
-│   │   │   ├── RegistrarMovimentacaoUseCase.java
-│   │   │   ├── ListarHistoricoMovimentacoesUseCase.java
-│   │   │   └── ListarPecasEstoqueBaixoUseCase.java
+│   │   │   └── RegistrarMovimentacaoUseCase.java
 │   │   ├── domain/
 │   │   │   ├── entities/
 │   │   │   │   ├── PecaInsumo.java
@@ -133,8 +132,8 @@ As decisoes de pesquisa foram consolidadas em [research.md](./research.md), reso
 - [x] **Idioma e Plataforma**: Artefatos e contrato mantidos em pt-BR; stack continua Java 21.
 - [x] **Padroes de Codigo**: O desenho privilegia comportamento no dominio (`registrarEntrada`, `registrarSaida`, `ajustarEstoque`, `removerLogicamente`) em vez de setters indiscriminados.
 - [x] **Arquitetura**: A integracao entre pecas e movimentacoes ocorre por repositorio/caso de uso, sem acoplamento da API a JPA.
-- [x] **Dominio (DDD)**: A unicidade do SKU entre pecas ativas, a proibicao de estoque negativo e o controle de concorrencia ficam no dominio/aplicacao, nao no controller.
+- [x] **Dominio (DDD)**: A unicidade do SKU entre pecas ativas, a proibicao de estoque negativo, a unicidade de localizacao por peca e o controle de concorrencia ficam no dominio/aplicacao, nao no controller.
 - [x] **Documentacao**: OpenAPI cobre endpoints, filtros e payloads do MVP; Javadocs continuarao obrigatorios para todos os metodos publicos relevantes.
 - [x] **Testes**: O quickstart exige cobertura unitaria e de integracao para todas as operacoes publicas da feature.
 - [x] **Validacao e Padroes de Erro**: O contrato distingue 422 (estrutura) de 400 (negocio) e preserva 404 para recursos inexistentes.
-- [x] **Banco de Dados**: O modelo inclui tabelas `pecas_insumos`, `estoques` e `movimentacoes_estoque` com auditoria, FKs nomeadas, indices otimizados e suporte a remocao logica. Quantidade total de uma peca e calculada pela soma de seus estoques.
+- [x] **Banco de Dados**: O modelo inclui tabelas `pecas_insumos`, `estoques` e `movimentacoes_estoque` com auditoria, FKs nomeadas, indices otimizados e suporte a remocao logica. Quantidade total de uma peca e calculada pela soma dos estoques ativos vinculados.

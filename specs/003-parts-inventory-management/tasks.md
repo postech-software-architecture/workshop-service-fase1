@@ -24,9 +24,9 @@
 
 **Purpose**: Database schema and base infrastructure for parts/inventory
 
-- [ ] T001 Create Flyway migration for pecas_insumos, estoques and movimentacoes_estoque tables in `src/main/resources/db/migration/V0.20260429220000__create_table_pecas_estoques_movimentacoes.sql`
-- [ ] T002 [P] Create TipoMovimentacao enum in `src/main/java/com/postech/workshop_service/domain/valueobjects/TipoMovimentacao.java`
-- [ ] T003 [P] Create UnidadeMedida enum in `src/main/java/com/postech/workshop_service/domain/valueobjects/UnidadeMedida.java`
+- [x] T001 Create Flyway migration for pecas_insumos, estoques and movimentacoes_estoque tables in `src/main/resources/db/migration/V0.20260429220000__create_table_pecas_estoques_movimentacoes.sql`
+- [x] T002 [P] Create TipoMovimentacao enum in `src/main/java/com/postech/workshop_service/domain/valueobjects/TipoMovimentacao.java`
+- [x] T003 [P] Create UnidadeMedida enum in `src/main/java/com/postech/workshop_service/domain/valueobjects/UnidadeMedida.java`
 
 ---
 
@@ -36,24 +36,24 @@
 
 **⚠ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create PecaInsumo domain entity (without quantidadeEstoque) in `src/main/java/com/postech/workshop_service/domain/entities/PecaInsumo.java`
-- [ ] T005 [P] Create Estoque domain entity with business methods in `src/main/java/com/postech/workshop_service/domain/entities/Estoque.java`
-- [ ] T006 [P] Create MovimentacaoEstoque domain entity in `src/main/java/com/postech/workshop_service/domain/entities/MovimentacaoEstoque.java`
-- [ ] T007 [P] Create PecaInsumoRepository interface in `src/main/java/com/postech/workshop_service/domain/repositories/PecaInsumoRepository.java`
-- [ ] T008 [P] Create EstoqueRepository interface in `src/main/java/com/postech/workshop_service/domain/repositories/EstoqueRepository.java`
-- [ ] T009 [P] Create MovimentacaoEstoqueRepository interface in `src/main/java/com/postech/workshop_service/domain/repositories/MovimentacaoEstoqueRepository.java`
-- [ ] T010 Create PecaInsumoJpaEntity with optimistic locking (@Version) in `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/PecaInsumoJpaEntity.java`
-- [ ] T011 [P] Create EstoqueJpaEntity with optimistic locking in `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/EstoqueJpaEntity.java`
-- [ ] T012 [P] Create MovimentacaoEstoqueJpaEntity in `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/MovimentacaoEstoqueJpaEntity.java`
-- [ ] T013 [P] Create PecaInsumoMapper (MapStruct) in `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/PecaInsumoMapper.java`
-- [ ] T014 [P] Create EstoqueMapper (MapStruct) in `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/EstoqueMapper.java`
-- [ ] T015 [P] Create MovimentacaoEstoqueMapper (MapStruct) in `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/MovimentacaoEstoqueMapper.java`
-- [ ] T016 Create PecaInsumoJpaRepository with custom queries in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/PecaInsumoJpaRepository.java`
-- [ ] T017 [P] Create EstoqueJpaRepository with custom queries in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/EstoqueJpaRepository.java`
-- [ ] T018 [P] Create MovimentacaoEstoqueJpaRepository in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/MovimentacaoEstoqueJpaRepository.java`
-- [ ] T019 Implement PecaInsumoRepositoryImpl using JPA repository in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/PecaInsumoRepositoryImpl.java`
-- [ ] T020 [P] Implement EstoqueRepositoryImpl in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/EstoqueRepositoryImpl.java`
-- [ ] T021 [P] Implement MovimentacaoEstoqueRepositoryImpl in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/MovimentacaoEstoqueRepositoryImpl.java`
+- [x] T004 Create PecaInsumo domain entity (without quantidadeEstoque) in `src/main/java/com/postech/workshop_service/domain/entities/PecaInsumo.java`
+- [x] T005 [P] Create Estoque domain entity with business methods in `src/main/java/com/postech/workshop_service/domain/entities/Estoque.java`
+- [x] T006 [P] Create MovimentacaoEstoque domain entity in `src/main/java/com/postech/workshop_service/domain/entities/MovimentacaoEstoque.java`
+- [x] T007 [P] Create PecaInsumoRepository interface in `src/main/java/com/postech/workshop_service/domain/repositories/PecaInsumoRepository.java`
+- [x] T008 [P] Create EstoqueRepository interface in `src/main/java/com/postech/workshop_service/domain/repositories/EstoqueRepository.java`
+- [x] T009 [P] Create MovimentacaoEstoqueRepository interface in `src/main/java/com/postech/workshop_service/domain/repositories/MovimentacaoEstoqueRepository.java`
+- [x] T010 Create PecaInsumoJpaEntity with optimistic locking (@Version) in `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/PecaInsumoJpaEntity.java`
+- [x] T011 [P] Create EstoqueJpaEntity with optimistic locking in `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/EstoqueJpaEntity.java`
+- [x] T012 [P] Create MovimentacaoEstoqueJpaEntity in `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/MovimentacaoEstoqueJpaEntity.java`
+- [x] T013 [P] Create PecaInsumoMapper (MapStruct) in `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/PecaInsumoMapper.java`
+- [x] T014 [P] Create EstoqueMapper (MapStruct) in `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/EstoqueMapper.java`
+- [x] T015 [P] Create MovimentacaoEstoqueMapper (MapStruct) in `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/MovimentacaoEstoqueMapper.java`
+- [x] T016 Create PecaInsumoJpaRepository with custom queries in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/PecaInsumoJpaRepository.java`
+- [x] T017 [P] Create EstoqueJpaRepository with custom queries in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/EstoqueJpaRepository.java`
+- [x] T018 [P] Create MovimentacaoEstoqueJpaRepository in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/MovimentacaoEstoqueJpaRepository.java`
+- [x] T019 Implement PecaInsumoRepositoryImpl using JPA repository in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/PecaInsumoRepositoryImpl.java`
+- [x] T020 [P] Implement EstoqueRepositoryImpl in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/EstoqueRepositoryImpl.java`
+- [x] T021 [P] Implement MovimentacaoEstoqueRepositoryImpl in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/MovimentacaoEstoqueRepositoryImpl.java`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -73,16 +73,16 @@
 
 ### Implementation for User Story 1
 
-- [ ] T019 [P] [US1] Create CadastroPecaRequest DTO with validations in `src/main/java/com/postech/workshop_service/api/dtos/CadastroPecaRequest.java`
-- [ ] T020 [P] [US1] Create AtualizarPecaRequest DTO with validations in `src/main/java/com/postech/workshop_service/api/dtos/AtualizarPecaRequest.java`
-- [ ] T021 [P] [US1] Create PecaResponse DTO in `src/main/java/com/postech/workshop_service/api/dtos/PecaResponse.java`
-- [ ] T022 [US1] Implement CriarPecaUseCase with SKU uniqueness validation in `src/main/java/com/postech/workshop_service/application/usecases/CriarPecaUseCase.java`
-- [ ] T023 [US1] Implement AtualizarPecaUseCase with optimistic locking in `src/main/java/com/postech/workshop_service/application/usecases/AtualizarPecaUseCase.java`
-- [ ] T024 [US1] Implement BuscarPecaPorIdUseCase in `src/main/java/com/postech/workshop_service/application/usecases/BuscarPecaPorIdUseCase.java`
-- [ ] T025 [US1] Implement BuscarPecaPorSkuUseCase in `src/main/java/com/postech/workshop_service/application/usecases/BuscarPecaPorSkuUseCase.java`
-- [ ] T026 [US1] Implement ListarPecasUseCase with pagination and filters in `src/main/java/com/postech/workshop_service/application/usecases/ListarPecasUseCase.java`
-- [ ] T027 [US1] Create PecaInsumoController with CRUD endpoints in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
-- [ ] T028 [US1] Add OpenAPI documentation for pecas endpoints in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [x] T019 [P] [US1] Create CadastroPecaRequest DTO with validations in `src/main/java/com/postech/workshop_service/api/dtos/CadastroPecaRequest.java`
+- [x] T020 [P] [US1] Create AtualizarPecaRequest DTO with validations in `src/main/java/com/postech/workshop_service/api/dtos/AtualizarPecaRequest.java`
+- [x] T021 [P] [US1] Create PecaResponse DTO in `src/main/java/com/postech/workshop_service/api/dtos/PecaResponse.java`
+- [x] T022 [US1] Implement CriarPecaUseCase with SKU uniqueness validation in `src/main/java/com/postech/workshop_service/application/usecases/CriarPecaUseCase.java`
+- [x] T023 [US1] Implement AtualizarPecaUseCase with optimistic locking in `src/main/java/com/postech/workshop_service/application/usecases/AtualizarPecaUseCase.java`
+- [x] T024 [US1] Implement BuscarPecaPorIdUseCase in `src/main/java/com/postech/workshop_service/application/usecases/BuscarPecaPorIdUseCase.java`
+- [x] T025 [US1] Implement BuscarPecaPorSkuUseCase in `src/main/java/com/postech/workshop_service/application/usecases/BuscarPecaPorSkuUseCase.java`
+- [x] T026 [US1] Implement ListarPecasUseCase with pagination and filters in `src/main/java/com/postech/workshop_service/application/usecases/ListarPecasUseCase.java`
+- [x] T027 [US1] Create PecaInsumoController with CRUD endpoints in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
+- [x] T028 [US1] Add OpenAPI documentation for pecas endpoints in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
 
 **Checkpoint**: User Story 1 completo - CRUD de pecas funcional e testado independentemente
 
@@ -90,9 +90,9 @@
 
 ## Phase 4: User Story 1.5 - Criar estoques para pecas (Priority: P1) 🎯 MVP
 
-**Goal**: Permitir criar estoques (localizacoes) para pecas cadastradas, possibilitando multiplas localizacoes por peca.
+**Goal**: Permitir criar um ou mais estoques para uma peca cadastrada, um por localizacao fisica.
 
-**Independent Test**: Criar um estoque para uma peca existente com localizacao e quantidade inicial, verificando que a quantidade total da peca e calculada corretamente.
+**Independent Test**: Criar estoques para uma peca existente em localizacoes diferentes, verificando que a quantidade total da peca e calculada pela soma das localizacoes.
 
 ### Tests for User Story 1.5
 
@@ -101,21 +101,21 @@
 
 ### Implementation for User Story 1.5
 
-- [ ] T040 [P] [US1.5] Create CriarEstoqueRequest DTO with validations in `src/main/java/com/postech/workshop_service/api/dtos/CriarEstoqueRequest.java`
-- [ ] T041 [P] [US1.5] Create EstoqueResponse DTO in `src/main/java/com/postech/workshop_service/api/dtos/EstoqueResponse.java`
-- [ ] T042 [US1.5] Implement CriarEstoqueUseCase in `src/main/java/com/postech/workshop_service/application/usecases/CriarEstoqueUseCase.java`
-- [ ] T043 [US1.5] Add estoques endpoints to PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
-- [ ] T044 [US1.5] Update OpenAPI documentation for estoques endpoints in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [x] T040 [P] [US1.5] Create CriarEstoqueRequest DTO with validations in `src/main/java/com/postech/workshop_service/api/dtos/CriarEstoqueRequest.java`
+- [x] T041 [P] [US1.5] Create EstoqueResponse DTO in `src/main/java/com/postech/workshop_service/api/dtos/EstoqueResponse.java`
+- [x] T042 [US1.5] Implement CriarEstoqueUseCase in `src/main/java/com/postech/workshop_service/application/usecases/CriarEstoqueUseCase.java`
+- [x] T043 [US1.5] Add estoques endpoints to PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
+- [x] T044 [US1.5] Update OpenAPI documentation for estoques endpoints in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
 
-**Checkpoint**: User Story 1.5 completo - Estoque por localizacao funcional
+**Checkpoint**: User Story 1.5 completo - Estoques por localizacao funcionais
 
 ---
 
 ## Phase 5: User Story 2 - Controlar movimentacoes de estoque (Priority: P1) 🎯 MVP
 
-**Goal**: Registrar entradas, saidas e ajustes de estoque mantendo controle preciso da quantidade disponivel por localizacao.
+**Goal**: Registrar entradas, saidas e ajustes de estoque mantendo controle preciso da quantidade disponivel.
 
-**Independent Test**: Realizar uma entrada de estoque, uma saida e um ajuste em um estoque especifico, verificando que as quantidades sao atualizadas corretamente e o historico registra cada operacao.
+**Independent Test**: Realizar uma entrada de estoque, uma saida e um ajuste em um estoque especifico, verificando que as quantidades sao atualizadas corretamente.
 
 ### Tests for User Story 2
 
@@ -124,11 +124,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T047 [P] [US2] Create MovimentacaoRequest DTO with validations in `src/main/java/com/postech/workshop_service/api/dtos/MovimentacaoRequest.java`
-- [ ] T048 [P] [US2] Create MovimentacaoResponse DTO in `src/main/java/com/postech/workshop_service/api/dtos/MovimentacaoResponse.java`
-- [ ] T049 [US2] Implement RegistrarMovimentacaoUseCase with stock validation in `src/main/java/com/postech/workshop_service/application/usecases/RegistrarMovimentacaoUseCase.java`
-- [ ] T050 [US2] Add movimentacao endpoint to PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
-- [ ] T051 [US2] Update OpenAPI documentation for movimentacoes endpoints in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [x] T047 [P] [US2] Create MovimentacaoRequest DTO with validations in `src/main/java/com/postech/workshop_service/api/dtos/MovimentacaoRequest.java`
+- [x] T048 [P] [US2] Create MovimentacaoResponse DTO in `src/main/java/com/postech/workshop_service/api/dtos/MovimentacaoResponse.java`
+- [x] T049 [US2] Implement RegistrarMovimentacaoUseCase with stock validation in `src/main/java/com/postech/workshop_service/application/usecases/RegistrarMovimentacaoUseCase.java`
+- [x] T050 [US2] Add movimentacao endpoint to PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
+- [x] T051 [US2] Update OpenAPI documentation for movimentacoes endpoints in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
 
 **Checkpoint**: User Story 2 completo - Movimentacoes de estoque funcionais e testadas independentemente
 
@@ -136,9 +136,9 @@
 
 ## Phase 6: User Story 3 - Consultar pecas e verificar disponibilidade (Priority: P2)
 
-**Goal**: Consultar pecas por SKU, nome ou categoria e verificar disponibilidade em estoque (soma de todas as localizacoes).
+**Goal**: Consultar pecas por SKU, nome ou categoria e verificar disponibilidade em estoque.
 
-**Independent Test**: Cadastrar varias pecas com estoques em multiplas localizacoes e verificar que a busca por SKU retorna a peca correta com quantidade total calculada.
+**Independent Test**: Cadastrar varias pecas com estoque e verificar que a busca por SKU retorna a peca correta com quantidade total calculada.
 
 ### Tests for User Story 3
 
@@ -146,87 +146,44 @@
 
 ### Implementation for User Story 3
 
-- [ ] T053 [US3] Enhance ListarPecasUseCase with categoria and nome filters in `src/main/java/com/postech/workshop_service/application/usecases/ListarPecasUseCase.java`
-- [ ] T054 [US3] Add query methods to PecaInsumoJpaRepository for filters in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/PecaInsumoJpaRepository.java`
-- [ ] T055 [US3] Add filter parameters to list endpoint in PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
-- [ ] T056 [US3] Update PecaResponse to include quantidadeTotal (calculated) in `src/main/java/com/postech/workshop_service/api/dtos/PecaResponse.java`
+- [x] T053 [US3] Enhance ListarPecasUseCase with categoria and nome filters in `src/main/java/com/postech/workshop_service/application/usecases/ListarPecasUseCase.java`
+- [x] T054 [US3] Add query methods to PecaInsumoJpaRepository for filters in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/PecaInsumoJpaRepository.java`
+- [x] T055 [US3] Add filter parameters to list endpoint in PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
+- [x] T056 [US3] Update PecaResponse to include quantidadeTotal (calculated) in `src/main/java/com/postech/workshop_service/api/dtos/PecaResponse.java`
 
 **Checkpoint**: User Story 3 completo - Consultas com filtros funcionais
 
 ---
 
-## Phase 7: User Story 4 - Receber alertas de estoque baixo (Priority: P2)
+## Phase 7: User Story 4 - Remover peca do catalogo (Priority: P3)
 
-**Goal**: Consultar lista de pecas com estoque total abaixo do minimo para providenciar reposicao.
+**Goal**: Desativar pecas descontinuadas.
 
-**Independent Test**: Cadastrar pecas com estoque minimo definido, reduzir o estoque total abaixo do limite e verificar que a consulta de itens com estoque baixo retorna as pecas corretas.
+**Independent Test**: Remover uma peca e verificar que a peca desaparece das consultas ativas.
 
 ### Tests for User Story 4
 
-- [ ] T057 [P] [US4] Create integration tests for estoque baixo endpoint in `src/test/java/com/postech/workshop_service/api/controllers/PecaInsumoControllerIntegrationTest.java`
+- [ ] T057 [P] [US4] Create integration tests for soft delete endpoint in `src/test/java/com/postech/workshop_service/api/controllers/PecaInsumoControllerIntegrationTest.java`
 
 ### Implementation for User Story 4
 
-- [ ] T058 [P] [US4] Create PecaEstoqueBaixoResponse DTO in `src/main/java/com/postech/workshop_service/api/dtos/PecaEstoqueBaixoResponse.java`
-- [ ] T059 [US4] Implement ListarPecasEstoqueBaixoUseCase in `src/main/java/com/postech/workshop_service/application/usecases/ListarPecasEstoqueBaixoUseCase.java`
-- [ ] T060 [US4] Add estoque-baixo query method to PecaInsumoJpaRepository (using view or subquery) in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/PecaInsumoJpaRepository.java`
-- [ ] T061 [US4] Add estoque-baixo endpoint to PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
-- [ ] T062 [US4] Update OpenAPI documentation for estoque-baixo endpoint in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [x] T058 [US4] Implement RemoverPecaUseCase with soft delete in `src/main/java/com/postech/workshop_service/application/usecases/RemoverPecaUseCase.java`
+- [x] T059 [US4] Add delete endpoint to PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
 
-**Checkpoint**: User Story 4 completo - Alertas de estoque baixo funcionais
+**Checkpoint**: User Story 4 completo - Remocao logica funcional
 
 ---
 
-## Phase 8: User Story 5 - Consultar historico de movimentacoes (Priority: P3)
-
-**Goal**: Consultar o historico completo de movimentacoes de um estoque especifico para rastrear entradas, saidas e ajustes.
-
-**Independent Test**: Realizar algumas movimentacoes em um estoque e verificar que o historico lista todas as operacoes com data, tipo, quantidade e motivo.
-
-### Tests for User Story 5
-
-- [ ] T063 [P] [US5] Create integration tests for historico endpoint in `src/test/java/com/postech/workshop_service/api/controllers/PecaInsumoControllerIntegrationTest.java`
-
-### Implementation for User Story 5
-
-- [ ] T064 [US5] Implement ListarHistoricoMovimentacoesUseCase with filters in `src/main/java/com/postech/workshop_service/application/usecases/ListarHistoricoMovimentacoesUseCase.java`
-- [ ] T065 [US5] Add historico query methods to MovimentacaoEstoqueJpaRepository in `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/MovimentacaoEstoqueJpaRepository.java`
-- [ ] T066 [US5] Add historico endpoint to PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
-- [ ] T067 [US5] Update OpenAPI documentation for historico endpoint in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-
-**Checkpoint**: User Story 5 completo - Historico de movimentacoes funcional
-
----
-
-## Phase 9: User Story 6 - Remover peca do catalogo (Priority: P3)
-
-**Goal**: Desativar pecas descontinuadas preservando o historico de movimentacoes.
-
-**Independent Test**: Tentar remover uma peca sem estoques (sucesso) e uma com estoques/movimentacoes (soft delete), verificando que a peca desaparece das consultas ativas mas o historico permanece acessivel.
-
-### Tests for User Story 6
-
-- [ ] T068 [P] [US6] Create integration tests for soft delete endpoint in `src/test/java/com/postech/workshop_service/api/controllers/PecaInsumoControllerIntegrationTest.java`
-
-### Implementation for User Story 6
-
-- [ ] T069 [US6] Implement RemoverPecaUseCase with soft delete in `src/main/java/com/postech/workshop_service/application/usecases/RemoverPecaUseCase.java`
-- [ ] T070 [US6] Add delete endpoint to PecaInsumoController in `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
-
-**Checkpoint**: User Story 6 completo - Remocao logica funcional
-
----
-
-## Phase 10: Polish & Cross-Cutting Concerns
+## Phase 8: Polish & Cross-Cutting Concerns
 
 **Purpose**: Final improvements and validation
 
-- [ ] T071 Add Javadoc to all public methods in domain entities
-- [ ] T072 [P] Add Javadoc to all public methods in use cases
-- [ ] T073 [P] Add Javadoc to all public methods in controller
-- [ ] T074 Run JaCoCo coverage report and verify >= 80% coverage
-- [ ] T075 Run quickstart.md validation scenarios
-- [ ] T076 Final code review and cleanup
+- [ ] T060 Add Javadoc to all public methods in domain entities
+- [ ] T061 [P] Add Javadoc to all public methods in use cases
+- [ ] T062 [P] Add Javadoc to all public methods in controller
+- [ ] T063 Run JaCoCo coverage report and verify >= 80% coverage
+- [ ] T064 Run quickstart.md validation scenarios
+- [ ] T065 Final code review and cleanup
 
 ---
 
@@ -236,15 +193,13 @@
 
 - **Setup (Phase 1)**: No dependencies - can start immediately
 - **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
-- **User Stories (Phase 3-9)**: All depend on Foundational phase completion
+- **User Stories (Phase 3-7)**: All depend on Foundational phase completion
   - US1 (P1): Peca CRUD
   - US1.5 (P1): Estoque creation - depends on US1
   - US2 (P1): Movimentacoes - depends on US1.5
   - US3 (P2): Consultas - depends on US1
-  - US4 (P2): Alertas - depends on US1 + US1.5
-  - US5 (P3): Historico - depends on US2
-  - US6 (P3): Remocao - depends on US1
-- **Polish (Phase 10)**: Depends on all user stories being complete
+  - US4 (P3): Remocao - depends on US1
+- **Polish (Phase 8)**: Depends on all user stories being complete
 
 ### User Story Dependencies
 
@@ -252,9 +207,7 @@
 - **US1.5 (P1)**: Depends on US1 (needs PecaInsumo to exist)
 - **US2 (P1)**: Depends on US1.5 (needs Estoque to exist)
 - **US3 (P2)**: Can start after Foundational - Uses endpoints from US1
-- **US4 (P2)**: Depends on US1 + US1.5 (needs estoques with quantities)
-- **US5 (P3)**: Depends on US2 (needs MovimentacaoEstoque)
-- **US6 (P3)**: Can start after Foundational - Uses PecaInsumo from US1
+- **US4 (P3)**: Can start after Foundational - Uses PecaInsumo from US1
 
 ### Within Each User Story
 

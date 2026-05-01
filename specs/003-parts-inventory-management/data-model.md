@@ -2,13 +2,13 @@
 
 **Feature**: 003-parts-inventory-management  
 **Date**: 2026-04-29  
-**Updated**: 2026-04-29 (adicao da entidade Estoques)
+**Updated**: 2026-04-30 (estoque por localizacao)
 
 ## Entities
 
 ### PecaInsumo (Aggregate Root)
 
-**Description**: Item utilizado nos servicos da oficina, identificado por SKU unico. Nao armazena quantidade total (delegado a entidade Estoques).
+**Description**: Item utilizado nos servicos da oficina, identificado por SKU unico. Nao armazena quantidade diretamente (delegado a entidade Estoques).
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
@@ -16,8 +16,9 @@
 | sku | VARCHAR(50) | NOT NULL, UNIQUE (ativo) | Codigo unico da peca |
 | nome | VARCHAR(200) | NOT NULL | Nome/descricao da peca |
 | valorUnitario | DECIMAL(10,2) | NOT NULL, > 0 | Preco unitario |
-| estoqueMinimo | DECIMAL(10,3) | NOT NULL, >= 0 | Nivel de alerta para reposicao (soma de todos os estoques) |
+| estoqueMinimo | DECIMAL(10,3) | NOT NULL, >= 0 | Nivel minimo de estoque |
 | unidadeMedida | VARCHAR(10) | NOT NULL | Unidade: UN, L, KG, M, ML, CX, PC |
+| tipoItem | VARCHAR(20) | NOT NULL | Tipo principal: PECA ou INSUMO |
 | fornecedor | VARCHAR(200) | NULLABLE | Nome do fornecedor |
 | codigoBarras | VARCHAR(50) | NULLABLE | Codigo de barras |
 | marca | VARCHAR(100) | NULLABLE | Marca/fabricante |
@@ -137,6 +138,7 @@ CREATE TABLE pecas_insumos (
     valor_unitario DECIMAL(10,2) NOT NULL,
     estoque_minimo DECIMAL(10,3) NOT NULL DEFAULT 0,
     unidade_medida VARCHAR(10) NOT NULL,
+    tipo_item VARCHAR(20) NOT NULL,
     fornecedor VARCHAR(200),
     codigo_barras VARCHAR(50),
     marca VARCHAR(100),
@@ -159,8 +161,9 @@ COMMENT ON COLUMN pecas_insumos.id IS 'Identificador unico da peca';
 COMMENT ON COLUMN pecas_insumos.sku IS 'Codigo SKU unico entre pecas ativas';
 COMMENT ON COLUMN pecas_insumos.nome IS 'Nome ou descricao da peca';
 COMMENT ON COLUMN pecas_insumos.valor_unitario IS 'Preco unitario da peca';
-COMMENT ON COLUMN pecas_insumos.estoque_minimo IS 'Nivel minimo para alerta de reposicao (soma de todos os estoques)';
+COMMENT ON COLUMN pecas_insumos.estoque_minimo IS 'Nivel minimo de estoque';
 COMMENT ON COLUMN pecas_insumos.unidade_medida IS 'Unidade de medida: UN, L, KG, M, ML, CX, PC';
+COMMENT ON COLUMN pecas_insumos.tipo_item IS 'Tipo principal do item: PECA ou INSUMO';
 COMMENT ON COLUMN pecas_insumos.ativo IS 'Indicador de peca ativa no catalogo';
 COMMENT ON COLUMN pecas_insumos.versao IS 'Versao para controle de concurrencia (optimistic locking)';
 
@@ -224,23 +227,6 @@ CREATE INDEX idx_pecas_insumos_sku ON pecas_insumos(sku);
 CREATE INDEX idx_pecas_insumos_ativo ON pecas_insumos(ativo);
 CREATE INDEX idx_pecas_insumos_categoria ON pecas_insumos(categoria);
 
--- View para consulta de pecas com quantidade total
-CREATE VIEW vw_pecas_com_estoque_total AS
-SELECT 
-    p.id,
-    p.sku,
-    p.nome,
-    p.valor_unitario,
-    p.estoque_minimo,
-    p.unidade_medida,
-    p.categoria,
-    p.ativo,
-    COALESCE(SUM(e.quantidade), 0) AS quantidade_total
-FROM pecas_insumos p
-LEFT JOIN estoques e ON e.peca_insumo_id = p.id AND e.ativo = true
-GROUP BY p.id;
-
-COMMENT ON VIEW vw_pecas_com_estoque_total IS 'View para consulta de pecas com quantidade total calculada';
 ```
 
 ## Index Strategy
