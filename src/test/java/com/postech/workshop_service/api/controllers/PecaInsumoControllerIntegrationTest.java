@@ -74,7 +74,7 @@ class PecaInsumoControllerIntegrationTest extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/pecas").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
-			.andExpect(status().isBadRequest());
+			.andExpect(status().isUnprocessableEntity());
 	}
 
 	@Test

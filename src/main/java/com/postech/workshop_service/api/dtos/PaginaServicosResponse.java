@@ -9,16 +9,16 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * Resposta paginada contendo veiculos.
+ * Resposta paginada contendo servicos.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Resposta paginada contendo veículos")
-public class PaginaVeiculosResponse {
+@Schema(description = "Resposta paginada contendo serviços")
+public class PaginaServicosResponse {
 
-	private List<VeiculoResponse> conteudo;
+	private List<ServicoResponse> conteudo;
 
 	private int pagina;
 

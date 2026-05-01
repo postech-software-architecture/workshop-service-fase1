@@ -86,16 +86,17 @@ class ClienteControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void shouldReturn422WhenDocumentoIsInvalid() throws Exception {
+	void shouldReturn400WhenDocumentoIsInvalid() throws Exception {
 		CadastroClienteRequest request = new CadastroClienteRequest();
 		request.setNome("Maria DB");
-		request.setDocumento("123"); // Inválido
+		request.setDocumento("123"); // Invalido — Documento value object lanca
+										// IllegalArgumentException
 		request.setEmail("maria@db.com");
 
 		mockMvc
 			.perform(post("/api/v1/clientes").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
-			.andExpect(status().isUnprocessableEntity());
+			.andExpect(status().isBadRequest());
 	}
 
 }

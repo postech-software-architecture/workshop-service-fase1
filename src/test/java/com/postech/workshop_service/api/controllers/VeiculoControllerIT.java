@@ -110,7 +110,7 @@ class VeiculoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void shouldReturn400WhenPlateIsInvalid() throws Exception {
+	void shouldReturn422WhenPlateIsInvalid() throws Exception {
 		UUID clienteA = criarCliente("Cliente Erro", "11144477735");
 
 		CadastroVeiculoRequest cadastro = CadastroVeiculoRequest.builder()
@@ -124,11 +124,11 @@ class VeiculoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/veiculos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isBadRequest());
+			.andExpect(status().isUnprocessableEntity());
 	}
 
 	@Test
-	void shouldReturn422WhenClientesListIsEmpty() throws Exception {
+	void shouldReturn400WhenClientesListIsEmpty() throws Exception {
 		CadastroVeiculoRequest cadastro = CadastroVeiculoRequest.builder()
 			.placa("BRA1D23")
 			.marca("Toyota")
@@ -140,11 +140,11 @@ class VeiculoControllerIT extends PostgresTestContainer {
 		mockMvc
 			.perform(post("/api/v1/veiculos").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isUnprocessableEntity());
+			.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	void shouldReturn400WhenTryingToRemoveLastCliente() throws Exception {
+	void shouldReturn422WhenTryingToRemoveLastCliente() throws Exception {
 		UUID clienteA = criarCliente("Cliente Unico", "98712345628");
 
 		CadastroVeiculoRequest cadastro = CadastroVeiculoRequest.builder()
@@ -165,7 +165,7 @@ class VeiculoControllerIT extends PostgresTestContainer {
 			.fromString(objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asText());
 
 		mockMvc.perform(delete("/api/v1/veiculos/{id}/clientes/{clienteId}", veiculoId, clienteA))
-			.andExpect(status().isBadRequest());
+			.andExpect(status().isUnprocessableEntity());
 	}
 
 	private UUID criarCliente(String nome, String documento) {

@@ -1,41 +1,43 @@
 package com.postech.workshop_service.api.dtos;
 
+import com.postech.workshop_service.domain.enums.CategoriaServico;
+import com.postech.workshop_service.domain.enums.NivelComplexidade;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 /**
- * Resposta detalhada do veiculo.
+ * Resposta detalhada do servico.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Dados detalhados do veículo")
-public class VeiculoResponse {
+@Schema(description = "Dados detalhados do serviço")
+public class ServicoResponse {
 
 	@Schema(example = "550e8400-e29b-41d4-a716-446655440000")
 	private UUID id;
 
-	private String placa;
+	private String nome;
 
-	private String marca;
+	private String descricao;
 
-	private String modelo;
+	private BigDecimal valor;
 
-	private int ano;
+	private CategoriaServico categoria;
 
-	private String cor;
+	private NivelComplexidade nivelComplexidade;
 
-	private String observacoes;
+	private Integer garantiaDias;
 
-	private List<ClienteVinculadoResponse> clientes;
+	private String observacoesTecnicas;
 
 	private boolean ativo;
 

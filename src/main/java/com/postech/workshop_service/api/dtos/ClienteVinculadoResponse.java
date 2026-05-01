@@ -15,13 +15,13 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Cliente vinculado ao veiculo")
+@Schema(description = "Cliente vinculado ao veículo")
 public class ClienteVinculadoResponse {
 
 	@Schema(example = "550e8400-e29b-41d4-a716-446655440000")
 	private UUID id;
 
-	@Schema(example = "Joao da Silva")
+	@Schema(example = "João da Silva")
 	private String nome;
 
 	@Schema(example = "***.654.321-**")

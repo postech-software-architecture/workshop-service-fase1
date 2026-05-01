@@ -34,7 +34,7 @@ public class VincularClienteVeiculoUseCase {
 	@Transactional
 	public Veiculo executar(UUID veiculoId, UUID clienteId) {
 		Veiculo veiculo = veiculoRepository.buscarPorId(veiculoId, true)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Veículo não encontrado com o ID informado."));
 
 		if (clienteRepository.buscarPorId(clienteId, false).isEmpty()) {
 			throw new RegraDeNegocioException("O cliente informado deve existir previamente.");
