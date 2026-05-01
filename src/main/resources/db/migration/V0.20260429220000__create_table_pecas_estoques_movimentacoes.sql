@@ -1,6 +1,6 @@
 -- Tabela de pecas/insumos
 CREATE TABLE pecas_insumos (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     sku VARCHAR(50) NOT NULL,
     nome VARCHAR(200) NOT NULL,
     valor_unitario DECIMAL(10,2) NOT NULL,
@@ -39,7 +39,7 @@ COMMENT ON COLUMN pecas_insumos.versao IS 'Versao para controle de concurrencia 
 
 -- Tabela de estoques (localizacoes)
 CREATE TABLE estoques (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     peca_insumo_id UUID NOT NULL,
     localizacao VARCHAR(100) NOT NULL,
     quantidade DECIMAL(10,3) NOT NULL DEFAULT 0,
@@ -66,7 +66,7 @@ COMMENT ON COLUMN estoques.versao IS 'Versao para controle de concurrencia (opti
 
 -- Tabela de movimentacoes de estoque
 CREATE TABLE movimentacoes_estoque (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     estoque_id UUID NOT NULL,
     tipo VARCHAR(20) NOT NULL,
     quantidade DECIMAL(10,3) NOT NULL,
