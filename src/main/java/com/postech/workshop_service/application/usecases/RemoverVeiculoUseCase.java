@@ -30,7 +30,7 @@ public class RemoverVeiculoUseCase {
 	@Transactional
 	public void executar(UUID id) {
 		var veiculo = veiculoRepository.buscarPorId(id, true)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Veículo não encontrado com o ID informado."));
 		veiculo.removerLogicamente();
 		veiculoRepository.salvar(veiculo);
 	}

@@ -30,7 +30,7 @@ public class DesvincularClienteVeiculoUseCase {
 	@Transactional
 	public Veiculo executar(UUID veiculoId, UUID clienteId) {
 		Veiculo veiculo = veiculoRepository.buscarPorId(veiculoId, true)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Veículo não encontrado com o ID informado."));
 
 		try {
 			veiculo.desvincularCliente(clienteId);

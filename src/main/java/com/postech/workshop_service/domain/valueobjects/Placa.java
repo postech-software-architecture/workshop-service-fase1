@@ -23,7 +23,7 @@ public final class Placa {
 	 */
 	public Placa(String valorOriginal) {
 		if (valorOriginal == null || valorOriginal.trim().isEmpty()) {
-			throw new IllegalArgumentException("A placa do veiculo e obrigatoria.");
+			throw new IllegalArgumentException("A placa do veículo é obrigatória.");
 		}
 
 		String normalizada = valorOriginal.replaceAll("[^A-Za-z0-9]", "").toUpperCase();

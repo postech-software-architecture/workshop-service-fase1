@@ -50,7 +50,7 @@ public class CriarVeiculoUseCase {
 			validarClientes(clientesIds);
 
 			if (veiculoRepository.existePlacaAtiva(placa.getValor(), null)) {
-				throw new RegraDeNegocioException("Ja existe um veiculo ativo cadastrado com a placa informada.");
+				throw new RegraDeNegocioException("Já existe um veículo ativo cadastrado com a placa informada.");
 			}
 
 			Veiculo veiculo = new Veiculo(null, placa, marca, modelo, ano, cor, observacoes, clientesIds);
@@ -67,7 +67,7 @@ public class CriarVeiculoUseCase {
 
 	private void validarClientes(List<UUID> clientesIds) {
 		if (clientesIds == null || clientesIds.isEmpty()) {
-			throw new RegraDeNegocioException("O veiculo deve possuir ao menos um cliente vinculado.");
+			throw new RegraDeNegocioException("O veículo deve possuir ao menos um cliente vinculado.");
 		}
 		for (UUID clienteId : clientesIds) {
 			if (clienteRepository.buscarPorId(clienteId, false).isEmpty()) {

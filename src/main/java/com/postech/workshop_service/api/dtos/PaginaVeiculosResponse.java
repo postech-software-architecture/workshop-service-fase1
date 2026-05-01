@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Resposta paginada contendo veiculos")
+@Schema(description = "Resposta paginada contendo veículos")
 public class PaginaVeiculosResponse {
 
 	private List<VeiculoResponse> conteudo;

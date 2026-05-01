@@ -1,0 +1,482 @@
+openapi: 3.0.3
+info:
+  title: Workshop Service API - Pecas, Insumos e Estoques
+  description: Endpoints para cadastro de pecas/insumos, controle de estoque por localizacao e movimentacoes basicas.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local
+
+security: []
+
+paths:
+  /api/v1/pecas:
+    post:
+      tags: [Pecas]
+      summary: Cadastrar peca ou insumo
+      operationId: criarPeca
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroPecaRequest'
+      responses:
+        '201':
+          description: Peca cadastrada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '400':
+          description: Erro de regra de negocio
+        '422':
+          description: Erro de validacao estrutural no payload
+    get:
+      tags: [Pecas]
+      summary: Listar pecas com paginacao e filtros
+      operationId: listarPecas
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: categoria
+          in: query
+          schema:
+            type: string
+        - name: nome
+          in: query
+          schema:
+            type: string
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Pagina de pecas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaPecasResponse'
+
+  /api/v1/pecas/{id}:
+    get:
+      tags: [Pecas]
+      summary: Buscar peca por ID
+      operationId: buscarPecaPorId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Peca encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '404':
+          description: Peca nao encontrada
+    put:
+      tags: [Pecas]
+      summary: Atualizar dados de uma peca
+      operationId: atualizarPeca
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarPecaRequest'
+      responses:
+        '200':
+          description: Peca atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '400':
+          description: Erro de regra de negocio
+        '404':
+          description: Peca nao encontrada
+        '422':
+          description: Erro de validacao estrutural no payload
+    delete:
+      tags: [Pecas]
+      summary: Remover peca do catalogo
+      operationId: removerPeca
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Peca removida logicamente
+        '404':
+          description: Peca nao encontrada
+
+  /api/v1/pecas/sku/{sku}:
+    get:
+      tags: [Pecas]
+      summary: Buscar peca por SKU
+      operationId: buscarPecaPorSku
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Peca encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PecaResponse'
+        '404':
+          description: Peca nao encontrada
+
+  /api/v1/pecas/estoques:
+    post:
+      tags: [Estoques]
+      summary: Criar estoque para uma peca
+      operationId: criarEstoque
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriarEstoqueRequest'
+      responses:
+        '201':
+          description: Estoque criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstoqueResponse'
+        '400':
+          description: Erro de regra de negocio
+        '422':
+          description: Erro de validacao estrutural no payload
+
+  /api/v1/estoques/{id}:
+    get:
+      tags: [Estoques]
+      summary: Buscar estoque por ID
+      operationId: buscarEstoquePorId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Estoque encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstoqueResponse'
+        '404':
+          description: Estoque nao encontrado
+
+  /api/v1/estoques/peca/{pecaInsumoId}:
+    get:
+      tags: [Estoques]
+      summary: Listar estoques de uma peca
+      operationId: listarEstoquesPorPeca
+      parameters:
+        - name: pecaInsumoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Estoques da peca
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EstoqueResponse'
+
+  /api/v1/estoques/movimentacoes:
+    post:
+      tags: [Movimentacoes]
+      summary: Registrar movimentacao de estoque
+      operationId: registrarMovimentacao
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MovimentacaoRequest'
+      responses:
+        '201':
+          description: Movimentacao registrada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovimentacaoResponse'
+        '400':
+          description: Erro de regra de negocio
+        '422':
+          description: Erro de validacao estrutural no payload
+
+components:
+  schemas:
+    CadastroPecaRequest:
+      type: object
+      required: [sku, nome, valorUnitario, estoqueMinimo, unidadeMedida, tipoItem]
+      properties:
+        sku:
+          type: string
+          maxLength: 50
+          example: FIL-001
+        nome:
+          type: string
+          maxLength: 200
+          example: Filtro de oleo
+        valorUnitario:
+          type: number
+          format: decimal
+          exclusiveMinimum: 0
+          example: 45.90
+        estoqueMinimo:
+          type: number
+          format: decimal
+          minimum: 0
+          example: 5
+        unidadeMedida:
+          type: string
+          enum: [UN, L, KG, M, ML, CX, PC]
+          example: UN
+        tipoItem:
+          type: string
+          enum: [PECA, INSUMO]
+          example: PECA
+        fornecedor:
+          type: string
+        codigoBarras:
+          type: string
+        marca:
+          type: string
+        categoria:
+          type: string
+        aplicacao:
+          type: string
+        observacoes:
+          type: string
+
+    AtualizarPecaRequest:
+      type: object
+      required: [nome, valorUnitario, estoqueMinimo, unidadeMedida, tipoItem]
+      properties:
+        nome:
+          type: string
+          maxLength: 200
+        valorUnitario:
+          type: number
+          format: decimal
+          exclusiveMinimum: 0
+        estoqueMinimo:
+          type: number
+          format: decimal
+          minimum: 0
+        unidadeMedida:
+          type: string
+          enum: [UN, L, KG, M, ML, CX, PC]
+        tipoItem:
+          type: string
+          enum: [PECA, INSUMO]
+        fornecedor:
+          type: string
+        codigoBarras:
+          type: string
+        marca:
+          type: string
+        categoria:
+          type: string
+        aplicacao:
+          type: string
+        observacoes:
+          type: string
+
+    PecaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        nome:
+          type: string
+        valorUnitario:
+          type: number
+          format: decimal
+        estoqueMinimo:
+          type: number
+          format: decimal
+        unidadeMedida:
+          type: string
+        tipoItem:
+          type: string
+        quantidadeTotal:
+          type: number
+          format: decimal
+        ativo:
+          type: boolean
+        versao:
+          type: integer
+
+    PaginaPecasResponse:
+      type: object
+      properties:
+        conteudo:
+          type: array
+          items:
+            $ref: '#/components/schemas/PecaResponse'
+        pagina:
+          type: integer
+        tamanho:
+          type: integer
+        totalElementos:
+          type: integer
+          format: int64
+        totalPaginas:
+          type: integer
+
+    CriarEstoqueRequest:
+      type: object
+      required: [pecaInsumoId, quantidade]
+      properties:
+        pecaInsumoId:
+          type: string
+          format: uuid
+        quantidade:
+          type: number
+          format: decimal
+          minimum: 0
+
+    EstoqueResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        pecaInsumoId:
+          type: string
+          format: uuid
+        quantidade:
+          type: number
+          format: decimal
+        ativo:
+          type: boolean
+        versao:
+          type: integer
+
+    MovimentacaoRequest:
+      type: object
+      required: [estoqueId, tipo, quantidade]
+      properties:
+        estoqueId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          enum: [ENTRADA, SAIDA, AJUSTE]
+        quantidade:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Para AJUSTE, representa o novo saldo absoluto. Para ENTRADA/SAIDA, deve ser maior que zero.
+        motivo:
+          type: string
+          maxLength: 500
+
+    MovimentacaoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        estoqueId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+        quantidade:
+          type: number
+          format: decimal
+        quantidadeAnterior:
+          type: number
+          format: decimal
+        quantidadePosterior:
+          type: number
+          format: decimal
+        motivo:
+          type: string
+        dataMovimentacao:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string

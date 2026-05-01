@@ -102,7 +102,7 @@ public class Veiculo extends EntidadeBase {
 	public void vincularCliente(UUID clienteId) {
 		validarClienteNaoNulo(clienteId);
 		if (!this.clientesVinculados.add(clienteId)) {
-			throw new IllegalArgumentException("O cliente informado ja esta vinculado ao veiculo.");
+			throw new IllegalArgumentException("O cliente informado já está vinculado ao veículo.");
 		}
 		atualizarDataUltimaAtualizacao();
 	}
@@ -114,10 +114,10 @@ public class Veiculo extends EntidadeBase {
 	public void desvincularCliente(UUID clienteId) {
 		validarClienteNaoNulo(clienteId);
 		if (!this.clientesVinculados.contains(clienteId)) {
-			throw new IllegalArgumentException("O cliente informado nao esta vinculado ao veiculo.");
+			throw new IllegalArgumentException("O cliente informado não está vinculado ao veículo.");
 		}
 		if (this.clientesVinculados.size() == 1) {
-			throw new IllegalArgumentException("O veiculo deve possuir ao menos um cliente vinculado.");
+			throw new IllegalArgumentException("O veículo deve possuir ao menos um cliente vinculado.");
 		}
 		this.clientesVinculados.remove(clienteId);
 		atualizarDataUltimaAtualizacao();
@@ -136,14 +136,14 @@ public class Veiculo extends EntidadeBase {
 
 	private void aplicarDados(Placa placa, String marca, String modelo, int ano, String cor, String observacoes) {
 		if (placa == null) {
-			throw new IllegalArgumentException("A placa do veiculo e obrigatoria.");
+			throw new IllegalArgumentException("A placa do veículo é obrigatória.");
 		}
 		if (ano < ANO_MINIMO || ano > LocalDateTime.now().getYear()) {
-			throw new IllegalArgumentException("O ano do veiculo esta fora da faixa permitida.");
+			throw new IllegalArgumentException("O ano do veículo está fora da faixa permitida.");
 		}
 		this.placa = placa;
-		this.marca = sanitizarObrigatorio(marca, "A marca do veiculo e obrigatoria.");
-		this.modelo = sanitizarObrigatorio(modelo, "O modelo do veiculo e obrigatorio.");
+		this.marca = sanitizarObrigatorio(marca, "A marca do veículo é obrigatória.");
+		this.modelo = sanitizarObrigatorio(modelo, "O modelo do veículo é obrigatório.");
 		this.ano = ano;
 		this.cor = sanitizarOpcional(cor);
 		this.observacoes = sanitizarOpcional(observacoes);
@@ -159,13 +159,13 @@ public class Veiculo extends EntidadeBase {
 
 	private void validarClienteNaoNulo(UUID clienteId) {
 		if (clienteId == null) {
-			throw new IllegalArgumentException("Nao e permitido informar cliente nulo no vinculo do veiculo.");
+			throw new IllegalArgumentException("Não é permitido informar cliente nulo no vínculo do veículo.");
 		}
 	}
 
 	private void definirClientesIniciais(Collection<UUID> clientesVinculados) {
 		if (clientesVinculados == null || clientesVinculados.isEmpty()) {
-			throw new IllegalArgumentException("O veiculo deve possuir ao menos um cliente vinculado.");
+			throw new IllegalArgumentException("O veículo deve possuir ao menos um cliente vinculado.");
 		}
 
 		LinkedHashSet<UUID> conjunto = new LinkedHashSet<>();
@@ -175,7 +175,7 @@ public class Veiculo extends EntidadeBase {
 		}
 
 		if (conjunto.size() != clientesVinculados.size()) {
-			throw new IllegalArgumentException("Nao e permitido repetir clientes vinculados ao mesmo veiculo.");
+			throw new IllegalArgumentException("Não é permitido repetir clientes vinculados ao mesmo veículo.");
 		}
 
 		this.clientesVinculados.addAll(conjunto);

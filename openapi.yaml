@@ -1,0 +1,1215 @@
+openapi: 3.1.0
+info:
+  title: Workshop Service API
+  description: |
+    API REST de gestao de oficina mecanica.
+
+    Domínios cobertos:
+    - **Clientes** — cadastro, atualização e consulta de clientes (PF/PJ).
+    - **Veiculos** — cadastro, atualização, vínculo com clientes, consulta por placa, listagem por cliente.
+    - **Servicos** — catálogo de serviços oferecidos (CRUD, filtros, tempo médio).
+
+    Convenção de status HTTP:
+    - `200 OK` — leitura/atualização bem-sucedida.
+    - `201 Created` — recurso criado.
+    - `204 No Content` — soft delete bem-sucedido.
+    - `400 Bad Request` — payload inválido, JSON malformado, parâmetro inválido (Bean Validation).
+    - `404 Not Found` — recurso não encontrado.
+    - `405 Method Not Allowed` — verbo HTTP não suportado pelo recurso.
+    - `422 Unprocessable Entity` — violação de regra de negócio (ex.: duplicação de nome único).
+    - `500 Internal Server Error` — falha não prevista.
+    - `503 Service Unavailable` — falha de acesso ao banco de dados.
+  version: 0.0.1-SNAPSHOT
+  contact:
+    name: postech-software-architecture
+    url: https://github.com/postech-software-architecture/workshop-service-fase1
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: http://localhost:8080
+    description: Ambiente de desenvolvimento local
+  - url: 'https://{host}'
+    description: Ambiente customizável
+    variables:
+      host:
+        default: workshop.example.com
+        description: Hostname do ambiente alvo
+
+tags:
+  - name: Clientes
+    description: Gerenciamento de clientes (PF/PJ) da oficina
+  - name: Veiculos
+    description: Gerenciamento de veículos e seus vínculos com clientes
+  - name: Servicos
+    description: Catálogo de serviços oferecidos pela oficina
+
+security: []
+
+paths:
+  /api/v1/clientes:
+    post:
+      tags: [Clientes]
+      operationId: clientesCriar
+      summary: Cadastrar um novo cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroClienteRequest'
+      responses:
+        '201':
+          description: Cliente cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    get:
+      tags: [Clientes]
+      operationId: clientesListar
+      summary: Listar clientes com paginacao
+      parameters:
+        - $ref: '#/components/parameters/paginaQuery'
+        - $ref: '#/components/parameters/tamanhoQuery'
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Lista de clientes paginada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClienteResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/clientes/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idPath'
+    get:
+      tags: [Clientes]
+      operationId: clientesBuscarPorId
+      summary: Buscar cliente por identificador
+      parameters:
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '404':
+          description: Cliente não encontrado
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    put:
+      tags: [Clientes]
+      operationId: clientesAtualizar
+      summary: Atualizar dados de um cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarClienteRequest'
+      responses:
+        '200':
+          description: Cliente atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    delete:
+      tags: [Clientes]
+      operationId: clientesRemover
+      summary: Remover (soft delete) um cliente
+      responses:
+        '204':
+          description: Cliente removido logicamente
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/clientes/documento/{documento}:
+    parameters:
+      - name: documento
+        in: path
+        required: true
+        description: CPF (11 dígitos) ou CNPJ (14 dígitos), com ou sem máscara.
+        schema:
+          type: string
+          example: '12345678901'
+    get:
+      tags: [Clientes]
+      operationId: clientesBuscarPorDocumento
+      summary: Buscar cliente por CPF ou CNPJ
+      parameters:
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '404':
+          description: Cliente não encontrado
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/veiculos:
+    post:
+      tags: [Veiculos]
+      operationId: veiculosCriar
+      summary: Cadastrar um novo veiculo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroVeiculoRequest'
+      responses:
+        '201':
+          description: Veículo cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    get:
+      tags: [Veiculos]
+      operationId: veiculosListar
+      summary: Listar veículos com paginação e filtros
+      parameters:
+        - $ref: '#/components/parameters/paginaQuery'
+        - $ref: '#/components/parameters/tamanhoQuery'
+        - name: placa
+          in: query
+          required: false
+          description: Filtro parcial pela placa do veículo
+          schema:
+            type: string
+            example: BRA1D
+        - name: clienteId
+          in: query
+          required: false
+          description: Filtra veículos vinculados ao cliente informado
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Lista paginada de veículos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaVeiculosResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/veiculos/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idPath'
+    get:
+      tags: [Veiculos]
+      operationId: veiculosBuscarPorId
+      summary: Buscar veículo por identificador
+      parameters:
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Veículo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    put:
+      tags: [Veiculos]
+      operationId: veiculosAtualizar
+      summary: Atualizar dados de um veiculo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarVeiculoRequest'
+      responses:
+        '200':
+          description: Veículo atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    delete:
+      tags: [Veiculos]
+      operationId: veiculosRemover
+      summary: Remover (soft delete) um veiculo
+      responses:
+        '204':
+          description: Veículo removido logicamente
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/veiculos/{id}/clientes/{clienteId}:
+    parameters:
+      - $ref: '#/components/parameters/idPath'
+      - name: clienteId
+        in: path
+        required: true
+        description: Identificador do cliente
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags: [Veiculos]
+      operationId: veiculosVincularCliente
+      summary: Vincular cliente a um veiculo
+      responses:
+        '200':
+          description: Veículo com vínculo atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    delete:
+      tags: [Veiculos]
+      operationId: veiculosDesvincularCliente
+      summary: Desvincular cliente de um veiculo
+      responses:
+        '200':
+          description: Veículo com vínculo atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/veiculos/placa/{placa}:
+    parameters:
+      - name: placa
+        in: path
+        required: true
+        description: 'Placa do veiculo (ex.: BRA1D23)'
+        schema:
+          type: string
+          example: BRA1D23
+    get:
+      tags: [Veiculos]
+      operationId: veiculosBuscarPorPlaca
+      summary: Buscar veículo por placa
+      parameters:
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Veículo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeiculoResponse'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/veiculos/cliente/{clienteId}:
+    parameters:
+      - name: clienteId
+        in: path
+        required: true
+        description: Identificador do cliente
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Veiculos]
+      operationId: veiculosListarPorCliente
+      summary: Listar veiculos vinculados a um cliente
+      parameters:
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Lista de veículos do cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VeiculoResponse'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/servicos:
+    post:
+      tags: [Servicos]
+      operationId: servicosCriar
+      summary: Cadastrar um novo serviço no catálogo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroServicoRequest'
+      responses:
+        '201':
+          description: Serviço cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicoResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    get:
+      tags: [Servicos]
+      operationId: servicosListar
+      summary: Listar serviços com paginação e filtros
+      parameters:
+        - $ref: '#/components/parameters/paginaQuery'
+        - $ref: '#/components/parameters/tamanhoQuery'
+        - name: nome
+          in: query
+          required: false
+          description: Filtro parcial pelo nome do serviço
+          schema:
+            type: string
+            example: oleo
+        - name: categoria
+          in: query
+          required: false
+          description: Filtro pela categoria do serviço
+          schema:
+            $ref: '#/components/schemas/CategoriaServico'
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Lista paginada de serviços
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaServicosResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/servicos/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idPath'
+    get:
+      tags: [Servicos]
+      operationId: servicosBuscarPorId
+      summary: Buscar serviço por identificador
+      parameters:
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Serviço encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicoResponse'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    put:
+      tags: [Servicos]
+      operationId: servicosAtualizar
+      summary: Atualizar serviço do catálogo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarServicoRequest'
+      responses:
+        '200':
+          description: Serviço atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicoResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+    delete:
+      tags: [Servicos]
+      operationId: servicosRemover
+      summary: Remover serviço logicamente
+      responses:
+        '204':
+          description: Serviço removido logicamente
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/servicos/categoria/{categoria}:
+    parameters:
+      - name: categoria
+        in: path
+        required: true
+        description: Categoria do servico
+        schema:
+          $ref: '#/components/schemas/CategoriaServico'
+    get:
+      tags: [Servicos]
+      operationId: servicosListarPorCategoria
+      summary: Listar serviços por categoria
+      parameters:
+        - $ref: '#/components/parameters/incluirInativosQuery'
+      responses:
+        '200':
+          description: Lista de serviços da categoria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServicoResponse'
+        '400':
+          $ref: '#/components/responses/Response400BadRequest'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+  /api/v1/servicos/{id}/reativar:
+    parameters:
+      - $ref: '#/components/parameters/idPath'
+    post:
+      tags: [Servicos]
+      operationId: servicosReativar
+      summary: Reativar serviço previamente removido
+      description: |
+        Reativa logicamente um servico que havia sido removido (soft delete).
+        Operacao idempotente: se o servico ja estiver ativo, retorna 200 com o estado atual.
+        Falha com 422 se outro servico ativo estiver usando o mesmo nome.
+      responses:
+        '200':
+          description: Serviço reativado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicoResponse'
+        '404':
+          $ref: '#/components/responses/Response404NotFound'
+        '422':
+          $ref: '#/components/responses/Response422UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/Response500InternalServerError'
+
+components:
+  parameters:
+    idPath:
+      name: id
+      in: path
+      required: true
+      description: Identificador único do recurso (UUID)
+      schema:
+        type: string
+        format: uuid
+        example: 550e8400-e29b-41d4-a716-446655440000
+
+    paginaQuery:
+      name: pagina
+      in: query
+      required: false
+      description: Número da página (zero-based)
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+        example: 0
+
+    tamanhoQuery:
+      name: tamanho
+      in: query
+      required: false
+      description: Quantidade de registros por página
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 20
+        example: 20
+
+    incluirInativosQuery:
+      name: incluirInativos
+      in: query
+      required: false
+      description: Se verdadeiro, inclui registros logicamente removidos no resultado
+      schema:
+        type: boolean
+        default: false
+
+  responses:
+    Response400BadRequest:
+      description: Requisição inválida — payload mal formado ou validação de campo (Bean Validation)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            campoObrigatorio:
+              summary: Campo obrigatório ausente
+              value:
+                timestamp: '2026-04-29T22:00:00Z'
+                status: 400
+                error: Bad Request
+                message: 'Erro de validação estrutural no payload.'
+                path: /api/v1/servicos
+                fieldErrors:
+                  - field: nome
+                    message: 'O nome e obrigatorio'
+
+    Response404NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            recursoInexistente:
+              summary: ID inexistente
+              value:
+                timestamp: '2026-04-29T22:00:00Z'
+                status: 404
+                error: Not Found
+                message: 'Serviço não encontrado com o ID informado.'
+                path: /api/v1/servicos/00000000-0000-0000-0000-000000000000
+
+    Response422UnprocessableEntity:
+      description: Violação de regra de negócio
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            nomeDuplicado:
+              summary: Nome já existente em registro ativo
+              value:
+                timestamp: '2026-04-29T22:00:00Z'
+                status: 422
+                error: Unprocessable Entity
+                message: 'Já existe um serviço ativo cadastrado com o nome informado.'
+                path: /api/v1/servicos
+
+    Response405MethodNotAllowed:
+      description: Método HTTP não suportado pelo recurso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            metodoNaoPermitido:
+              summary: Verbo HTTP não suportado
+              value:
+                timestamp: '2026-04-29T22:00:00Z'
+                status: 405
+                error: Method Not Allowed
+                message: 'Método PATCH não suportado neste recurso. Métodos permitidos: [GET, PUT, DELETE].'
+                path: /api/v1/servicos/00000000-0000-0000-0000-000000000000
+
+    Response500InternalServerError:
+      description: Erro interno não previsto
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            erroGenerico:
+              summary: Falha inesperada
+              value:
+                timestamp: '2026-04-29T22:00:00Z'
+                status: 500
+                error: Internal Server Error
+                message: 'Ocorreu um erro interno no servidor.'
+                path: /api/v1/servicos
+
+    Response503ServiceUnavailable:
+      description: 'Serviço temporariamente indisponível (ex.: banco de dados fora do ar)'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            bancoIndisponivel:
+              summary: Falha de acesso ao banco de dados
+              value:
+                timestamp: '2026-04-29T22:00:00Z'
+                status: 503
+                error: Service Unavailable
+                message: 'Serviço de banco de dados temporariamente indisponível. Tente novamente em alguns instantes.'
+                path: /api/v1/servicos
+
+  schemas:
+    ErrorResponse:
+      type: object
+      description: Payload padrão para erros HTTP
+      required: [timestamp, status, error, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Data e hora do erro
+        status:
+          type: integer
+          description: Código HTTP do erro
+          example: 400
+        error:
+          type: string
+          description: Reason phrase do status HTTP
+          example: Bad Request
+        message:
+          type: string
+          description: Mensagem amigável do erro
+        path:
+          type: string
+          description: URI requisitado quando o erro ocorreu
+        fieldErrors:
+          type: array
+          description: Detalhes por campo (presente em erros de validação)
+          items:
+            $ref: '#/components/schemas/FieldErrorDetail'
+
+    FieldErrorDetail:
+      type: object
+      required: [field, message]
+      properties:
+        field:
+          type: string
+          description: Nome do campo que falhou na validação
+          example: nome
+        message:
+          type: string
+          description: Mensagem de erro específica do campo
+          example: 'O nome e obrigatorio'
+
+    CategoriaServico:
+      type: string
+      description: Categoria de serviço oferecida pela oficina
+      enum: [MECANICA, ELETRICA, ESTETICA, PREVENTIVA]
+      example: MECANICA
+
+    NivelComplexidade:
+      type: string
+      description: Nível de complexidade do serviço
+      enum: [BAIXA, MEDIA, ALTA]
+      example: BAIXA
+
+    EnderecoDTO:
+      type: object
+      description: Dados de endereço do cliente
+      properties:
+        logradouro:
+          type:
+            - string
+            - 'null'
+          example: Avenida Paulista
+        numero:
+          type:
+            - string
+            - 'null'
+          example: '1000'
+        complemento:
+          type:
+            - string
+            - 'null'
+          example: Apto 101
+        bairro:
+          type:
+            - string
+            - 'null'
+          example: Bela Vista
+        cidade:
+          type:
+            - string
+            - 'null'
+          example: Sao Paulo
+        estado:
+          type:
+            - string
+            - 'null'
+          example: SP
+        cep:
+          type:
+            - string
+            - 'null'
+          example: 01310-100
+
+    CadastroClienteRequest:
+      type: object
+      required: [nome, documento]
+      properties:
+        nome:
+          type: string
+          minLength: 1
+          description: Nome completo (PF) ou razao social (PJ)
+          example: Joao da Silva
+        documento:
+          type: string
+          minLength: 1
+          description: CPF (11 digitos) ou CNPJ (14 digitos), com ou sem mascara
+          example: '12345678901'
+        email:
+          type:
+            - string
+            - 'null'
+          format: email
+          example: joao@email.com
+        telefone:
+          type:
+            - string
+            - 'null'
+          example: (11) 99999-9999
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+        dataNascimentoFundacao:
+          type:
+            - string
+            - 'null'
+          format: date
+          example: '1990-01-01'
+        observacoes:
+          type:
+            - string
+            - 'null'
+          example: Cliente prefere contato via WhatsApp
+
+    AtualizarClienteRequest:
+      type: object
+      required: [nome]
+      properties:
+        nome:
+          type: string
+          minLength: 1
+          example: Joao da Silva Sauro
+        email:
+          type:
+            - string
+            - 'null'
+          format: email
+          example: joao.sauro@email.com
+        telefone:
+          type:
+            - string
+            - 'null'
+          example: (11) 98888-8888
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+        dataNascimentoFundacao:
+          type:
+            - string
+            - 'null'
+          format: date
+          example: '1990-01-01'
+        observacoes:
+          type:
+            - string
+            - 'null'
+          example: Cliente VIP
+
+    ClienteResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        nome:
+          type: string
+          example: Joao da Silva
+        documento:
+          type: string
+          description: Documento mascarado (LGPD)
+          example: '***.456.789-**'
+        email:
+          type:
+            - string
+            - 'null'
+          format: email
+        telefone:
+          type:
+            - string
+            - 'null'
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+        dataNascimentoFundacao:
+          type:
+            - string
+            - 'null'
+          format: date
+        observacoes:
+          type:
+            - string
+            - 'null'
+        ativo:
+          type: boolean
+          example: true
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+        dataRemocao:
+          type:
+            - string
+            - 'null'
+          format: date-time
+
+    CadastroVeiculoRequest:
+      type: object
+      required: [placa, marca, modelo, ano, clientesIds]
+      properties:
+        placa:
+          type: string
+          minLength: 1
+          maxLength: 10
+          description: Placa antes da normalização (limite de 10 caracteres)
+          example: BRA1D23
+        marca:
+          type: string
+          minLength: 1
+          maxLength: 60
+          example: Toyota
+        modelo:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: Corolla
+        ano:
+          type: integer
+          minimum: 1900
+          maximum: 3000
+          example: 2020
+        clientesIds:
+          type: array
+          minItems: 1
+          description: Identificadores dos clientes vinculados ao veículo
+          items:
+            type: string
+            format: uuid
+          example:
+            - 550e8400-e29b-41d4-a716-446655440000
+        cor:
+          type:
+            - string
+            - 'null'
+          maxLength: 30
+          example: Prata
+        observacoes:
+          type:
+            - string
+            - 'null'
+          maxLength: 2000
+          example: Veiculo compartilhado entre familiares
+
+    AtualizarVeiculoRequest:
+      type: object
+      required: [placa, marca, modelo, ano]
+      properties:
+        placa:
+          type: string
+          minLength: 1
+          maxLength: 10
+          example: BRA1D23
+        marca:
+          type: string
+          minLength: 1
+          maxLength: 60
+          example: Toyota
+        modelo:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: Corolla
+        ano:
+          type: integer
+          minimum: 1900
+          maximum: 3000
+          example: 2020
+        cor:
+          type:
+            - string
+            - 'null'
+          maxLength: 30
+          example: Prata
+        observacoes:
+          type:
+            - string
+            - 'null'
+          maxLength: 2000
+
+    ClienteVinculadoResponse:
+      type: object
+      description: Resumo do cliente vinculado a um veículo
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        nome:
+          type: string
+          example: Joao da Silva
+        documentoMascarado:
+          type: string
+          example: '***.654.321-**'
+
+    VeiculoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        placa:
+          type: string
+          example: BRA1D23
+        marca:
+          type: string
+        modelo:
+          type: string
+        ano:
+          type: integer
+        cor:
+          type:
+            - string
+            - 'null'
+        observacoes:
+          type:
+            - string
+            - 'null'
+        clientes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClienteVinculadoResponse'
+        ativo:
+          type: boolean
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+        dataRemocao:
+          type:
+            - string
+            - 'null'
+          format: date-time
+
+    PaginaVeiculosResponse:
+      type: object
+      required: [conteudo, pagina, tamanho, totalElementos, totalPaginas]
+      properties:
+        conteudo:
+          type: array
+          items:
+            $ref: '#/components/schemas/VeiculoResponse'
+        pagina:
+          type: integer
+          minimum: 0
+          example: 0
+        tamanho:
+          type: integer
+          minimum: 1
+          example: 20
+        totalElementos:
+          type: integer
+          format: int64
+          example: 42
+        totalPaginas:
+          type: integer
+          minimum: 0
+          example: 3
+
+    CadastroServicoRequest:
+      type: object
+      required: [nome, descricao, valor]
+      properties:
+        nome:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Nome do serviço (único entre os ativos)
+          example: Troca de oleo
+        descricao:
+          type: string
+          minLength: 1
+          example: Substituicao do oleo do motor e filtro de oleo
+        valor:
+          type: number
+          multipleOf: 0.01
+          exclusiveMinimum: 0
+          description: Valor monetário decimal maior que zero
+          example: 150.00
+        categoria:
+          $ref: '#/components/schemas/CategoriaServico'
+        nivelComplexidade:
+          $ref: '#/components/schemas/NivelComplexidade'
+        garantiaDias:
+          type:
+            - integer
+            - 'null'
+          exclusiveMinimum: 0
+          example: 30
+        observacoesTecnicas:
+          type:
+            - string
+            - 'null'
+          example: Utilizar oleo sintetico 5W30 conforme manual do fabricante
+
+    AtualizarServicoRequest:
+      type: object
+      required: [nome, descricao, valor]
+      properties:
+        nome:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Troca de oleo
+        descricao:
+          type: string
+          minLength: 1
+          example: Substituicao do oleo do motor e filtro de oleo
+        valor:
+          type: number
+          multipleOf: 0.01
+          exclusiveMinimum: 0
+          example: 150.00
+        categoria:
+          $ref: '#/components/schemas/CategoriaServico'
+        nivelComplexidade:
+          $ref: '#/components/schemas/NivelComplexidade'
+        garantiaDias:
+          type:
+            - integer
+            - 'null'
+          exclusiveMinimum: 0
+        observacoesTecnicas:
+          type:
+            - string
+            - 'null'
+
+    ServicoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        descricao:
+          type: string
+        valor:
+          type: number
+          example: 150.00
+        categoria:
+          $ref: '#/components/schemas/CategoriaServico'
+        nivelComplexidade:
+          $ref: '#/components/schemas/NivelComplexidade'
+        garantiaDias:
+          type:
+            - integer
+            - 'null'
+        observacoesTecnicas:
+          type:
+            - string
+            - 'null'
+        ativo:
+          type: boolean
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+        dataRemocao:
+          type:
+            - string
+            - 'null'
+          format: date-time
+
+    PaginaServicosResponse:
+      type: object
+      required: [conteudo, pagina, tamanho, totalElementos, totalPaginas]
+      properties:
+        conteudo:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServicoResponse'
+        pagina:
+          type: integer
+          minimum: 0
+        tamanho:
+          type: integer
+          minimum: 1
+        totalElementos:
+          type: integer
+          format: int64
+        totalPaginas:
+          type: integer
+          minimum: 0
+

@@ -32,6 +32,8 @@ Java 21: Follow standard conventions
 - 005-json-shortname-budget: Added Java 21 + Spring Boot 3.4.1, Spring Data JPA, Spring Validation, Spring Security, Lombok, Flyway, MapStruct
 - 004-orcamento-ordem-servico: Added Java 21 + Spring Boot 3.4.1, Lombok, Spring Validation, Spring Data JPA, Flyway, MapStruct
 - 003-ordem-servico-base: Added Java 21 + Spring Boot 3.4.1, Lombok, Spring Validation, Spring Data JPA, Flyway, MapStruct
+- 003-parts-inventory-management: Added Java 21 + Spring Boot 3.4.1, Spring Web, Spring Data JPA, Spring Validation, Spring Security, SpringDoc OpenAPI, Lombok, MapStruct, Flyway
+- 002-vehicle-management: Added full vehicle management with customer links, paginated queries and logical removal
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
