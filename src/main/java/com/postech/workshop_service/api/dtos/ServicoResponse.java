@@ -19,7 +19,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Dados detalhados do servico")
+@Schema(description = "Dados detalhados do serviço")
 public class ServicoResponse {
 
 	@Schema(example = "550e8400-e29b-41d4-a716-446655440000")

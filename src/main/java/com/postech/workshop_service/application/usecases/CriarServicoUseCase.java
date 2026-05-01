@@ -44,7 +44,7 @@ public class CriarServicoUseCase {
 			String observacoesTecnicas) {
 		try {
 			if (servicoRepository.existeNomeAtivo(nome, null)) {
-				throw new RegraDeNegocioException("Ja existe um servico ativo cadastrado com o nome informado.");
+				throw new RegraDeNegocioException("Já existe um serviço ativo cadastrado com o nome informado.");
 			}
 
 			Servico servico = new Servico(null, nome, descricao, valor, tempoEstimadoMinutos, categoria,

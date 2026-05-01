@@ -29,7 +29,7 @@ servers:
   - url: http://localhost:8080
     description: Ambiente de desenvolvimento local
   - url: 'https://{host}'
-    description: Ambiente customizavel
+    description: Ambiente customizável
     variables:
       host:
         default: workshop.example.com
@@ -39,9 +39,9 @@ tags:
   - name: Clientes
     description: Gerenciamento de clientes (PF/PJ) da oficina
   - name: Veiculos
-    description: Gerenciamento de veiculos e seus vinculos com clientes
+    description: Gerenciamento de veículos e seus vínculos com clientes
   - name: Servicos
-    description: Catalogo de servicos oferecidos pela oficina
+    description: Catálogo de serviços oferecidos pela oficina
 
 security: []
 
@@ -189,7 +189,7 @@ paths:
               $ref: '#/components/schemas/CadastroVeiculoRequest'
       responses:
         '201':
-          description: Veiculo cadastrado com sucesso
+          description: Veículo cadastrado com sucesso
           content:
             application/json:
               schema:
@@ -203,28 +203,28 @@ paths:
     get:
       tags: [Veiculos]
       operationId: veiculosListar
-      summary: Listar veiculos com paginacao e filtros
+      summary: Listar veículos com paginação e filtros
       parameters:
         - $ref: '#/components/parameters/paginaQuery'
         - $ref: '#/components/parameters/tamanhoQuery'
         - name: placa
           in: query
           required: false
-          description: Filtro parcial pela placa do veiculo
+          description: Filtro parcial pela placa do veículo
           schema:
             type: string
             example: BRA1D
         - name: clienteId
           in: query
           required: false
-          description: Filtra veiculos vinculados ao cliente informado
+          description: Filtra veículos vinculados ao cliente informado
           schema:
             type: string
             format: uuid
         - $ref: '#/components/parameters/incluirInativosQuery'
       responses:
         '200':
-          description: Lista paginada de veiculos
+          description: Lista paginada de veículos
           content:
             application/json:
               schema:
@@ -240,12 +240,12 @@ paths:
     get:
       tags: [Veiculos]
       operationId: veiculosBuscarPorId
-      summary: Buscar veiculo por identificador
+      summary: Buscar veículo por identificador
       parameters:
         - $ref: '#/components/parameters/incluirInativosQuery'
       responses:
         '200':
-          description: Veiculo encontrado
+          description: Veículo encontrado
           content:
             application/json:
               schema:
@@ -266,7 +266,7 @@ paths:
               $ref: '#/components/schemas/AtualizarVeiculoRequest'
       responses:
         '200':
-          description: Veiculo atualizado com sucesso
+          description: Veículo atualizado com sucesso
           content:
             application/json:
               schema:
@@ -285,7 +285,7 @@ paths:
       summary: Remover (soft delete) um veiculo
       responses:
         '204':
-          description: Veiculo removido logicamente
+          description: Veículo removido logicamente
         '404':
           $ref: '#/components/responses/Response404NotFound'
         '500':
@@ -307,7 +307,7 @@ paths:
       summary: Vincular cliente a um veiculo
       responses:
         '200':
-          description: Veiculo com vinculo atualizado
+          description: Veículo com vínculo atualizado
           content:
             application/json:
               schema:
@@ -324,7 +324,7 @@ paths:
       summary: Desvincular cliente de um veiculo
       responses:
         '200':
-          description: Veiculo com vinculo atualizado
+          description: Veículo com vínculo atualizado
           content:
             application/json:
               schema:
@@ -348,12 +348,12 @@ paths:
     get:
       tags: [Veiculos]
       operationId: veiculosBuscarPorPlaca
-      summary: Buscar veiculo por placa
+      summary: Buscar veículo por placa
       parameters:
         - $ref: '#/components/parameters/incluirInativosQuery'
       responses:
         '200':
-          description: Veiculo encontrado
+          description: Veículo encontrado
           content:
             application/json:
               schema:
@@ -380,7 +380,7 @@ paths:
         - $ref: '#/components/parameters/incluirInativosQuery'
       responses:
         '200':
-          description: Lista de veiculos do cliente
+          description: Lista de veículos do cliente
           content:
             application/json:
               schema:
@@ -396,7 +396,7 @@ paths:
     post:
       tags: [Servicos]
       operationId: servicosCriar
-      summary: Cadastrar um novo servico no catalogo
+      summary: Cadastrar um novo serviço no catálogo
       requestBody:
         required: true
         content:
@@ -405,7 +405,7 @@ paths:
               $ref: '#/components/schemas/CadastroServicoRequest'
       responses:
         '201':
-          description: Servico cadastrado com sucesso
+          description: Serviço cadastrado com sucesso
           content:
             application/json:
               schema:
@@ -419,27 +419,27 @@ paths:
     get:
       tags: [Servicos]
       operationId: servicosListar
-      summary: Listar servicos com paginacao e filtros
+      summary: Listar serviços com paginação e filtros
       parameters:
         - $ref: '#/components/parameters/paginaQuery'
         - $ref: '#/components/parameters/tamanhoQuery'
         - name: nome
           in: query
           required: false
-          description: Filtro parcial pelo nome do servico
+          description: Filtro parcial pelo nome do serviço
           schema:
             type: string
             example: oleo
         - name: categoria
           in: query
           required: false
-          description: Filtro pela categoria do servico
+          description: Filtro pela categoria do serviço
           schema:
             $ref: '#/components/schemas/CategoriaServico'
         - $ref: '#/components/parameters/incluirInativosQuery'
       responses:
         '200':
-          description: Lista paginada de servicos
+          description: Lista paginada de serviços
           content:
             application/json:
               schema:
@@ -455,12 +455,12 @@ paths:
     get:
       tags: [Servicos]
       operationId: servicosBuscarPorId
-      summary: Buscar servico por identificador
+      summary: Buscar serviço por identificador
       parameters:
         - $ref: '#/components/parameters/incluirInativosQuery'
       responses:
         '200':
-          description: Servico encontrado
+          description: Serviço encontrado
           content:
             application/json:
               schema:
@@ -472,7 +472,7 @@ paths:
     put:
       tags: [Servicos]
       operationId: servicosAtualizar
-      summary: Atualizar servico do catalogo
+      summary: Atualizar serviço do catálogo
       requestBody:
         required: true
         content:
@@ -481,7 +481,7 @@ paths:
               $ref: '#/components/schemas/AtualizarServicoRequest'
       responses:
         '200':
-          description: Servico atualizado com sucesso
+          description: Serviço atualizado com sucesso
           content:
             application/json:
               schema:
@@ -497,10 +497,10 @@ paths:
     delete:
       tags: [Servicos]
       operationId: servicosRemover
-      summary: Remover servico logicamente
+      summary: Remover serviço logicamente
       responses:
         '204':
-          description: Servico removido logicamente
+          description: Serviço removido logicamente
         '404':
           $ref: '#/components/responses/Response404NotFound'
         '500':
@@ -517,12 +517,12 @@ paths:
     get:
       tags: [Servicos]
       operationId: servicosListarPorCategoria
-      summary: Listar servicos por categoria
+      summary: Listar serviços por categoria
       parameters:
         - $ref: '#/components/parameters/incluirInativosQuery'
       responses:
         '200':
-          description: Lista de servicos da categoria
+          description: Lista de serviços da categoria
           content:
             application/json:
               schema:
@@ -540,14 +540,14 @@ paths:
     get:
       tags: [Servicos]
       operationId: servicosBuscarTempoMedio
-      summary: Buscar tempo medio de execucao do servico
+      summary: Buscar tempo médio de execução do serviço
       description: |
         Retorna o tempo estimado e o tempo medio real de execucao do servico.
         Atualmente o `tempoMedioRealMinutos` retorna `null` ate a entrega da
         funcionalidade de Ordens de Servico (issue #5).
       responses:
         '200':
-          description: Tempo medio do servico
+          description: Tempo médio do serviço
           content:
             application/json:
               schema:
@@ -563,14 +563,14 @@ paths:
     post:
       tags: [Servicos]
       operationId: servicosReativar
-      summary: Reativar servico previamente removido
+      summary: Reativar serviço previamente removido
       description: |
         Reativa logicamente um servico que havia sido removido (soft delete).
         Operacao idempotente: se o servico ja estiver ativo, retorna 200 com o estado atual.
         Falha com 422 se outro servico ativo estiver usando o mesmo nome.
       responses:
         '200':
-          description: Servico reativado
+          description: Serviço reativado
           content:
             application/json:
               schema:
@@ -588,7 +588,7 @@ components:
       name: id
       in: path
       required: true
-      description: Identificador unico do recurso (UUID)
+      description: Identificador único do recurso (UUID)
       schema:
         type: string
         format: uuid
@@ -598,7 +598,7 @@ components:
       name: pagina
       in: query
       required: false
-      description: Numero da pagina (zero-based)
+      description: Número da página (zero-based)
       schema:
         type: integer
         minimum: 0
@@ -609,7 +609,7 @@ components:
       name: tamanho
       in: query
       required: false
-      description: Quantidade de registros por pagina
+      description: Quantidade de registros por página
       schema:
         type: integer
         minimum: 1
@@ -628,26 +628,26 @@ components:
 
   responses:
     Response400BadRequest:
-      description: Requisicao invalida — payload mal formado ou validacao de campo (Bean Validation)
+      description: Requisição inválida — payload mal formado ou validação de campo (Bean Validation)
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
             campoObrigatorio:
-              summary: Campo obrigatorio ausente
+              summary: Campo obrigatório ausente
               value:
                 timestamp: '2026-04-29T22:00:00Z'
                 status: 400
                 error: Bad Request
-                message: 'Erro de validacao estrutural no payload.'
+                message: 'Erro de validação estrutural no payload.'
                 path: /api/v1/servicos
                 fieldErrors:
                   - field: nome
                     message: 'O nome e obrigatorio'
 
     Response404NotFound:
-      description: Recurso nao encontrado
+      description: Recurso não encontrado
       content:
         application/json:
           schema:
@@ -659,27 +659,27 @@ components:
                 timestamp: '2026-04-29T22:00:00Z'
                 status: 404
                 error: Not Found
-                message: 'Servico nao encontrado com o ID informado.'
+                message: 'Serviço não encontrado com o ID informado.'
                 path: /api/v1/servicos/00000000-0000-0000-0000-000000000000
 
     Response422UnprocessableEntity:
-      description: Violacao de regra de negocio
+      description: Violação de regra de negócio
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           examples:
             nomeDuplicado:
-              summary: Nome ja existente em registro ativo
+              summary: Nome já existente em registro ativo
               value:
                 timestamp: '2026-04-29T22:00:00Z'
                 status: 422
                 error: Unprocessable Entity
-                message: 'Ja existe um servico ativo cadastrado com o nome informado.'
+                message: 'Já existe um serviço ativo cadastrado com o nome informado.'
                 path: /api/v1/servicos
 
     Response500InternalServerError:
-      description: Erro interno nao previsto
+      description: Erro interno não previsto
       content:
         application/json:
           schema:
@@ -697,7 +697,7 @@ components:
   schemas:
     ErrorResponse:
       type: object
-      description: Payload padrao para erros HTTP
+      description: Payload padrão para erros HTTP
       required: [timestamp, status, error, message, path]
       properties:
         timestamp:
@@ -706,7 +706,7 @@ components:
           description: Data e hora do erro
         status:
           type: integer
-          description: Codigo HTTP do erro
+          description: Código HTTP do erro
           example: 400
         error:
           type: string
@@ -714,13 +714,13 @@ components:
           example: Bad Request
         message:
           type: string
-          description: Mensagem amigavel do erro
+          description: Mensagem amigável do erro
         path:
           type: string
           description: URI requisitado quando o erro ocorreu
         fieldErrors:
           type: array
-          description: Detalhes por campo (presente em erros de validacao)
+          description: Detalhes por campo (presente em erros de validação)
           items:
             $ref: '#/components/schemas/FieldErrorDetail'
 
@@ -730,28 +730,28 @@ components:
       properties:
         field:
           type: string
-          description: Nome do campo que falhou na validacao
+          description: Nome do campo que falhou na validação
           example: nome
         message:
           type: string
-          description: Mensagem de erro especifica do campo
+          description: Mensagem de erro específica do campo
           example: 'O nome e obrigatorio'
 
     CategoriaServico:
       type: string
-      description: Categoria de servico oferecida pela oficina
+      description: Categoria de serviço oferecida pela oficina
       enum: [MECANICA, ELETRICA, ESTETICA, PREVENTIVA]
       example: MECANICA
 
     NivelComplexidade:
       type: string
-      description: Nivel de complexidade do servico
+      description: Nível de complexidade do serviço
       enum: [BAIXA, MEDIA, ALTA]
       example: BAIXA
 
     EnderecoDTO:
       type: object
-      description: Dados de endereco do cliente
+      description: Dados de endereço do cliente
       properties:
         logradouro:
           type:
@@ -918,7 +918,7 @@ components:
           type: string
           minLength: 1
           maxLength: 10
-          description: Placa antes da normalizacao (limite de 10 caracteres)
+          description: Placa antes da normalização (limite de 10 caracteres)
           example: BRA1D23
         marca:
           type: string
@@ -938,7 +938,7 @@ components:
         clientesIds:
           type: array
           minItems: 1
-          description: Identificadores dos clientes vinculados ao veiculo
+          description: Identificadores dos clientes vinculados ao veículo
           items:
             type: string
             format: uuid
@@ -995,7 +995,7 @@ components:
 
     ClienteVinculadoResponse:
       type: object
-      description: Resumo do cliente vinculado a um veiculo
+      description: Resumo do cliente vinculado a um veículo
       properties:
         id:
           type: string
@@ -1082,7 +1082,7 @@ components:
           type: string
           minLength: 1
           maxLength: 100
-          description: Nome do servico (unico entre os ativos)
+          description: Nome do serviço (único entre os ativos)
           example: Troca de oleo
         descricao:
           type: string
@@ -1091,7 +1091,7 @@ components:
         valor:
           type: string
           pattern: '^\d+(\.\d{1,2})?$'
-          description: Valor monetario maior que zero (BigDecimal serializado como string para preservar precisao)
+          description: Valor monetário maior que zero (BigDecimal serializado como string para preservar precisão)
           example: '150.00'
         tempoEstimadoMinutos:
           type: integer
@@ -1226,7 +1226,7 @@ components:
           type:
             - integer
             - 'null'
-          description: Tempo medio real em minutos; null quando nao disponivel
+          description: Tempo médio real em minutos; null quando não disponível
         disponivelAPartirDe:
           type:
             - string

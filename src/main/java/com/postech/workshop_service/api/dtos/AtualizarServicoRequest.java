@@ -21,24 +21,24 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Dados para atualizacao de um servico existente no catalogo")
+@Schema(description = "Dados para atualização de um serviço existente no catálogo")
 public class AtualizarServicoRequest {
 
-	@NotBlank(message = "O nome e obrigatorio")
-	@Size(max = 100, message = "O nome deve possuir no maximo 100 caracteres")
-	@Schema(example = "Troca de oleo")
+	@NotBlank(message = "O nome é obrigatório")
+	@Size(max = 100, message = "O nome deve possuir no máximo 100 caracteres")
+	@Schema(example = "Troca de óleo")
 	private String nome;
 
-	@NotBlank(message = "A descricao e obrigatoria")
-	@Schema(example = "Substituicao do oleo do motor e filtro de oleo")
+	@NotBlank(message = "A descrição é obrigatória")
+	@Schema(example = "Substituição do óleo do motor e filtro de óleo")
 	private String descricao;
 
-	@NotNull(message = "O valor e obrigatorio")
+	@NotNull(message = "O valor é obrigatório")
 	@Positive(message = "O valor deve ser maior que zero")
 	@Schema(example = "150.00")
 	private BigDecimal valor;
 
-	@NotNull(message = "O tempo estimado e obrigatorio")
+	@NotNull(message = "O tempo estimado é obrigatório")
 	@Positive(message = "O tempo estimado deve ser maior que zero")
 	@Schema(example = "60")
 	private Integer tempoEstimadoMinutos;
@@ -53,7 +53,7 @@ public class AtualizarServicoRequest {
 	@Schema(example = "30")
 	private Integer garantiaDias;
 
-	@Schema(example = "Utilizar oleo sintetico 5W30 conforme manual do fabricante")
+	@Schema(example = "Utilizar óleo sintético 5W30 conforme manual do fabricante")
 	private String observacoesTecnicas;
 
 }

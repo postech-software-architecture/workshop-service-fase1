@@ -126,13 +126,13 @@ public class Servico extends EntidadeBase {
 	private void aplicarDados(String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos,
 			CategoriaServico categoria, NivelComplexidade nivelComplexidade, Integer garantiaDias,
 			String observacoesTecnicas) {
-		this.nome = sanitizarObrigatorio(nome, "O nome do servico e obrigatorio.");
-		this.descricao = sanitizarObrigatorio(descricao, "A descricao do servico e obrigatoria.");
+		this.nome = sanitizarObrigatorio(nome, "O nome do serviço é obrigatório.");
+		this.descricao = sanitizarObrigatorio(descricao, "A descrição do serviço é obrigatória.");
 		if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
-			throw new IllegalArgumentException("O valor do servico deve ser maior que zero.");
+			throw new IllegalArgumentException("O valor do serviço deve ser maior que zero.");
 		}
 		if (tempoEstimadoMinutos <= 0) {
-			throw new IllegalArgumentException("O tempo estimado do servico deve ser maior que zero.");
+			throw new IllegalArgumentException("O tempo estimado do serviço deve ser maior que zero.");
 		}
 		if (garantiaDias != null && garantiaDias <= 0) {
 			throw new IllegalArgumentException("A garantia em dias deve ser maior que zero quando informada.");

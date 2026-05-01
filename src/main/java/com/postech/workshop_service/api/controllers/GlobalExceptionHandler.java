@@ -90,7 +90,7 @@ public class GlobalExceptionHandler {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.BAD_REQUEST.value())
 			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-			.message("Erro de validacao estrutural no payload.")
+			.message("Erro de validação estrutural no payload.")
 			.path(request.getRequestURI())
 			.fieldErrors(fieldErrors)
 			.build();
@@ -135,7 +135,7 @@ public class GlobalExceptionHandler {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.BAD_REQUEST.value())
 			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-			.message("Payload invalido ou mal formado.")
+			.message("Payload inválido ou mal formado.")
 			.path(request.getRequestURI())
 			.build();
 
@@ -156,7 +156,7 @@ public class GlobalExceptionHandler {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.BAD_REQUEST.value())
 			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-			.message("Parametro '" + ex.getName() + "' tem formato invalido.")
+			.message("Parâmetro '" + ex.getName() + "' tem formato inválido.")
 			.path(request.getRequestURI())
 			.build();
 
@@ -174,7 +174,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex,
 			HttpServletRequest request) {
 
-		String message = String.format("Recurso nao encontrado: %s /%s. Verifique a URL informada.",
+		String message = String.format("Recurso não encontrado: %s /%s. Verifique a URL informada.",
 				request.getMethod(), ex.getResourcePath());
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
@@ -199,7 +199,7 @@ public class GlobalExceptionHandler {
 			HttpServletRequest request) {
 
 		String supported = ex.getSupportedHttpMethods() == null ? "" : ex.getSupportedHttpMethods().toString();
-		String message = String.format("Metodo %s nao suportado neste recurso. Metodos permitidos: %s.", ex.getMethod(),
+		String message = String.format("Método %s não suportado neste recurso. Métodos permitidos: %s.", ex.getMethod(),
 				supported);
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
@@ -223,7 +223,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleMissingRequestParameter(MissingServletRequestParameterException ex,
 			HttpServletRequest request) {
 
-		String message = String.format("Parametro obrigatorio '%s' ausente na requisicao.", ex.getParameterName());
+		String message = String.format("Parâmetro obrigatório '%s' ausente na requisição.", ex.getParameterName());
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
 			.timestamp(LocalDateTime.now())
@@ -249,7 +249,7 @@ public class GlobalExceptionHandler {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.SERVICE_UNAVAILABLE.value())
 			.error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
-			.message("Servico de banco de dados temporariamente indisponivel. Tente novamente em alguns instantes.")
+			.message("Serviço de banco de dados temporariamente indisponível. Tente novamente em alguns instantes.")
 			.path(request.getRequestURI())
 			.build();
 

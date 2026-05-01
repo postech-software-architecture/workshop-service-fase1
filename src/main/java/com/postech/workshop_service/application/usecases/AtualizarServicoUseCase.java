@@ -46,11 +46,11 @@ public class AtualizarServicoUseCase {
 			CategoriaServico categoria, NivelComplexidade nivelComplexidade, Integer garantiaDias,
 			String observacoesTecnicas) {
 		Servico servico = servicoRepository.buscarPorId(id, true)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado com o ID informado."));
 
 		try {
 			if (servicoRepository.existeNomeAtivo(nome, id)) {
-				throw new RegraDeNegocioException("Ja existe um servico ativo cadastrado com o nome informado.");
+				throw new RegraDeNegocioException("Já existe um serviço ativo cadastrado com o nome informado.");
 			}
 
 			servico.atualizarDados(nome, descricao, valor, tempoEstimadoMinutos, categoria, nivelComplexidade,

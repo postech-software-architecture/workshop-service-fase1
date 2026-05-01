@@ -523,7 +523,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc.perform(get("/api/v1/servicos/"))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("$.status").value(404))
-			.andExpect(jsonPath("$.message").value(containsString("Recurso nao encontrado")))
+			.andExpect(jsonPath("$.message").value(containsString("Recurso não encontrado")))
 			.andExpect(jsonPath("$.message").value(containsString("Verifique a URL")));
 	}
 
@@ -532,7 +532,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc.perform(get("/api/v1/servicos/{id}/inexistente", UUID.randomUUID()))
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("$.status").value(404))
-			.andExpect(jsonPath("$.message").value(containsString("Recurso nao encontrado")));
+			.andExpect(jsonPath("$.message").value(containsString("Recurso não encontrado")));
 	}
 
 	@Test
@@ -540,7 +540,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 		mockMvc.perform(patch("/api/v1/servicos/{id}", UUID.randomUUID()))
 			.andExpect(status().isMethodNotAllowed())
 			.andExpect(jsonPath("$.status").value(405))
-			.andExpect(jsonPath("$.message").value(containsString("Metodo PATCH nao suportado")));
+			.andExpect(jsonPath("$.message").value(containsString("Método PATCH não suportado")));
 	}
 
 }

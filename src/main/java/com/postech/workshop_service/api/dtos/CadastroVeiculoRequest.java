@@ -21,39 +21,39 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Dados para cadastro de um novo veiculo")
+@Schema(description = "Dados para cadastro de um novo veículo")
 public class CadastroVeiculoRequest {
 
-	@NotBlank(message = "A placa e obrigatoria")
-	@Size(max = 10, message = "A placa deve possuir no maximo 10 caracteres antes da normalizacao")
+	@NotBlank(message = "A placa é obrigatória")
+	@Size(max = 10, message = "A placa deve possuir no máximo 10 caracteres antes da normalização")
 	@Schema(example = "BRA1D23")
 	private String placa;
 
-	@NotBlank(message = "A marca e obrigatoria")
-	@Size(max = 60, message = "A marca deve possuir no maximo 60 caracteres")
+	@NotBlank(message = "A marca é obrigatória")
+	@Size(max = 60, message = "A marca deve possuir no máximo 60 caracteres")
 	@Schema(example = "Toyota")
 	private String marca;
 
-	@NotBlank(message = "O modelo e obrigatorio")
-	@Size(max = 80, message = "O modelo deve possuir no maximo 80 caracteres")
+	@NotBlank(message = "O modelo é obrigatório")
+	@Size(max = 80, message = "O modelo deve possuir no máximo 80 caracteres")
 	@Schema(example = "Corolla")
 	private String modelo;
 
 	@Min(value = 1900, message = "O ano deve ser igual ou superior a 1900")
-	@Max(value = 3000, message = "O ano informado e invalido")
+	@Max(value = 3000, message = "O ano informado é inválido")
 	@Schema(example = "2020")
 	private int ano;
 
 	@NotEmpty(message = "Deve existir ao menos um cliente vinculado")
-	@Schema(description = "Lista de clientes vinculados ao veiculo")
+	@Schema(description = "Lista de clientes vinculados ao veículo")
 	private List<UUID> clientesIds;
 
-	@Size(max = 30, message = "A cor deve possuir no maximo 30 caracteres")
+	@Size(max = 30, message = "A cor deve possuir no máximo 30 caracteres")
 	@Schema(example = "Prata")
 	private String cor;
 
-	@Size(max = 2000, message = "As observacoes devem possuir no maximo 2000 caracteres")
-	@Schema(example = "Veiculo compartilhado entre familiares")
+	@Size(max = 2000, message = "As observações devem possuir no máximo 2000 caracteres")
+	@Schema(example = "Veículo compartilhado entre familiares")
 	private String observacoes;
 
 }

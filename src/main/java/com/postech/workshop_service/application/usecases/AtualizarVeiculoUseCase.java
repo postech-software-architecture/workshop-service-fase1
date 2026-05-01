@@ -41,13 +41,13 @@ public class AtualizarVeiculoUseCase {
 	public Veiculo executar(UUID id, String placaRaw, String marca, String modelo, int ano, String cor,
 			String observacoes) {
 		Veiculo veiculo = veiculoRepository.buscarPorId(id, true)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Veiculo nao encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Veículo não encontrado com o ID informado."));
 
 		try {
 			Placa placa = new Placa(placaRaw);
 
 			if (veiculoRepository.existePlacaAtiva(placa.getValor(), id)) {
-				throw new RegraDeNegocioException("Ja existe um veiculo ativo cadastrado com a placa informada.");
+				throw new RegraDeNegocioException("Já existe um veículo ativo cadastrado com a placa informada.");
 			}
 
 			veiculo.atualizarDados(placa, marca, modelo, ano, cor, observacoes);

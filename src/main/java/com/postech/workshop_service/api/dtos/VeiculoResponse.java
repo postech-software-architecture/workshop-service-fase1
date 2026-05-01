@@ -17,7 +17,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Dados detalhados do veiculo")
+@Schema(description = "Dados detalhados do veículo")
 public class VeiculoResponse {
 
 	@Schema(example = "550e8400-e29b-41d4-a716-446655440000")

@@ -23,15 +23,15 @@ public abstract class EntidadeBase {
 
 	protected EntidadeBase(UUID id, LocalDateTime dataCriacao, LocalDateTime dataUltimaAtualizacao,
 			LocalDateTime dataRemocao) {
-		this.id = Objects.requireNonNull(id, "O identificador da entidade e obrigatorio.");
-		this.dataCriacao = Objects.requireNonNull(dataCriacao, "A data de criacao da entidade e obrigatoria.");
+		this.id = Objects.requireNonNull(id, "O identificador da entidade é obrigatório.");
+		this.dataCriacao = Objects.requireNonNull(dataCriacao, "A data de criação da entidade é obrigatória.");
 		this.dataUltimaAtualizacao = Objects.requireNonNull(dataUltimaAtualizacao,
-				"A data de ultima atualizacao da entidade e obrigatoria.");
+				"A data de última atualização da entidade é obrigatória.");
 		this.dataRemocao = dataRemocao;
 	}
 
 	protected EntidadeBase(UUID id) {
-		this.id = Objects.requireNonNull(id, "O identificador da entidade e obrigatorio.");
+		this.id = Objects.requireNonNull(id, "O identificador da entidade é obrigatório.");
 		LocalDateTime agora = LocalDateTime.now();
 		this.dataCriacao = agora;
 		this.dataUltimaAtualizacao = agora;

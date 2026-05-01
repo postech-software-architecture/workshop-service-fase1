@@ -41,7 +41,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/v1/servicos")
-@Tag(name = "Servicos", description = "Gerenciamento do catalogo de servicos da oficina")
+@Tag(name = "Servicos", description = "Gerenciamento do catálogo de serviços da oficina")
 public class ServicoController {
 
 	private final CriarServicoUseCase criarServicoUseCase;
@@ -87,7 +87,7 @@ public class ServicoController {
 	 * @return servico persistido.
 	 */
 	@PostMapping
-	@Operation(summary = "Cadastrar servico no catalogo")
+	@Operation(summary = "Cadastrar serviço no catálogo")
 	public ResponseEntity<ServicoResponse> criar(@RequestBody @Valid CadastroServicoRequest request) {
 		Servico servico = criarServicoUseCase.executar(request.getNome(), request.getDescricao(), request.getValor(),
 				request.getTempoEstimadoMinutos(), request.getCategoria(), request.getNivelComplexidade(),
@@ -105,16 +105,16 @@ public class ServicoController {
 	 * @return pagina de servicos.
 	 */
 	@GetMapping
-	@Operation(summary = "Listar servicos com paginacao e filtros")
+	@Operation(summary = "Listar serviços com paginação e filtros")
 	public ResponseEntity<PaginaServicosResponse> listar(
-			@RequestParam(defaultValue = "0") @Parameter(description = "Pagina solicitada (base zero)") int pagina,
+			@RequestParam(defaultValue = "0") @Parameter(description = "Página solicitada (base zero)") int pagina,
 			@RequestParam(defaultValue = "20") @Parameter(
-					description = "Quantidade de registros por pagina") int tamanho,
-			@RequestParam(required = false) @Parameter(description = "Filtro parcial pelo nome do servico") String nome,
+					description = "Quantidade de registros por página") int tamanho,
+			@RequestParam(required = false) @Parameter(description = "Filtro parcial pelo nome do serviço") String nome,
 			@RequestParam(required = false) @Parameter(
-					description = "Filtro por categoria do servico") CategoriaServico categoria,
+					description = "Filtro por categoria do serviço") CategoriaServico categoria,
 			@RequestParam(defaultValue = "false") @Parameter(
-					description = "Indica se servicos inativos devem ser considerados") boolean incluirInativos) {
+					description = "Indica se serviços inativos devem ser considerados") boolean incluirInativos) {
 		PaginaResultado<Servico> resultado = listarServicosUseCase.executar(pagina, tamanho, nome, categoria,
 				incluirInativos);
 		return ResponseEntity.ok(PaginaServicosResponse.builder()
@@ -133,12 +133,12 @@ public class ServicoController {
 	 * @return servico encontrado.
 	 */
 	@GetMapping("/{id}")
-	@Operation(summary = "Buscar servico por identificador")
+	@Operation(summary = "Buscar serviço por identificador")
 	public ResponseEntity<ServicoResponse> buscarPorId(@PathVariable UUID id,
 			@RequestParam(defaultValue = "false") @Parameter(
-					description = "Indica se servicos inativos devem ser considerados") boolean incluirInativos) {
+					description = "Indica se serviços inativos devem ser considerados") boolean incluirInativos) {
 		Servico servico = buscarServicoPorIdUseCase.executar(id, incluirInativos)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado com o ID informado."));
 		return ResponseEntity.ok(toResponse(servico));
 	}
 
@@ -149,10 +149,10 @@ public class ServicoController {
 	 * @return lista de servicos da categoria.
 	 */
 	@GetMapping("/categoria/{categoria}")
-	@Operation(summary = "Listar servicos por categoria")
+	@Operation(summary = "Listar serviços por categoria")
 	public ResponseEntity<List<ServicoResponse>> listarPorCategoria(@PathVariable CategoriaServico categoria,
 			@RequestParam(defaultValue = "false") @Parameter(
-					description = "Indica se servicos inativos devem ser considerados") boolean incluirInativos) {
+					description = "Indica se serviços inativos devem ser considerados") boolean incluirInativos) {
 		List<ServicoResponse> respostas = listarServicosPorCategoriaUseCase.executar(categoria, incluirInativos)
 			.stream()
 			.map(this::toResponse)
@@ -167,7 +167,7 @@ public class ServicoController {
 	 * @return servico atualizado.
 	 */
 	@PutMapping("/{id}")
-	@Operation(summary = "Atualizar servico do catalogo")
+	@Operation(summary = "Atualizar serviço do catálogo")
 	public ResponseEntity<ServicoResponse> atualizar(@PathVariable UUID id,
 			@RequestBody @Valid AtualizarServicoRequest request) {
 		Servico servico = atualizarServicoUseCase.executar(id, request.getNome(), request.getDescricao(),
@@ -181,7 +181,7 @@ public class ServicoController {
 	 * @param id identificador do servico.
 	 */
 	@DeleteMapping("/{id}")
-	@Operation(summary = "Remover servico logicamente")
+	@Operation(summary = "Remover serviço logicamente")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void remover(@PathVariable UUID id) {
 		removerServicoUseCase.executar(id);
@@ -193,7 +193,7 @@ public class ServicoController {
 	 * @return servico reativado.
 	 */
 	@PostMapping("/{id}/reativar")
-	@Operation(summary = "Reativar servico previamente removido")
+	@Operation(summary = "Reativar serviço previamente removido")
 	public ResponseEntity<ServicoResponse> reativar(@PathVariable UUID id) {
 		Servico servico = reativarServicoUseCase.executar(id);
 		return ResponseEntity.ok(toResponse(servico));
@@ -205,10 +205,10 @@ public class ServicoController {
 	 * @return resposta com tempo estimado e medio.
 	 */
 	@GetMapping("/{id}/tempo-medio")
-	@Operation(summary = "Buscar tempo medio de execucao do servico")
+	@Operation(summary = "Buscar tempo médio de execução do serviço")
 	public ResponseEntity<TempoMedioServicoResponse> buscarTempoMedio(@PathVariable UUID id) {
 		Servico servico = buscarServicoPorIdUseCase.executar(id, false)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado com o ID informado."));
 		return ResponseEntity.ok(TempoMedioServicoResponse.builder()
 			.servicoId(servico.getId())
 			.tempoEstimadoMinutos(servico.getTempoEstimadoMinutos())

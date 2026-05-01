@@ -34,11 +34,11 @@ public class ReativarServicoUseCase {
 	@Transactional
 	public Servico executar(UUID id) {
 		Servico servico = servicoRepository.buscarPorId(id, true)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado com o ID informado."));
 
 		if (servicoRepository.existeNomeAtivo(servico.getNome(), id)) {
 			throw new RegraDeNegocioException(
-					"Ja existe um servico ativo cadastrado com o nome informado; renomeie o servico antes de reativar.");
+					"Já existe um serviço ativo cadastrado com o nome informado; renomeie o serviço antes de reativar.");
 		}
 
 		servico.reativar();

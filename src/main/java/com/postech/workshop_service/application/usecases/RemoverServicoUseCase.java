@@ -30,7 +30,7 @@ public class RemoverServicoUseCase {
 	@Transactional
 	public void executar(UUID id) {
 		var servico = servicoRepository.buscarPorId(id, true)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado com o ID informado."));
 		servico.removerLogicamente();
 		servicoRepository.salvar(servico);
 	}

@@ -15,7 +15,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Informacoes de tempo estimado e medio de execucao do servico")
+@Schema(description = "Informações de tempo estimado e médio de execução do serviço")
 public class TempoMedioServicoResponse {
 
 	@Schema(example = "550e8400-e29b-41d4-a716-446655440000")
@@ -27,7 +27,7 @@ public class TempoMedioServicoResponse {
 	@Schema(example = "null", nullable = true, description = "Tempo medio real em minutos; null quando nao disponivel")
 	private Integer tempoMedioRealMinutos;
 
-	@Schema(example = "Disponivel apos implementacao de Ordens de Servico (Issue #5)")
+	@Schema(example = "Disponível após implementação de Ordens de Serviço (Issue #5)")
 	private String disponivelAPartirDe;
 
 }
