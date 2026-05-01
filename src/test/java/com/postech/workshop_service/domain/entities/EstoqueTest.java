@@ -36,7 +36,6 @@ class EstoqueTest {
 		assertEquals(new BigDecimal("10"), movimentacao.getQuantidadeAnterior());
 		assertEquals(new BigDecimal("15"), movimentacao.getQuantidadePosterior());
 		assertEquals("Reposicao", movimentacao.getMotivo());
-		assertEquals(1, estoque.getVersao());
 	}
 
 	@Test
@@ -51,7 +50,6 @@ class EstoqueTest {
 		assertEquals(new BigDecimal("3"), movimentacao.getQuantidade());
 		assertEquals(new BigDecimal("10"), movimentacao.getQuantidadeAnterior());
 		assertEquals(new BigDecimal("7"), movimentacao.getQuantidadePosterior());
-		assertEquals(1, estoque.getVersao());
 	}
 
 	@Test
@@ -89,7 +87,6 @@ class EstoqueTest {
 		assertEquals(TipoMovimentacao.AJUSTE, movimentacao.getTipo());
 		assertEquals(new BigDecimal("10"), movimentacao.getQuantidadeAnterior());
 		assertEquals(new BigDecimal("20"), movimentacao.getQuantidadePosterior());
-		assertEquals(1, estoque.getVersao());
 	}
 
 	@Test

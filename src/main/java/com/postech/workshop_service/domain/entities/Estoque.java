@@ -131,20 +131,12 @@ public class Estoque {
 	}
 
 	/**
-	 * Incrementa a versao para optimistic locking.
-	 */
-	public void incrementarVersao() {
-		this.versao++;
-	}
-
-	/**
 	 * Atualiza a localizacao do estoque.
 	 * @param novaLocalizacao nova localizacao.
 	 */
 	public void atualizarLocalizacao(String novaLocalizacao) {
 		this.localizacao = sanitizarObrigatorio(novaLocalizacao, "A localizacao do estoque e obrigatoria.");
 		this.dataUltimaAtualizacao = LocalDateTime.now();
-		incrementarVersao();
 	}
 
 	private MovimentacaoEstoque criarMovimentacao(TipoMovimentacao tipo, BigDecimal quantidadeMovimentada,
@@ -164,7 +156,6 @@ public class Estoque {
 		}
 
 		this.dataUltimaAtualizacao = LocalDateTime.now();
-		incrementarVersao();
 
 		return new MovimentacaoEstoque(null, this.id, tipo, quantidadeMovimentada, quantidadeAnterior, this.quantidade,
 				motivo);
