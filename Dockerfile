@@ -19,7 +19,6 @@ WORKDIR /app
 COPY --from=build /workspace/target/workshop-service-0.0.1-SNAPSHOT.jar app.jar
 
 ENV SPRING_PROFILES_ACTIVE=docker
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0"
 
 USER spring:spring
 
@@ -28,4 +27,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
 	CMD curl -fsS http://localhost:8080/actuator/health | grep -q '"status":"UP"' || exit 1
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]
