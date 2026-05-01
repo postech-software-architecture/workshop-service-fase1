@@ -38,11 +38,6 @@ public class AtualizarServicoRequest {
 	@Schema(example = "150.00")
 	private BigDecimal valor;
 
-	@NotNull(message = "O tempo estimado é obrigatório")
-	@Positive(message = "O tempo estimado deve ser maior que zero")
-	@Schema(example = "60")
-	private Integer tempoEstimadoMinutos;
-
 	@Schema(example = "PREVENTIVA")
 	private CategoriaServico categoria;
 

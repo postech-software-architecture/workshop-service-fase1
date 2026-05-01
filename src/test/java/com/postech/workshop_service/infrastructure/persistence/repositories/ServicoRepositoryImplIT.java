@@ -24,7 +24,7 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 
 	@Test
 	void shouldSaveAndFindById() {
-		Servico servico = criarServico("Troca de oleo", "Descricao completa", new BigDecimal("150.00"), 60,
+		Servico servico = criarServico("Troca de oleo", "Descricao completa", new BigDecimal("150.00"),
 				CategoriaServico.PREVENTIVA);
 		Servico salvo = servicoRepository.salvar(servico);
 
@@ -39,7 +39,7 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 
 	@Test
 	void shouldReturnEmptyForInactiveWithoutFlag() {
-		Servico servico = criarServico("Balanceamento", "Balanceamento de rodas", new BigDecimal("80.00"), 30, null);
+		Servico servico = criarServico("Balanceamento", "Balanceamento de rodas", new BigDecimal("80.00"), null);
 		Servico salvo = servicoRepository.salvar(servico);
 
 		salvo.removerLogicamente();
@@ -51,9 +51,9 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 
 	@Test
 	void shouldListWithPagination() {
-		servicoRepository.salvar(criarServico("Servico A", "Descricao A", new BigDecimal("100.00"), 60, null));
-		servicoRepository.salvar(criarServico("Servico B", "Descricao B", new BigDecimal("200.00"), 90, null));
-		servicoRepository.salvar(criarServico("Servico C", "Descricao C", new BigDecimal("300.00"), 120, null));
+		servicoRepository.salvar(criarServico("Servico A", "Descricao A", new BigDecimal("100.00"), null));
+		servicoRepository.salvar(criarServico("Servico B", "Descricao B", new BigDecimal("200.00"), null));
+		servicoRepository.salvar(criarServico("Servico C", "Descricao C", new BigDecimal("300.00"), null));
 
 		PaginaResultado<Servico> pagina = servicoRepository.listar(0, 2, null, null, false);
 
@@ -63,7 +63,7 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 
 	@Test
 	void shouldDetectDuplicateName() {
-		Servico servico = criarServico("Alinhamento", "Alinhamento de rodas", new BigDecimal("90.00"), 30, null);
+		Servico servico = criarServico("Alinhamento", "Alinhamento de rodas", new BigDecimal("90.00"), null);
 		Servico salvo = servicoRepository.salvar(servico);
 
 		assertTrue(servicoRepository.existeNomeAtivo("Alinhamento", null));
@@ -74,7 +74,7 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 	@Test
 	void shouldRemoveLogically() {
 		Servico servico = criarServico("Troca de correia", "Substituicao da correia dentada", new BigDecimal("450.00"),
-				180, CategoriaServico.MECANICA);
+				CategoriaServico.MECANICA);
 		Servico salvo = servicoRepository.salvar(servico);
 
 		assertTrue(salvo.isAtivo());
@@ -90,9 +90,9 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 
 	@Test
 	void shouldFilterByPartialName() {
-		servicoRepository.salvar(criarServico("Troca de oleo", "Substituicao do oleo", new BigDecimal("100.00"), 60,
+		servicoRepository.salvar(criarServico("Troca de oleo", "Substituicao do oleo", new BigDecimal("100.00"),
 				CategoriaServico.PREVENTIVA));
-		servicoRepository.salvar(criarServico("Alinhamento", "Alinhamento de rodas", new BigDecimal("80.00"), 30,
+		servicoRepository.salvar(criarServico("Alinhamento", "Alinhamento de rodas", new BigDecimal("80.00"),
 				CategoriaServico.MECANICA));
 
 		PaginaResultado<Servico> resultado = servicoRepository.listar(0, 10, "oleo", null, false);
@@ -103,10 +103,10 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 
 	@Test
 	void shouldFilterByCategoria() {
+		servicoRepository
+			.salvar(criarServico("Servico mecanico", "Reparo", new BigDecimal("200.00"), CategoriaServico.MECANICA));
 		servicoRepository.salvar(
-				criarServico("Servico mecanico", "Reparo", new BigDecimal("200.00"), 90, CategoriaServico.MECANICA));
-		servicoRepository.salvar(criarServico("Servico eletrico", "Diagnostico", new BigDecimal("150.00"), 60,
-				CategoriaServico.ELETRICA));
+				criarServico("Servico eletrico", "Diagnostico", new BigDecimal("150.00"), CategoriaServico.ELETRICA));
 
 		PaginaResultado<Servico> resultado = servicoRepository.listar(0, 10, null, CategoriaServico.MECANICA, false);
 
@@ -116,10 +116,9 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 
 	@Test
 	void shouldIncludeInactivesWhenFlagOn() {
-		Servico ativo = servicoRepository
-			.salvar(criarServico("Ativo", "Servico ativo", new BigDecimal("50.00"), 30, null));
+		Servico ativo = servicoRepository.salvar(criarServico("Ativo", "Servico ativo", new BigDecimal("50.00"), null));
 		Servico inativo = servicoRepository
-			.salvar(criarServico("Inativo", "Servico a remover", new BigDecimal("75.00"), 45, null));
+			.salvar(criarServico("Inativo", "Servico a remover", new BigDecimal("75.00"), null));
 		inativo.removerLogicamente();
 		servicoRepository.salvar(inativo);
 
@@ -134,9 +133,9 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 	@Test
 	void shouldListByCategoriaIncludingInactivesWhenFlagOn() {
 		Servico ativo = servicoRepository
-			.salvar(criarServico("Mecanica ativo", "X", new BigDecimal("100.00"), 60, CategoriaServico.MECANICA));
+			.salvar(criarServico("Mecanica ativo", "X", new BigDecimal("100.00"), CategoriaServico.MECANICA));
 		Servico inativo = servicoRepository
-			.salvar(criarServico("Mecanica inativo", "Y", new BigDecimal("100.00"), 60, CategoriaServico.MECANICA));
+			.salvar(criarServico("Mecanica inativo", "Y", new BigDecimal("100.00"), CategoriaServico.MECANICA));
 		inativo.removerLogicamente();
 		servicoRepository.salvar(inativo);
 
@@ -149,20 +148,19 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 
 	@Test
 	void shouldAllowReusingNameAfterSoftDelete() {
-		Servico original = servicoRepository
-			.salvar(criarServico("Servico unico", "X", new BigDecimal("100.00"), 60, null));
+		Servico original = servicoRepository.salvar(criarServico("Servico unico", "X", new BigDecimal("100.00"), null));
 		original.removerLogicamente();
 		servicoRepository.salvar(original);
 
 		assertFalse(servicoRepository.existeNomeAtivo("Servico unico", null));
 
-		Servico novo = servicoRepository.salvar(criarServico("Servico unico", "Y", new BigDecimal("120.00"), 75, null));
+		Servico novo = servicoRepository.salvar(criarServico("Servico unico", "Y", new BigDecimal("120.00"), null));
 		assertNotNull(novo.getId());
 	}
 
 	@Test
 	void shouldReturnEmptyForInactiveBuscarPorIdWithoutFlag() {
-		Servico salvo = servicoRepository.salvar(criarServico("Para remover", "X", new BigDecimal("100.00"), 60, null));
+		Servico salvo = servicoRepository.salvar(criarServico("Para remover", "X", new BigDecimal("100.00"), null));
 		salvo.removerLogicamente();
 		servicoRepository.salvar(salvo);
 
@@ -170,9 +168,8 @@ class ServicoRepositoryImplIT extends PostgresTestContainer {
 		assertTrue(servicoRepository.buscarPorId(salvo.getId(), true).isPresent());
 	}
 
-	private Servico criarServico(String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos,
-			CategoriaServico categoria) {
-		return new Servico(null, nome, descricao, valor, tempoEstimadoMinutos, categoria, null, null, null);
+	private Servico criarServico(String nome, String descricao, BigDecimal valor, CategoriaServico categoria) {
+		return new Servico(null, nome, descricao, valor, categoria, null, null, null);
 	}
 
 }

@@ -26,7 +26,6 @@ public class ServicoMapper {
 			.nome(servico.getNome())
 			.descricao(servico.getDescricao())
 			.valor(servico.getValor())
-			.tempoEstimadoMinutos(servico.getTempoEstimadoMinutos())
 			.categoria(servico.getCategoria())
 			.nivelComplexidade(servico.getNivelComplexidade())
 			.garantiaDias(servico.getGarantiaDias())
@@ -51,7 +50,6 @@ public class ServicoMapper {
 		entity.setNome(servico.getNome());
 		entity.setDescricao(servico.getDescricao());
 		entity.setValor(servico.getValor());
-		entity.setTempoEstimadoMinutos(servico.getTempoEstimadoMinutos());
 		entity.setCategoria(servico.getCategoria());
 		entity.setNivelComplexidade(servico.getNivelComplexidade());
 		entity.setGarantiaDias(servico.getGarantiaDias());
@@ -71,9 +69,9 @@ public class ServicoMapper {
 			return null;
 		}
 		return new Servico(entity.getId(), entity.getNome(), entity.getDescricao(), entity.getValor(),
-				entity.getTempoEstimadoMinutos(), entity.getCategoria(), entity.getNivelComplexidade(),
-				entity.getGarantiaDias(), entity.getObservacoesTecnicas(), Boolean.TRUE.equals(entity.getAtivo()),
-				entity.getDataCriacao(), entity.getDataUltimaAtualizacao(), entity.getDataRemocao());
+				entity.getCategoria(), entity.getNivelComplexidade(), entity.getGarantiaDias(),
+				entity.getObservacoesTecnicas(), Boolean.TRUE.equals(entity.getAtivo()), entity.getDataCriacao(),
+				entity.getDataUltimaAtualizacao(), entity.getDataRemocao());
 	}
 
 }

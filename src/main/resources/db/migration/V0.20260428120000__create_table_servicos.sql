@@ -3,7 +3,6 @@ CREATE TABLE servicos (
     nome VARCHAR(120) NOT NULL,
     descricao TEXT NOT NULL,
     valor NUMERIC(10,2) NOT NULL,
-    tempo_estimado_minutos INTEGER NOT NULL,
     categoria VARCHAR(30),
     nivel_complexidade VARCHAR(20),
     garantia_dias INTEGER,
@@ -13,7 +12,6 @@ CREATE TABLE servicos (
     data_ultima_atualizacao TIMESTAMP NOT NULL,
     data_remocao TIMESTAMP,
     CONSTRAINT ck_servicos_valor_positivo CHECK (valor > 0),
-    CONSTRAINT ck_servicos_tempo_estimado_positivo CHECK (tempo_estimado_minutos > 0),
     CONSTRAINT ck_servicos_garantia_dias_positivo CHECK (garantia_dias IS NULL OR garantia_dias > 0)
 );
 
@@ -26,7 +24,6 @@ COMMENT ON COLUMN servicos.id IS 'Identificador único do serviço em formato UU
 COMMENT ON COLUMN servicos.nome IS 'Nome do serviço, único entre os serviços ativos.';
 COMMENT ON COLUMN servicos.descricao IS 'Descrição detalhada do serviço prestado.';
 COMMENT ON COLUMN servicos.valor IS 'Valor cobrado pelo serviço, deve ser maior que zero.';
-COMMENT ON COLUMN servicos.tempo_estimado_minutos IS 'Tempo estimado de execução do serviço em minutos, deve ser maior que zero.';
 COMMENT ON COLUMN servicos.categoria IS 'Categoria do serviço: MECANICA, ELETRICA, ESTETICA ou PREVENTIVA.';
 COMMENT ON COLUMN servicos.nivel_complexidade IS 'Nível de complexidade do serviço: BAIXA, MEDIA ou ALTA.';
 COMMENT ON COLUMN servicos.garantia_dias IS 'Prazo de garantia do serviço em dias, quando aplicável.';

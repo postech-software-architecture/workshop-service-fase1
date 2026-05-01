@@ -51,7 +51,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Troca de oleo")
 			.descricao("Substituicao do oleo do motor")
 			.valor(new BigDecimal("150.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		MvcResult createResult = mockMvc
@@ -77,7 +76,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Troca de oleo premium")
 			.descricao("Substituicao do oleo sintetico")
 			.valor(new BigDecimal("200.00"))
-			.tempoEstimadoMinutos(75)
 			.build();
 
 		mockMvc
@@ -96,7 +94,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.descricao("Descricao sem nome")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		mockMvc
@@ -111,7 +108,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Alinhamento")
 			.descricao("Alinhamento de rodas")
 			.valor(new BigDecimal("80.00"))
-			.tempoEstimadoMinutos(30)
 			.build();
 
 		mockMvc
@@ -123,7 +119,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Alinhamento")
 			.descricao("Outro alinhamento")
 			.valor(new BigDecimal("90.00"))
-			.tempoEstimadoMinutos(45)
 			.build();
 
 		mockMvc
@@ -138,7 +133,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Servico invalido")
 			.descricao("Descricao")
 			.valor(new BigDecimal("-50.00"))
-			.tempoEstimadoMinutos(30)
 			.build();
 
 		mockMvc
@@ -153,7 +147,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Revisao preventiva")
 			.descricao("Revisao completa do veiculo")
 			.valor(new BigDecimal("300.00"))
-			.tempoEstimadoMinutos(120)
 			.categoria(CategoriaServico.PREVENTIVA)
 			.build();
 
@@ -168,35 +161,10 @@ class ServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void shouldReturn200ForTempoMedio() throws Exception {
-		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
-			.nome("Troca de correia")
-			.descricao("Substituicao da correia dentada")
-			.valor(new BigDecimal("450.00"))
-			.tempoEstimadoMinutos(180)
-			.build();
-
-		MvcResult createResult = mockMvc
-			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isCreated())
-			.andReturn();
-
-		UUID servicoId = UUID
-			.fromString(objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asText());
-
-		mockMvc.perform(get("/api/v1/servicos/{id}/tempo-medio", servicoId))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.tempoEstimadoMinutos").value(180))
-			.andExpect(jsonPath("$.tempoMedioRealMinutos").isEmpty());
-	}
-
-	@Test
 	void shouldReturn400WhenNomeIsNull() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.descricao("Descricao valida")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		mockMvc
@@ -212,7 +180,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Servico X")
 			.descricao("")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		mockMvc
@@ -227,7 +194,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome("Servico X")
 			.descricao("Descricao valida")
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		mockMvc
@@ -243,37 +209,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Servico X")
 			.descricao("Descricao valida")
 			.valor(BigDecimal.ZERO)
-			.tempoEstimadoMinutos(60)
-			.build();
-
-		mockMvc
-			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isBadRequest());
-	}
-
-	@Test
-	void shouldReturn400WhenTempoEstimadoIsNull() throws Exception {
-		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
-			.nome("Servico X")
-			.descricao("Descricao valida")
-			.valor(new BigDecimal("100.00"))
-			.build();
-
-		mockMvc
-			.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(cadastro)))
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.fieldErrors[?(@.field=='tempoEstimadoMinutos')]").exists());
-	}
-
-	@Test
-	void shouldReturn400WhenTempoEstimadoIsZero() throws Exception {
-		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
-			.nome("Servico X")
-			.descricao("Descricao valida")
-			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(0)
 			.build();
 
 		mockMvc
@@ -288,7 +223,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Servico X")
 			.descricao("Descricao valida")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.garantiaDias(-5)
 			.build();
 
@@ -305,7 +239,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome(longName)
 			.descricao("Descricao valida")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		mockMvc
@@ -323,7 +256,7 @@ class ServicoControllerIT extends PostgresTestContainer {
 	@Test
 	void shouldReturn400WhenCategoriaEnumIsInvalid() throws Exception {
 		String payload = "{\"nome\":\"Servico X\",\"descricao\":\"D\",\"valor\":100.00,"
-				+ "\"tempoEstimadoMinutos\":60,\"categoria\":\"NAO_EXISTE\"}";
+				+ "\"categoria\":\"NAO_EXISTE\"}";
 		mockMvc.perform(post("/api/v1/servicos").contentType(MediaType.APPLICATION_JSON).content(payload))
 			.andExpect(status().isBadRequest());
 	}
@@ -334,7 +267,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Qualquer")
 			.descricao("Qualquer")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		mockMvc
@@ -359,7 +291,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Servico desativado")
 			.descricao("Sera removido")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		MvcResult result = mockMvc
@@ -380,17 +311,11 @@ class ServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void shouldReturn404WhenTempoMedioRequestedForUnknownId() throws Exception {
-		mockMvc.perform(get("/api/v1/servicos/{id}/tempo-medio", UUID.randomUUID())).andExpect(status().isNotFound());
-	}
-
-	@Test
 	void shouldReativarPreviouslyDeletedServico() throws Exception {
 		CadastroServicoRequest cadastro = CadastroServicoRequest.builder()
 			.nome("Servico para reativar")
 			.descricao("Descricao do servico")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		MvcResult result = mockMvc
@@ -420,7 +345,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Servico ja ativo")
 			.descricao("Descricao")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		MvcResult result = mockMvc
@@ -447,7 +371,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Servico A")
 			.descricao("Primeiro servico")
 			.valor(new BigDecimal("100.00"))
-			.tempoEstimadoMinutos(60)
 			.build();
 
 		MvcResult primeiroResult = mockMvc
@@ -465,7 +388,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Servico A")
 			.descricao("Segundo servico com mesmo nome")
 			.valor(new BigDecimal("110.00"))
-			.tempoEstimadoMinutos(70)
 			.build();
 
 		mockMvc
@@ -482,13 +404,11 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Lavagem completa")
 			.descricao("Lavagem externa e interna")
 			.valor(new BigDecimal("60.00"))
-			.tempoEstimadoMinutos(40)
 			.build();
 		CadastroServicoRequest second = CadastroServicoRequest.builder()
 			.nome("Polimento")
 			.descricao("Polimento da lataria")
 			.valor(new BigDecimal("120.00"))
-			.tempoEstimadoMinutos(90)
 			.build();
 
 		mockMvc
@@ -509,7 +429,6 @@ class ServicoControllerIT extends PostgresTestContainer {
 			.nome("Lavagem completa")
 			.descricao("Tentando duplicar")
 			.valor(new BigDecimal("130.00"))
-			.tempoEstimadoMinutos(95)
 			.build();
 
 		mockMvc

@@ -39,9 +39,6 @@ public class ServicoJpaEntity extends BaseJpaEntity {
 	@Column(nullable = false, precision = 10, scale = 2)
 	private BigDecimal valor;
 
-	@Column(nullable = false)
-	private Integer tempoEstimadoMinutos;
-
 	@Enumerated(EnumType.STRING)
 	@Column(length = 30)
 	private CategoriaServico categoria;

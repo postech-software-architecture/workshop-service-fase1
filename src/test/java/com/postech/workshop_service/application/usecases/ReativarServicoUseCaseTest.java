@@ -35,7 +35,7 @@ class ReativarServicoUseCaseTest {
 	@Test
 	void shouldReativarServicoInativo() {
 		UUID id = UUID.randomUUID();
-		Servico servico = criarServico(id, "Troca de oleo", "Descricao", new BigDecimal("100.00"), 60);
+		Servico servico = criarServico(id, "Troca de oleo", "Descricao", new BigDecimal("100.00"));
 		servico.removerLogicamente();
 
 		when(servicoRepository.buscarPorId(id, true)).thenReturn(Optional.of(servico));
@@ -61,7 +61,7 @@ class ReativarServicoUseCaseTest {
 	@Test
 	void shouldRejectWhenAnotherActiveServicoUsesSameName() {
 		UUID id = UUID.randomUUID();
-		Servico servico = criarServico(id, "Alinhamento", "Descricao", new BigDecimal("80.00"), 30);
+		Servico servico = criarServico(id, "Alinhamento", "Descricao", new BigDecimal("80.00"));
 		servico.removerLogicamente();
 
 		when(servicoRepository.buscarPorId(id, true)).thenReturn(Optional.of(servico));
@@ -74,7 +74,7 @@ class ReativarServicoUseCaseTest {
 	@Test
 	void shouldKeepServicoActiveWhenAlreadyActive() {
 		UUID id = UUID.randomUUID();
-		Servico servico = criarServico(id, "Lavagem", "Descricao", new BigDecimal("70.00"), 30);
+		Servico servico = criarServico(id, "Lavagem", "Descricao", new BigDecimal("70.00"));
 
 		when(servicoRepository.buscarPorId(id, true)).thenReturn(Optional.of(servico));
 		when(servicoRepository.existeNomeAtivo("Lavagem", id)).thenReturn(false);
@@ -87,8 +87,8 @@ class ReativarServicoUseCaseTest {
 		verify(servicoRepository).salvar(servico);
 	}
 
-	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos) {
-		return new Servico(id, nome, descricao, valor, tempoEstimadoMinutos, null, null, null, null);
+	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor) {
+		return new Servico(id, nome, descricao, valor, null, null, null, null);
 	}
 
 }

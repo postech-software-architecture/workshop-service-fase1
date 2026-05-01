@@ -33,7 +33,7 @@ class CriarServicoUseCaseTest {
 		when(servicoRepository.salvar(any(Servico.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		Servico servico = criarServicoUseCase.executar("Troca de oleo", "Descricao do servico",
-				new BigDecimal("100.00"), 60, CategoriaServico.PREVENTIVA, NivelComplexidade.BAIXA, 30, null);
+				new BigDecimal("100.00"), CategoriaServico.PREVENTIVA, NivelComplexidade.BAIXA, 30, null);
 
 		assertEquals("Troca de oleo", servico.getNome());
 		assertEquals(new BigDecimal("100.00"), servico.getValor());
@@ -44,7 +44,7 @@ class CriarServicoUseCaseTest {
 		when(servicoRepository.existeNomeAtivo("Troca de oleo", null)).thenReturn(true);
 
 		assertThrows(RegraDeNegocioException.class, () -> criarServicoUseCase.executar("Troca de oleo", "Descricao",
-				new BigDecimal("100.00"), 60, CategoriaServico.PREVENTIVA, NivelComplexidade.BAIXA, null, null));
+				new BigDecimal("100.00"), CategoriaServico.PREVENTIVA, NivelComplexidade.BAIXA, null, null));
 	}
 
 	@Test
@@ -52,7 +52,7 @@ class CriarServicoUseCaseTest {
 		when(servicoRepository.existeNomeAtivo("Servico X", null)).thenReturn(false);
 
 		assertThrows(RegraDeNegocioException.class, () -> criarServicoUseCase.executar("Servico X", "Descricao",
-				new BigDecimal("-1.00"), 60, null, null, null, null));
+				new BigDecimal("-1.00"), null, null, null, null));
 	}
 
 }

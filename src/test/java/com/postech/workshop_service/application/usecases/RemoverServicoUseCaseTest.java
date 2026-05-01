@@ -30,7 +30,7 @@ class RemoverServicoUseCaseTest {
 	@Test
 	void shouldRemoveServico() {
 		UUID id = UUID.randomUUID();
-		Servico servico = criarServico(id, "Troca de oleo", "Descricao", new BigDecimal("100.00"), 60);
+		Servico servico = criarServico(id, "Troca de oleo", "Descricao", new BigDecimal("100.00"));
 		when(servicoRepository.buscarPorId(id, true)).thenReturn(Optional.of(servico));
 		when(servicoRepository.salvar(any(Servico.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -44,8 +44,8 @@ class RemoverServicoUseCaseTest {
 		assertThrows(RecursoNaoEncontradoException.class, () -> removerServicoUseCase.executar(UUID.randomUUID()));
 	}
 
-	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos) {
-		return new Servico(id, nome, descricao, valor, tempoEstimadoMinutos, null, null, null, null);
+	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor) {
+		return new Servico(id, nome, descricao, valor, null, null, null, null);
 	}
 
 }

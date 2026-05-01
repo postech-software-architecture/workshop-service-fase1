@@ -29,7 +29,7 @@ class ListarServicosPorCategoriaUseCaseTest {
 	@Test
 	void shouldReturnServicosByCategoria() {
 		Servico servico = criarServico(UUID.randomUUID(), "Revisao completa", "Descricao", new BigDecimal("350.00"),
-				120, CategoriaServico.PREVENTIVA);
+				CategoriaServico.PREVENTIVA);
 		when(servicoRepository.listarPorCategoria(CategoriaServico.PREVENTIVA, false)).thenReturn(List.of(servico));
 
 		List<Servico> resultado = listarServicosPorCategoriaUseCase.executar(CategoriaServico.PREVENTIVA, false);
@@ -47,9 +47,8 @@ class ListarServicosPorCategoriaUseCaseTest {
 		assertTrue(resultado.isEmpty());
 	}
 
-	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos,
-			CategoriaServico categoria) {
-		return new Servico(id, nome, descricao, valor, tempoEstimadoMinutos, categoria, null, null, null);
+	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor, CategoriaServico categoria) {
+		return new Servico(id, nome, descricao, valor, categoria, null, null, null);
 	}
 
 }

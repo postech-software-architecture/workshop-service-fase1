@@ -18,14 +18,13 @@ class ServicoTest {
 
 	@Test
 	void shouldCreateServicoWithValidData() {
-		Servico servico = criarServico("Troca de oleo", "Descricao valida", new BigDecimal("100.00"), 60,
+		Servico servico = criarServico("Troca de oleo", "Descricao valida", new BigDecimal("100.00"),
 				CategoriaServico.PREVENTIVA, NivelComplexidade.BAIXA, 30, "Obs tecnica");
 
 		assertNotNull(servico.getId());
 		assertEquals("Troca de oleo", servico.getNome());
 		assertEquals("Descricao valida", servico.getDescricao());
 		assertEquals(new BigDecimal("100.00"), servico.getValor());
-		assertEquals(60, servico.getTempoEstimadoMinutos());
 		assertEquals(CategoriaServico.PREVENTIVA, servico.getCategoria());
 		assertEquals(NivelComplexidade.BAIXA, servico.getNivelComplexidade());
 		assertEquals(30, servico.getGarantiaDias());
@@ -38,8 +37,7 @@ class ServicoTest {
 
 	@Test
 	void shouldRemoveLogically() {
-		Servico servico = criarServico("Balanceamento", "Descricao", new BigDecimal("80.00"), 30, null, null, null,
-				null);
+		Servico servico = criarServico("Balanceamento", "Descricao", new BigDecimal("80.00"), null, null, null, null);
 
 		servico.removerLogicamente();
 
@@ -49,7 +47,7 @@ class ServicoTest {
 
 	@Test
 	void shouldBeIdempotentWhenRemovingLogicallyTwice() {
-		Servico servico = criarServico("Alinhamento", "Descricao", new BigDecimal("90.00"), 45, null, null, null, null);
+		Servico servico = criarServico("Alinhamento", "Descricao", new BigDecimal("90.00"), null, null, null, null);
 
 		servico.removerLogicamente();
 		LocalDateTime primeiraRemocao = servico.getDataRemocao();
@@ -62,7 +60,7 @@ class ServicoTest {
 
 	@Test
 	void shouldReativarServicoLogicamenteRemovido() throws InterruptedException {
-		Servico servico = criarServico("Lavagem", "Descricao", new BigDecimal("70.00"), 30, null, null, null, null);
+		Servico servico = criarServico("Lavagem", "Descricao", new BigDecimal("70.00"), null, null, null, null);
 
 		servico.removerLogicamente();
 		assertFalse(servico.isAtivo());
@@ -80,7 +78,7 @@ class ServicoTest {
 
 	@Test
 	void shouldBeIdempotentWhenReativarOnAlreadyActive() throws InterruptedException {
-		Servico servico = criarServico("Polimento", "Descricao", new BigDecimal("120.00"), 60, null, null, null, null);
+		Servico servico = criarServico("Polimento", "Descricao", new BigDecimal("120.00"), null, null, null, null);
 		LocalDateTime atualizacaoOriginal = servico.getDataUltimaAtualizacao();
 		Thread.sleep(2);
 
@@ -94,80 +92,67 @@ class ServicoTest {
 	@Test
 	void shouldRejectNullNome() {
 		assertThrows(IllegalArgumentException.class,
-				() -> criarServico(null, "Descricao", new BigDecimal("100.00"), 60, null, null, null, null));
+				() -> criarServico(null, "Descricao", new BigDecimal("100.00"), null, null, null, null));
 	}
 
 	@Test
 	void shouldRejectBlankNome() {
 		assertThrows(IllegalArgumentException.class,
-				() -> criarServico("   ", "Descricao", new BigDecimal("100.00"), 60, null, null, null, null));
+				() -> criarServico("   ", "Descricao", new BigDecimal("100.00"), null, null, null, null));
 	}
 
 	@Test
 	void shouldRejectZeroValor() {
 		assertThrows(IllegalArgumentException.class,
-				() -> criarServico("Servico X", "Descricao", BigDecimal.ZERO, 60, null, null, null, null));
+				() -> criarServico("Servico X", "Descricao", BigDecimal.ZERO, null, null, null, null));
 	}
 
 	@Test
 	void shouldRejectNegativeValor() {
 		assertThrows(IllegalArgumentException.class,
-				() -> criarServico("Servico X", "Descricao", new BigDecimal("-1.00"), 60, null, null, null, null));
-	}
-
-	@Test
-	void shouldRejectZeroTempoEstimado() {
-		assertThrows(IllegalArgumentException.class,
-				() -> criarServico("Servico X", "Descricao", new BigDecimal("100.00"), 0, null, null, null, null));
-	}
-
-	@Test
-	void shouldRejectNegativeTempoEstimado() {
-		assertThrows(IllegalArgumentException.class,
-				() -> criarServico("Servico X", "Descricao", new BigDecimal("100.00"), -10, null, null, null, null));
+				() -> criarServico("Servico X", "Descricao", new BigDecimal("-1.00"), null, null, null, null));
 	}
 
 	@Test
 	void shouldRejectZeroGarantiaDias() {
 		assertThrows(IllegalArgumentException.class,
-				() -> criarServico("Servico X", "Descricao", new BigDecimal("100.00"), 60, null, null, 0, null));
+				() -> criarServico("Servico X", "Descricao", new BigDecimal("100.00"), null, null, 0, null));
 	}
 
 	@Test
 	void shouldRejectNegativeGarantiaDias() {
 		assertThrows(IllegalArgumentException.class,
-				() -> criarServico("Servico X", "Descricao", new BigDecimal("100.00"), 60, null, null, -5, null));
+				() -> criarServico("Servico X", "Descricao", new BigDecimal("100.00"), null, null, -5, null));
 	}
 
 	@Test
 	void shouldSanitizeNomeWithExtraSpaces() {
-		Servico servico = criarServico("  Troca  de  oleo  ", "Descricao", new BigDecimal("100.00"), 60, null, null,
-				null, null);
+		Servico servico = criarServico("  Troca  de  oleo  ", "Descricao", new BigDecimal("100.00"), null, null, null,
+				null);
 
 		assertEquals("Troca de oleo", servico.getNome());
 	}
 
 	@Test
 	void shouldAcceptNullGarantiaDias() {
-		Servico servico = criarServico("Servico sem garantia", "Descricao", new BigDecimal("50.00"), 30, null, null,
-				null, null);
+		Servico servico = criarServico("Servico sem garantia", "Descricao", new BigDecimal("50.00"), null, null, null,
+				null);
 
 		assertNull(servico.getGarantiaDias());
 	}
 
 	@Test
 	void shouldUpdateDataAndTimestamp() {
-		Servico servico = criarServico("Nome original", "Descricao original", new BigDecimal("100.00"), 60,
+		Servico servico = criarServico("Nome original", "Descricao original", new BigDecimal("100.00"),
 				CategoriaServico.MECANICA, NivelComplexidade.MEDIA, 30, "Obs original");
 		LocalDateTime anteriorAtualizacao = servico.getDataUltimaAtualizacao();
 
-		servico.atualizarDados("Nome atualizado", "Descricao atualizada", new BigDecimal("200.00"), 90,
+		servico.atualizarDados("Nome atualizado", "Descricao atualizada", new BigDecimal("200.00"),
 				CategoriaServico.ELETRICA, NivelComplexidade.ALTA, 60, "Nova obs");
 
 		assertEquals("Nome atualizado", servico.getNome());
 		assertEquals("Descricao atualizada", servico.getDescricao());
 		assertEquals(new BigDecimal("200.00"), servico.getValor());
-		assertEquals(90, servico.getTempoEstimadoMinutos());
 		assertEquals(CategoriaServico.ELETRICA, servico.getCategoria());
 		assertEquals(NivelComplexidade.ALTA, servico.getNivelComplexidade());
 		assertEquals(60, servico.getGarantiaDias());
@@ -176,11 +161,10 @@ class ServicoTest {
 				|| servico.getDataUltimaAtualizacao().isEqual(anteriorAtualizacao));
 	}
 
-	private Servico criarServico(String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos,
-			CategoriaServico categoria, NivelComplexidade nivelComplexidade, Integer garantiaDias,
-			String observacoesTecnicas) {
-		return new Servico(null, nome, descricao, valor, tempoEstimadoMinutos, categoria, nivelComplexidade,
-				garantiaDias, observacoesTecnicas);
+	private Servico criarServico(String nome, String descricao, BigDecimal valor, CategoriaServico categoria,
+			NivelComplexidade nivelComplexidade, Integer garantiaDias, String observacoesTecnicas) {
+		return new Servico(null, nome, descricao, valor, categoria, nivelComplexidade, garantiaDias,
+				observacoesTecnicas);
 	}
 
 }

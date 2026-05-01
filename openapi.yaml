@@ -534,29 +534,6 @@ paths:
         '500':
           $ref: '#/components/responses/Response500InternalServerError'
 
-  /api/v1/servicos/{id}/tempo-medio:
-    parameters:
-      - $ref: '#/components/parameters/idPath'
-    get:
-      tags: [Servicos]
-      operationId: servicosBuscarTempoMedio
-      summary: Buscar tempo médio de execução do serviço
-      description: |
-        Retorna o tempo estimado e o tempo medio real de execucao do servico.
-        Atualmente o `tempoMedioRealMinutos` retorna `null` ate a entrega da
-        funcionalidade de Ordens de Servico (issue #5).
-      responses:
-        '200':
-          description: Tempo médio do serviço
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TempoMedioServicoResponse'
-        '404':
-          $ref: '#/components/responses/Response404NotFound'
-        '500':
-          $ref: '#/components/responses/Response500InternalServerError'
-
   /api/v1/servicos/{id}/reativar:
     parameters:
       - $ref: '#/components/parameters/idPath'
@@ -1076,7 +1053,7 @@ components:
 
     CadastroServicoRequest:
       type: object
-      required: [nome, descricao, valor, tempoEstimadoMinutos]
+      required: [nome, descricao, valor]
       properties:
         nome:
           type: string
@@ -1093,10 +1070,6 @@ components:
           pattern: '^\d+(\.\d{1,2})?$'
           description: Valor monetário maior que zero (BigDecimal serializado como string para preservar precisão)
           example: '150.00'
-        tempoEstimadoMinutos:
-          type: integer
-          exclusiveMinimum: 0
-          example: 60
         categoria:
           $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
@@ -1115,7 +1088,7 @@ components:
 
     AtualizarServicoRequest:
       type: object
-      required: [nome, descricao, valor, tempoEstimadoMinutos]
+      required: [nome, descricao, valor]
       properties:
         nome:
           type: string
@@ -1130,10 +1103,6 @@ components:
           type: string
           pattern: '^\d+(\.\d{1,2})?$'
           example: '150.00'
-        tempoEstimadoMinutos:
-          type: integer
-          exclusiveMinimum: 0
-          example: 60
         categoria:
           $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
@@ -1162,9 +1131,6 @@ components:
           type: string
           pattern: '^\d+(\.\d{1,2})?$'
           example: '150.00'
-        tempoEstimadoMinutos:
-          type: integer
-          example: 60
         categoria:
           $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
@@ -1212,23 +1178,3 @@ components:
           type: integer
           minimum: 0
 
-    TempoMedioServicoResponse:
-      type: object
-      required: [servicoId, tempoEstimadoMinutos]
-      properties:
-        servicoId:
-          type: string
-          format: uuid
-        tempoEstimadoMinutos:
-          type: integer
-          example: 60
-        tempoMedioRealMinutos:
-          type:
-            - integer
-            - 'null'
-          description: Tempo médio real em minutos; null quando não disponível
-        disponivelAPartirDe:
-          type:
-            - string
-            - 'null'
-          example: 'Disponivel apos implementacao de Ordens de Servico (Issue #5)'

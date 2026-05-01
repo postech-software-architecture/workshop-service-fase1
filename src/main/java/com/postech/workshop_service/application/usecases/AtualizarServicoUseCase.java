@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Caso de uso responsavel por atualizar os dados de um servico existente no catalogo.
+ * Caso de uso responsável por atualizar os dados de um serviço existente no catálogo.
  */
 @Service
 public class AtualizarServicoUseCase {
@@ -21,30 +21,28 @@ public class AtualizarServicoUseCase {
 	private final ServicoRepository servicoRepository;
 
 	/**
-	 * Construtor para injecao de dependencias.
-	 * @param servicoRepository repositorio de servicos.
+	 * Construtor para injeção de dependências.
+	 * @param servicoRepository repositório de serviços.
 	 */
 	public AtualizarServicoUseCase(ServicoRepository servicoRepository) {
 		this.servicoRepository = servicoRepository;
 	}
 
 	/**
-	 * Executa a atualizacao de um servico existente no catalogo.
-	 * @param id identificador do servico.
-	 * @param nome novo nome do servico.
-	 * @param descricao nova descricao do servico.
-	 * @param valor novo valor cobrado pelo servico.
-	 * @param tempoEstimadoMinutos novo tempo estimado de execucao em minutos.
-	 * @param categoria nova categoria do servico.
-	 * @param nivelComplexidade novo nivel de complexidade do servico.
+	 * Executa a atualização de um serviço existente no catálogo.
+	 * @param id identificador do serviço.
+	 * @param nome novo nome do serviço.
+	 * @param descricao nova descrição do serviço.
+	 * @param valor novo valor cobrado pelo serviço.
+	 * @param categoria nova categoria do serviço.
+	 * @param nivelComplexidade novo nível de complexidade do serviço.
 	 * @param garantiaDias nova quantidade de dias de garantia (nullable).
-	 * @param observacoesTecnicas novas observacoes tecnicas opcionais.
-	 * @return servico atualizado.
+	 * @param observacoesTecnicas novas observações técnicas opcionais.
+	 * @return serviço atualizado.
 	 */
 	@Transactional
-	public Servico executar(UUID id, String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos,
-			CategoriaServico categoria, NivelComplexidade nivelComplexidade, Integer garantiaDias,
-			String observacoesTecnicas) {
+	public Servico executar(UUID id, String nome, String descricao, BigDecimal valor, CategoriaServico categoria,
+			NivelComplexidade nivelComplexidade, Integer garantiaDias, String observacoesTecnicas) {
 		Servico servico = servicoRepository.buscarPorId(id, true)
 			.orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado com o ID informado."));
 
@@ -53,8 +51,8 @@ public class AtualizarServicoUseCase {
 				throw new RegraDeNegocioException("Já existe um serviço ativo cadastrado com o nome informado.");
 			}
 
-			servico.atualizarDados(nome, descricao, valor, tempoEstimadoMinutos, categoria, nivelComplexidade,
-					garantiaDias, observacoesTecnicas);
+			servico.atualizarDados(nome, descricao, valor, categoria, nivelComplexidade, garantiaDias,
+					observacoesTecnicas);
 
 			return servicoRepository.salvar(servico);
 		}

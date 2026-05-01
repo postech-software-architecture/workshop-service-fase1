@@ -31,7 +31,7 @@ class ListarServicosUseCaseTest {
 
 	@Test
 	void shouldReturnPaginatedServicos() {
-		Servico servico = criarServico(UUID.randomUUID(), "Troca de oleo", "Descricao", new BigDecimal("100.00"), 60);
+		Servico servico = criarServico(UUID.randomUUID(), "Troca de oleo", "Descricao", new BigDecimal("100.00"));
 		when(servicoRepository.listar(0, 20, null, null, false))
 			.thenReturn(new PaginaResultado<>(List.of(servico), 1, 1, 0, 20));
 
@@ -63,8 +63,8 @@ class ListarServicosUseCaseTest {
 		verify(servicoRepository).listar(2, 5, "oleo", CategoriaServico.MECANICA, true);
 	}
 
-	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor, int tempoEstimadoMinutos) {
-		return new Servico(id, nome, descricao, valor, tempoEstimadoMinutos, null, null, null, null);
+	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor) {
+		return new Servico(id, nome, descricao, valor, null, null, null, null);
 	}
 
 }

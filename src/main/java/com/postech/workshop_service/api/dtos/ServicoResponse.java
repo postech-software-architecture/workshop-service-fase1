@@ -31,8 +31,6 @@ public class ServicoResponse {
 
 	private BigDecimal valor;
 
-	private int tempoEstimadoMinutos;
-
 	private CategoriaServico categoria;
 
 	private NivelComplexidade nivelComplexidade;

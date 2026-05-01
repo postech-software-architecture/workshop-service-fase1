@@ -4,7 +4,6 @@ import com.postech.workshop_service.api.dtos.AtualizarServicoRequest;
 import com.postech.workshop_service.api.dtos.CadastroServicoRequest;
 import com.postech.workshop_service.api.dtos.PaginaServicosResponse;
 import com.postech.workshop_service.api.dtos.ServicoResponse;
-import com.postech.workshop_service.api.dtos.TempoMedioServicoResponse;
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.application.usecases.AtualizarServicoUseCase;
 import com.postech.workshop_service.application.usecases.BuscarServicoPorIdUseCase;
@@ -90,8 +89,8 @@ public class ServicoController {
 	@Operation(summary = "Cadastrar serviço no catálogo")
 	public ResponseEntity<ServicoResponse> criar(@RequestBody @Valid CadastroServicoRequest request) {
 		Servico servico = criarServicoUseCase.executar(request.getNome(), request.getDescricao(), request.getValor(),
-				request.getTempoEstimadoMinutos(), request.getCategoria(), request.getNivelComplexidade(),
-				request.getGarantiaDias(), request.getObservacoesTecnicas());
+				request.getCategoria(), request.getNivelComplexidade(), request.getGarantiaDias(),
+				request.getObservacoesTecnicas());
 		return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(servico));
 	}
 
@@ -171,8 +170,8 @@ public class ServicoController {
 	public ResponseEntity<ServicoResponse> atualizar(@PathVariable UUID id,
 			@RequestBody @Valid AtualizarServicoRequest request) {
 		Servico servico = atualizarServicoUseCase.executar(id, request.getNome(), request.getDescricao(),
-				request.getValor(), request.getTempoEstimadoMinutos(), request.getCategoria(),
-				request.getNivelComplexidade(), request.getGarantiaDias(), request.getObservacoesTecnicas());
+				request.getValor(), request.getCategoria(), request.getNivelComplexidade(), request.getGarantiaDias(),
+				request.getObservacoesTecnicas());
 		return ResponseEntity.ok(toResponse(servico));
 	}
 
@@ -199,31 +198,12 @@ public class ServicoController {
 		return ResponseEntity.ok(toResponse(servico));
 	}
 
-	/**
-	 * Retorna informacoes de tempo estimado e medio de execucao do servico.
-	 * @param id identificador do servico.
-	 * @return resposta com tempo estimado e medio.
-	 */
-	@GetMapping("/{id}/tempo-medio")
-	@Operation(summary = "Buscar tempo médio de execução do serviço")
-	public ResponseEntity<TempoMedioServicoResponse> buscarTempoMedio(@PathVariable UUID id) {
-		Servico servico = buscarServicoPorIdUseCase.executar(id, false)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado com o ID informado."));
-		return ResponseEntity.ok(TempoMedioServicoResponse.builder()
-			.servicoId(servico.getId())
-			.tempoEstimadoMinutos(servico.getTempoEstimadoMinutos())
-			.tempoMedioRealMinutos(null)
-			.disponivelAPartirDe("Disponivel apos implementacao de Ordens de Servico (Issue #5)")
-			.build());
-	}
-
 	private ServicoResponse toResponse(Servico servico) {
 		return ServicoResponse.builder()
 			.id(servico.getId())
 			.nome(servico.getNome())
 			.descricao(servico.getDescricao())
 			.valor(servico.getValor())
-			.tempoEstimadoMinutos(servico.getTempoEstimadoMinutos())
 			.categoria(servico.getCategoria())
 			.nivelComplexidade(servico.getNivelComplexidade())
 			.garantiaDias(servico.getGarantiaDias())
