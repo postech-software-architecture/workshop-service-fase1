@@ -1129,9 +1129,8 @@ components:
         descricao:
           type: string
         valor:
-          type: string
-          pattern: '^\d+(\.\d{1,2})?$'
-          example: '150.00'
+          type: number
+          example: 150.00
         categoria:
           $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
