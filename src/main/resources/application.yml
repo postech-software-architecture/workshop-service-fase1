@@ -17,3 +17,8 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+seguranca:
+  jwt:
+    secret: ${JWT_SECRET:01234567890123456789012345678901}
+    expiracao-access-segundos: ${JWT_ACCESS_EXPIRATION_SECONDS:3600}
+    expiracao-refresh-dias: ${JWT_REFRESH_EXPIRATION_DAYS:7}

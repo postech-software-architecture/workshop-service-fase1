@@ -25,9 +25,9 @@
 
 **Purpose**: Preparar dependencias, configuracao e contratos base da feature
 
-- [ ] T001 Adicionar dependencias JWT e ajustes de build em `pom.xml`
-- [ ] T002 Configurar propriedades de seguranca JWT e expiracao em `src/main/resources/application.yml`
-- [ ] T003 [P] Atualizar o contrato de autenticacao conforme as clarificacoes em `specs/006-jwt-auth-rbac/contracts/auth-api.yaml`
+- [X] T001 Adicionar dependencias JWT e ajustes de build em `pom.xml`
+- [X] T002 Configurar propriedades de seguranca JWT e expiracao em `src/main/resources/application.yml`
+- [X] T003 [P] Atualizar o contrato de autenticacao conforme as clarificacoes em `specs/006-jwt-auth-rbac/contracts/auth-api.yaml`
 
 ---
 
@@ -37,16 +37,16 @@
 
 **CRITICAL**: Nenhuma historia pode comecar antes desta fase
 
-- [ ] T004 Criar migration de usuarios, roles e refresh tokens em `src/main/resources/db/migration/V0.20260501190000__create_table_usuarios_roles_refresh_tokens.sql`
-- [ ] T005 [P] Criar enum de roles em `src/main/java/com/postech/workshop_service/domain/enums/Role.java`
-- [ ] T006 [P] Criar entidade de dominio `Usuario` em `src/main/java/com/postech/workshop_service/domain/entities/Usuario.java`
-- [ ] T007 [P] Criar entidade de dominio `RefreshToken` em `src/main/java/com/postech/workshop_service/domain/entities/RefreshToken.java`
-- [ ] T008 [P] Criar interfaces de repositorio em `src/main/java/com/postech/workshop_service/domain/repositories/UsuarioRepository.java` e `src/main/java/com/postech/workshop_service/domain/repositories/RefreshTokenRepository.java`
-- [ ] T009 [P] Criar entidades JPA em `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/UsuarioJpaEntity.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/RefreshTokenJpaEntity.java`
-- [ ] T010 [P] Criar repositorios Spring Data em `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaUsuarioRepository.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaRefreshTokenRepository.java`
-- [ ] T011 [P] Criar mapeadores e implementacoes de repositorio em `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/UsuarioMapper.java`, `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/RefreshTokenMapper.java`, `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/UsuarioRepositoryImpl.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/RefreshTokenRepositoryImpl.java`
-- [ ] T012 Implementar servico de tokens JWT e principal autenticado em `src/main/java/com/postech/workshop_service/infrastructure/security/JwtTokenService.java`, `src/main/java/com/postech/workshop_service/infrastructure/security/UsuarioAutenticadoPrincipal.java` e `src/main/java/com/postech/workshop_service/infrastructure/security/DetalhesUsuarioServiceImpl.java`
-- [ ] T013 Implementar filtro JWT, handlers 401/403 e endurecer a configuracao global em `src/main/java/com/postech/workshop_service/infrastructure/security/JwtAuthenticationFilter.java`, `src/main/java/com/postech/workshop_service/infrastructure/security/JwtAuthenticationEntryPoint.java`, `src/main/java/com/postech/workshop_service/infrastructure/security/JwtAccessDeniedHandler.java` e `src/main/java/com/postech/workshop_service/infrastructure/config/SecurityConfig.java`
+- [X] T004 Criar migration de usuarios, roles e refresh tokens em `src/main/resources/db/migration/V0.20260501190000__create_table_usuarios_roles_refresh_tokens.sql`
+- [X] T005 [P] Criar enum de roles em `src/main/java/com/postech/workshop_service/domain/enums/Role.java`
+- [X] T006 [P] Criar entidade de dominio `Usuario` em `src/main/java/com/postech/workshop_service/domain/entities/Usuario.java`
+- [X] T007 [P] Criar entidade de dominio `RefreshToken` em `src/main/java/com/postech/workshop_service/domain/entities/RefreshToken.java`
+- [X] T008 [P] Criar interfaces de repositorio em `src/main/java/com/postech/workshop_service/domain/repositories/UsuarioRepository.java` e `src/main/java/com/postech/workshop_service/domain/repositories/RefreshTokenRepository.java`
+- [X] T009 [P] Criar entidades JPA em `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/UsuarioJpaEntity.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/RefreshTokenJpaEntity.java`
+- [X] T010 [P] Criar repositorios Spring Data em `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaUsuarioRepository.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaRefreshTokenRepository.java`
+- [X] T011 [P] Criar mapeadores e implementacoes de repositorio em `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/UsuarioMapper.java`, `src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/RefreshTokenMapper.java`, `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/UsuarioRepositoryImpl.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/RefreshTokenRepositoryImpl.java`
+- [X] T012 Implementar servico de tokens JWT e principal autenticado em `src/main/java/com/postech/workshop_service/infrastructure/security/JwtTokenService.java`, `src/main/java/com/postech/workshop_service/infrastructure/security/UsuarioAutenticadoPrincipal.java` e `src/main/java/com/postech/workshop_service/infrastructure/security/DetalhesUsuarioServiceImpl.java`
+- [X] T013 Implementar filtro JWT, handlers 401/403 e endurecer a configuracao global em `src/main/java/com/postech/workshop_service/infrastructure/security/JwtAuthenticationFilter.java`, `src/main/java/com/postech/workshop_service/infrastructure/security/JwtAuthenticationEntryPoint.java`, `src/main/java/com/postech/workshop_service/infrastructure/security/JwtAccessDeniedHandler.java` e `src/main/java/com/postech/workshop_service/infrastructure/config/SecurityConfig.java`
 
 **Checkpoint**: Fundacao pronta - login JWT, persistencia de refresh token e pipeline de seguranca habilitados
 
@@ -60,18 +60,18 @@
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] Criar teste de integracao para `POST /api/auth/login` e `GET /api/auth/me` em `src/test/java/com/postech/workshop_service/api/controllers/AuthControllerIT.java`
-- [ ] T015 [P] [US1] Criar testes unitarios do caso de uso de login em `src/test/java/com/postech/workshop_service/application/usecases/RealizarLoginUseCaseTest.java`
-- [ ] T016 [P] [US1] Criar testes unitarios da consulta ao usuario autenticado em `src/test/java/com/postech/workshop_service/application/usecases/BuscarUsuarioAutenticadoUseCaseTest.java`
+- [X] T014 [P] [US1] Criar teste de integracao para `POST /api/auth/login` e `GET /api/auth/me` em `src/test/java/com/postech/workshop_service/api/controllers/AuthControllerIT.java`
+- [X] T015 [P] [US1] Criar testes unitarios do caso de uso de login em `src/test/java/com/postech/workshop_service/application/usecases/RealizarLoginUseCaseTest.java`
+- [X] T016 [P] [US1] Criar testes unitarios da consulta ao usuario autenticado em `src/test/java/com/postech/workshop_service/application/usecases/BuscarUsuarioAutenticadoUseCaseTest.java`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Criar DTOs de autenticacao em `src/main/java/com/postech/workshop_service/api/dtos/LoginRequest.java`, `src/main/java/com/postech/workshop_service/api/dtos/AuthTokensResponse.java` e `src/main/java/com/postech/workshop_service/api/dtos/UsuarioAutenticadoResponse.java`
-- [ ] T018 [P] [US1] Criar excecoes de autenticacao em `src/main/java/com/postech/workshop_service/application/exceptions/CredenciaisInvalidasException.java` e `src/main/java/com/postech/workshop_service/application/exceptions/ContaInativaException.java`
-- [ ] T019 [US1] Implementar caso de uso de login em `src/main/java/com/postech/workshop_service/application/usecases/RealizarLoginUseCase.java`
-- [ ] T020 [US1] Implementar caso de uso de consulta do usuario autenticado em `src/main/java/com/postech/workshop_service/application/usecases/BuscarUsuarioAutenticadoUseCase.java`
-- [ ] T021 [US1] Implementar endpoints `/api/auth/login` e `/api/auth/me` com Javadoc/OpenAPI em `src/main/java/com/postech/workshop_service/api/controllers/AuthController.java`
-- [ ] T022 [US1] Integrar excecoes de login ao tratamento HTTP em `src/main/java/com/postech/workshop_service/api/controllers/GlobalExceptionHandler.java`
+- [X] T017 [P] [US1] Criar DTOs de autenticacao em `src/main/java/com/postech/workshop_service/api/dtos/LoginRequest.java`, `src/main/java/com/postech/workshop_service/api/dtos/AuthTokensResponse.java` e `src/main/java/com/postech/workshop_service/api/dtos/UsuarioAutenticadoResponse.java`
+- [X] T018 [P] [US1] Criar excecoes de autenticacao em `src/main/java/com/postech/workshop_service/application/exceptions/CredenciaisInvalidasException.java` e `src/main/java/com/postech/workshop_service/application/exceptions/ContaInativaException.java`
+- [X] T019 [US1] Implementar caso de uso de login em `src/main/java/com/postech/workshop_service/application/usecases/RealizarLoginUseCase.java`
+- [X] T020 [US1] Implementar caso de uso de consulta do usuario autenticado em `src/main/java/com/postech/workshop_service/application/usecases/BuscarUsuarioAutenticadoUseCase.java`
+- [X] T021 [US1] Implementar endpoints `/api/auth/login` e `/api/auth/me` com Javadoc/OpenAPI em `src/main/java/com/postech/workshop_service/api/controllers/AuthController.java`
+- [X] T022 [US1] Integrar excecoes de login ao tratamento HTTP em `src/main/java/com/postech/workshop_service/api/controllers/GlobalExceptionHandler.java`
 
 **Checkpoint**: User Story 1 funcional e validavel de forma independente
 
@@ -85,17 +85,17 @@
 
 ### Tests for User Story 2
 
-- [ ] T023 [P] [US2] Criar teste de integracao para `/api/auth/refresh` e `/api/auth/logout` em `src/test/java/com/postech/workshop_service/api/controllers/AuthRefreshLogoutIT.java`
-- [ ] T024 [P] [US2] Criar testes unitarios do refresh rotativo em `src/test/java/com/postech/workshop_service/application/usecases/RenovarSessaoUseCaseTest.java`
-- [ ] T025 [P] [US2] Criar testes unitarios do logout por sessao em `src/test/java/com/postech/workshop_service/application/usecases/EncerrarSessaoUseCaseTest.java`
+- [X] T023 [P] [US2] Criar teste de integracao para `/api/auth/refresh` e `/api/auth/logout` em `src/test/java/com/postech/workshop_service/api/controllers/AuthRefreshLogoutIT.java`
+- [X] T024 [P] [US2] Criar testes unitarios do refresh rotativo em `src/test/java/com/postech/workshop_service/application/usecases/RenovarSessaoUseCaseTest.java`
+- [X] T025 [P] [US2] Criar testes unitarios do logout por sessao em `src/test/java/com/postech/workshop_service/application/usecases/EncerrarSessaoUseCaseTest.java`
 
 ### Implementation for User Story 2
 
-- [ ] T026 [P] [US2] Criar DTOs e excecao de refresh/logout em `src/main/java/com/postech/workshop_service/api/dtos/RefreshTokenRequest.java`, `src/main/java/com/postech/workshop_service/api/dtos/LogoutRequest.java` e `src/main/java/com/postech/workshop_service/application/exceptions/TokenInvalidoException.java`
-- [ ] T027 [US2] Implementar caso de uso de renovacao de sessao em `src/main/java/com/postech/workshop_service/application/usecases/RenovarSessaoUseCase.java`
-- [ ] T028 [US2] Implementar caso de uso de encerramento de sessao em `src/main/java/com/postech/workshop_service/application/usecases/EncerrarSessaoUseCase.java`
-- [ ] T029 [US2] Atualizar `AuthController` com `/api/auth/refresh` e `/api/auth/logout` em `src/main/java/com/postech/workshop_service/api/controllers/AuthController.java`
-- [ ] T030 [US2] Ajustar `JwtTokenService` e `RefreshTokenRepositoryImpl` para rotacao e multiplas sessoes em `src/main/java/com/postech/workshop_service/infrastructure/security/JwtTokenService.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/RefreshTokenRepositoryImpl.java`
+- [X] T026 [P] [US2] Criar DTOs e excecao de refresh/logout em `src/main/java/com/postech/workshop_service/api/dtos/RefreshTokenRequest.java`, `src/main/java/com/postech/workshop_service/api/dtos/LogoutRequest.java` e `src/main/java/com/postech/workshop_service/application/exceptions/TokenInvalidoException.java`
+- [X] T027 [US2] Implementar caso de uso de renovacao de sessao em `src/main/java/com/postech/workshop_service/application/usecases/RenovarSessaoUseCase.java`
+- [X] T028 [US2] Implementar caso de uso de encerramento de sessao em `src/main/java/com/postech/workshop_service/application/usecases/EncerrarSessaoUseCase.java`
+- [X] T029 [US2] Atualizar `AuthController` com `/api/auth/refresh` e `/api/auth/logout` em `src/main/java/com/postech/workshop_service/api/controllers/AuthController.java`
+- [X] T030 [US2] Ajustar `JwtTokenService` e `RefreshTokenRepositoryImpl` para rotacao e multiplas sessoes em `src/main/java/com/postech/workshop_service/infrastructure/security/JwtTokenService.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/RefreshTokenRepositoryImpl.java`
 
 **Checkpoint**: User Stories 1 e 2 funcionam isoladamente e em conjunto
 
@@ -109,16 +109,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Criar teste de integracao de `401/403` e rotas publicas em `src/test/java/com/postech/workshop_service/api/controllers/SecurityAccessIT.java`
-- [ ] T032 [P] [US3] Criar teste de integracao de escopo de dados proprios do cliente em `src/test/java/com/postech/workshop_service/api/controllers/ClienteSecurityIT.java`
-- [ ] T033 [P] [US3] Criar teste unitario do vinculo 1:1 cliente-conta em `src/test/java/com/postech/workshop_service/domain/entities/UsuarioTest.java`
+- [X] T031 [P] [US3] Criar teste de integracao de `401/403` e rotas publicas em `src/test/java/com/postech/workshop_service/api/controllers/SecurityAccessIT.java`
+- [X] T032 [P] [US3] Criar teste de integracao de escopo de dados proprios do cliente em `src/test/java/com/postech/workshop_service/api/controllers/ClienteSecurityIT.java`
+- [X] T033 [P] [US3] Criar teste unitario do vinculo 1:1 cliente-conta em `src/test/java/com/postech/workshop_service/domain/entities/UsuarioTest.java`
 
 ### Implementation for User Story 3
 
-- [ ] T034 [US3] Aplicar autorizacao por role em `src/main/java/com/postech/workshop_service/api/controllers/ClienteController.java` e `src/main/java/com/postech/workshop_service/api/controllers/VeiculoController.java`
-- [ ] T035 [US3] Aplicar autorizacao por role em `src/main/java/com/postech/workshop_service/api/controllers/ServicoController.java`, `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java` e `src/main/java/com/postech/workshop_service/api/controllers/EstoqueController.java`
-- [ ] T036 [US3] Implementar regra de ownership do papel `CLIENTE` em `src/main/java/com/postech/workshop_service/application/usecases/BuscarUsuarioAutenticadoUseCase.java`, `src/main/java/com/postech/workshop_service/domain/entities/Usuario.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/UsuarioJpaEntity.java`
-- [ ] T037 [US3] Expor o endpoint publico de rastreamento sem autenticacao e restringir o restante em `src/main/java/com/postech/workshop_service/infrastructure/config/SecurityConfig.java`
+- [X] T034 [US3] Aplicar autorizacao por role em `src/main/java/com/postech/workshop_service/api/controllers/ClienteController.java` e `src/main/java/com/postech/workshop_service/api/controllers/VeiculoController.java`
+- [X] T035 [US3] Aplicar autorizacao por role em `src/main/java/com/postech/workshop_service/api/controllers/ServicoController.java`, `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java` e `src/main/java/com/postech/workshop_service/api/controllers/EstoqueController.java`
+- [X] T036 [US3] Implementar regra de ownership do papel `CLIENTE` em `src/main/java/com/postech/workshop_service/application/usecases/BuscarUsuarioAutenticadoUseCase.java`, `src/main/java/com/postech/workshop_service/domain/entities/Usuario.java` e `src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/UsuarioJpaEntity.java`
+- [X] T037 [US3] Expor o endpoint publico de rastreamento sem autenticacao e restringir o restante em `src/main/java/com/postech/workshop_service/infrastructure/config/SecurityConfig.java`
 
 **Checkpoint**: Todas as historias estao independentes e funcionalmente completas
 
@@ -128,9 +128,9 @@
 
 **Purpose**: Fechamentos que afetam multiplas historias
 
-- [ ] T038 [P] Sincronizar `quickstart.md` com login por `username/email`, logout por sessao e multiplas sessoes em `specs/006-jwt-auth-rbac/quickstart.md`
-- [ ] T039 [P] Sincronizar `data-model.md` com o vinculo 1:1 do papel `CLIENTE` em `specs/006-jwt-auth-rbac/data-model.md`
-- [ ] T040 Validar a suite da feature e ajustar documentacao final em `pom.xml` e `specs/006-jwt-auth-rbac/contracts/auth-api.yaml`
+- [X] T038 [P] Sincronizar `quickstart.md` com login por `username/email`, logout por sessao e multiplas sessoes em `specs/006-jwt-auth-rbac/quickstart.md`
+- [X] T039 [P] Sincronizar `data-model.md` com o vinculo 1:1 do papel `CLIENTE` em `specs/006-jwt-auth-rbac/data-model.md`
+- [X] T040 Validar a suite da feature e ajustar documentacao final em `pom.xml` e `specs/006-jwt-auth-rbac/contracts/auth-api.yaml`
 
 ---
 

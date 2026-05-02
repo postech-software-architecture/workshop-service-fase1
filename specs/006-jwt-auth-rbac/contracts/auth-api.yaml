@@ -9,6 +9,7 @@ paths:
   /api/auth/login:
     post:
       summary: Inicia sessao de usuario
+      description: Aceita username ou email no campo `username` do payload.
       tags:
         - Autenticacao
       requestBody:
@@ -21,6 +22,10 @@ paths:
               padrao:
                 value:
                   username: admin
+                  password: senha123
+              porEmail:
+                value:
+                  username: admin@teste.com
                   password: senha123
       responses:
         '200':
@@ -44,6 +49,7 @@ paths:
   /api/auth/refresh:
     post:
       summary: Renova o access token a partir do refresh token
+      description: A renovacao e rotativa e revoga o refresh token anterior da sessao.
       tags:
         - Autenticacao
       requestBody:
@@ -59,6 +65,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthTokensResponse'
+              examples:
+                rotacao:
+                  value:
+                    accessToken: jwt-novo
+                    refreshToken: refresh-token-novo
+                    expiresIn: 3600
         '401':
           description: Refresh token expirado, inexistente ou revogado
           content:
@@ -74,6 +86,7 @@ paths:
   /api/auth/logout:
     post:
       summary: Encerra a capacidade de renovacao da sessao
+      description: Revoga apenas a sessao identificada pelo refresh token enviado.
       tags:
         - Autenticacao
       requestBody:

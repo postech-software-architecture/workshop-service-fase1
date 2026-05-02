@@ -12,10 +12,10 @@ Validar localmente o fluxo completo de autenticacao, renovacao, logout e proteca
    - `admin` com perfil `ADMINISTRADOR`
    - `atendente1` com perfil `ATENDENTE`
    - `mecanico1` com perfil `MECANICO`
-   - `cliente1` com perfil `CLIENTE`
+   - `cliente1` com perfil `CLIENTE` e vinculado 1:1 a um registro de `Cliente`
 4. Iniciar a aplicacao com `mvn spring-boot:run`.
 
-## Fluxo 1: Login bem-sucedido
+## Fluxo 1: Login bem-sucedido por username ou email
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
@@ -26,12 +26,15 @@ curl -X POST http://localhost:8080/api/auth/login \
   }'
 ```
 
+Tambem deve funcionar enviando o email no campo `username`, por exemplo `admin@teste.com`.
+
 **Resultado esperado**:
 
 - Retorno `200 OK`
 - `accessToken` preenchido
 - `refreshToken` preenchido
 - `expiresIn` com valor positivo
+- `accessToken` com claims `sub`, `username`, `roles`, `iat` e `exp`
 
 ## Fluxo 2: Consultar usuario autenticado
 
@@ -59,9 +62,11 @@ curl -X POST http://localhost:8080/api/auth/refresh \
 
 - Retorno `200 OK`
 - Novo `accessToken`
+- Novo `refreshToken`
 - Mesmo usuario/perfis da sessao original
+- O refresh token anterior deixa de ser aceito
 
-## Fluxo 4: Logout
+## Fluxo 4: Logout por sessao
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/logout \
@@ -73,8 +78,9 @@ curl -X POST http://localhost:8080/api/auth/logout \
 
 **Resultado esperado**:
 
-- Retorno `204 No Content` ou `200 OK`, conforme contrato final implementado
-- O refresh token informado fica inutilizavel
+- Retorno `204 No Content`
+- Apenas o refresh token informado fica inutilizavel
+- Outras sessoes ativas do mesmo usuario continuam validas
 
 ## Fluxo 5: Confirmar refresh revogado
 
@@ -84,7 +90,18 @@ Repetir a chamada de refresh com o mesmo token revogado.
 
 - Retorno `401 Unauthorized`
 
-## Fluxo 6: Validar 401 em rota protegida
+## Fluxo 6: Validar multiplas sessoes
+
+1. Efetuar dois logins consecutivos com o mesmo usuario.
+2. Executar logout apenas com o `refreshToken` da primeira sessao.
+3. Tentar renovar as duas sessoes.
+
+**Resultado esperado**:
+
+- A primeira sessao retorna `401 Unauthorized` no refresh
+- A segunda sessao continua retornando `200 OK`
+
+## Fluxo 7: Validar 401 em rota protegida
 
 ```bash
 curl http://localhost:8080/api/v1/clientes
@@ -94,7 +111,7 @@ curl http://localhost:8080/api/v1/clientes
 
 - Retorno `401 Unauthorized`
 
-## Fluxo 7: Validar 403 por perfil
+## Fluxo 8: Validar 403 por perfil
 
 1. Autenticar com um usuario de perfil `CLIENTE`.
 2. Chamar uma rota restrita a administracao, por exemplo cadastro administrativo futuro ou um endpoint marcado para `ADMINISTRADOR`.
@@ -103,7 +120,7 @@ curl http://localhost:8080/api/v1/clientes
 
 - Retorno `403 Forbidden`
 
-## Fluxo 8: Validar rota publica
+## Fluxo 9: Validar rota publica
 
 ```bash
 curl http://localhost:8080/api/public/ordem-servico/rastreamento?codigo=OS-123
