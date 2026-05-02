@@ -1,0 +1,50 @@
+sequenceDiagram
+    autonumber
+    actor U as Usuario / Swagger
+    participant CTRL as Controller protegida
+    participant JAF as JwtAuthenticationFilter
+    participant JTS as JwtTokenService
+    participant DUS as DetalhesUsuarioServiceImpl
+    participant UR as UsuarioRepository
+    participant SC as SecurityContextHolder
+    participant JEP as JwtAuthenticationEntryPoint
+    participant JADH as JwtAccessDeniedHandler
+
+    U->>CTRL: Requisicao protegida\nAuthorization: Bearer {accessToken}
+    CTRL->>JAF: passa pelo filtro JWT
+    JAF->>JAF: ler header Authorization
+
+    alt Header ausente ou sem Bearer
+        JAF-->>CTRL: segue sem autenticar
+        CTRL->>JEP: recurso exige autenticacao
+        JEP-->>U: 401 Unauthorized
+    else Header Bearer presente
+        JAF->>JTS: extrairUsuarioId(token)
+        alt Token invalido ou expirado
+            JAF->>SC: clearContext()
+            JAF-->>CTRL: segue sem autenticar
+            CTRL->>JEP: token rejeitado
+            JEP-->>U: 401 Unauthorized
+        else Token parseado com sucesso
+            JAF->>DUS: carregarPorId(usuarioId)
+            DUS->>UR: buscarPorId(usuarioId)
+            UR-->>DUS: Usuario
+            DUS-->>JAF: UsuarioAutenticadoPrincipal
+            JAF->>JTS: validarAccessToken(token, usuarioId)
+            alt Validacao final falha
+                JAF-->>CTRL: segue sem autenticar
+                CTRL->>JEP: autenticacao invalida
+                JEP-->>U: 401 Unauthorized
+            else Validacao final ok
+                JAF->>SC: setAuthentication(principal, authorities)
+                JAF-->>CTRL: segue autenticado
+                CTRL->>CTRL: avaliar @PreAuthorize / roles
+                alt Usuario tem role permitida
+                    CTRL-->>U: 200 / 201 / 204
+                else Usuario autenticado sem permissao
+                    CTRL->>JADH: acesso negado
+                    JADH-->>U: 403 Forbidden
+                end
+            end
+        end
+    end

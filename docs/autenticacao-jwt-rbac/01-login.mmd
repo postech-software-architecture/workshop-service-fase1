@@ -1,0 +1,27 @@
+sequenceDiagram
+    autonumber
+    actor U as Usuario / Swagger
+    participant AC as AuthController
+    participant RLU as RealizarLoginUseCase
+    participant AM as AuthenticationManager
+    participant DUS as DetalhesUsuarioServiceImpl
+    participant UR as UsuarioRepository
+    participant JTS as JwtTokenService
+    participant RTR as RefreshTokenRepository
+
+    U->>AC: POST /api/auth/login\nusername + password
+    AC->>RLU: executar(username, password)
+    RLU->>AM: authenticate(...)
+    AM->>DUS: loadUserByUsername(username)
+    DUS->>UR: buscarPorUsernameOuEmail(username)
+    UR-->>DUS: Usuario
+    DUS-->>AM: UsuarioAutenticadoPrincipal
+    AM-->>RLU: autenticacao aprovada
+    RLU->>JTS: gerarAccessToken(usuario)
+    JTS-->>RLU: accessToken
+    RLU->>JTS: gerarRefreshToken()
+    JTS-->>RLU: refreshToken
+    RLU->>RTR: salvar(refreshToken)
+    RTR-->>RLU: refresh token persistido
+    RLU-->>AC: accessToken + refreshToken + expiresIn
+    AC-->>U: 200 OK com os tokens
