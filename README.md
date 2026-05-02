@@ -84,3 +84,7 @@ mvn spring-boot:run
 
 - Os endpoints de veiculos estao liberados no MVP e preparados para futura restricao de acesso.
 - A remocao de veiculos e logica, preservando rastreabilidade e referencias historicas.
+
+## Documentacao
+
+- Fluxo detalhado de autenticacao e autorizacao JWT: [docs/autenticacao-jwt-rbac/README.md](docs/autenticacao-jwt-rbac/README.md)
