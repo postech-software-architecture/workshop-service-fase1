@@ -33,7 +33,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.FORBIDDEN.value())
 			.error(HttpStatus.FORBIDDEN.getReasonPhrase())
-			.message("Usuario autenticado sem permissao para acessar este recurso.")
+			.message("Usuário autenticado sem permissão para acessar este recurso.")
 			.path(request.getRequestURI())
 			.build();
 		response.setStatus(HttpStatus.FORBIDDEN.value());

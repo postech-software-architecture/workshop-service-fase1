@@ -33,7 +33,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.UNAUTHORIZED.value())
 			.error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-			.message("Autenticacao obrigatoria ou token invalido.")
+			.message("Autenticação obrigatória ou token inválido.")
 			.path(request.getRequestURI())
 			.build();
 		response.setStatus(HttpStatus.UNAUTHORIZED.value());
