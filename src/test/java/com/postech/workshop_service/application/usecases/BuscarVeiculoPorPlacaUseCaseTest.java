@@ -2,13 +2,13 @@ package com.postech.workshop_service.application.usecases;
 
 import com.postech.workshop_service.domain.entities.Veiculo;
 import com.postech.workshop_service.domain.repositories.VeiculoRepository;
-import com.postech.workshop_service.domain.valueobjects.Placa;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,8 +27,9 @@ class BuscarVeiculoPorPlacaUseCaseTest {
 
 	@Test
 	void shouldNormalizePlateBeforeSearch() {
-		Veiculo veiculo = new Veiculo(UUID.randomUUID(), new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(UUID.randomUUID()));
+		LocalDateTime agora = LocalDateTime.now();
+		Veiculo veiculo = new Veiculo(UUID.randomUUID(), "BRA1D23", "Toyota", "Corolla", 2020, null, null,
+				List.of(UUID.randomUUID()), true, agora, agora, null);
 		when(veiculoRepository.buscarPorPlaca("BRA1D23", false)).thenReturn(Optional.of(veiculo));
 
 		assertTrue(buscarVeiculoPorPlacaUseCase.executar("bra-1d23", false).isPresent());

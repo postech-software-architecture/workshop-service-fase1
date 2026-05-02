@@ -46,14 +46,13 @@ public class CriarVeiculoUseCase {
 	public Veiculo executar(String placaRaw, String marca, String modelo, int ano, String cor, String observacoes,
 			List<UUID> clientesIds) {
 		try {
-			Placa placa = new Placa(placaRaw);
 			validarClientes(clientesIds);
 
-			if (veiculoRepository.existePlacaAtiva(placa.getValor(), null)) {
+			if (veiculoRepository.existePlacaAtiva(Placa.normalizar(placaRaw), null)) {
 				throw new RegraDeNegocioException("Já existe um veículo ativo cadastrado com a placa informada.");
 			}
 
-			Veiculo veiculo = new Veiculo(null, placa, marca, modelo, ano, cor, observacoes, clientesIds);
+			Veiculo veiculo = new Veiculo(placaRaw, marca, modelo, ano, cor, observacoes, clientesIds);
 
 			return veiculoRepository.salvar(veiculo);
 		}

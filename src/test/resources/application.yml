@@ -1,0 +1,5 @@
+seguranca:
+  jwt:
+    secret: 01234567890123456789012345678901
+    expiracao-access-segundos: 3600
+    expiracao-refresh-dias: 7

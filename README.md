@@ -72,6 +72,23 @@ mvn test
 
 ### Aplicacao
 
+Antes de iniciar a API, defina a variavel de ambiente `JWT_SECRET` com um segredo de pelo menos 32 caracteres.
+
+Exemplo no PowerShell:
+
+```powershell
+$env:JWT_SECRET="defina-um-segredo-com-pelo-menos-32-caracteres"
+mvn spring-boot:run
+```
+
+Sem essa variavel a aplicacao falha no startup por seguranca.
+
+Exemplo alternativo passando pela linha de comando:
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.arguments=--JWT_SECRET=defina-um-segredo-com-pelo-menos-32-caracteres"
+```
+
 ```bash
 mvn spring-boot:run
 ```
@@ -84,3 +101,7 @@ mvn spring-boot:run
 
 - Os endpoints de veiculos estao liberados no MVP e preparados para futura restricao de acesso.
 - A remocao de veiculos e logica, preservando rastreabilidade e referencias historicas.
+
+## Documentacao
+
+- Fluxo detalhado de autenticacao e autorizacao JWT: [docs/autenticacao-jwt-rbac/README.md](docs/autenticacao-jwt-rbac/README.md)

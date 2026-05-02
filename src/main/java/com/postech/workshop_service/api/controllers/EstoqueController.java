@@ -1,23 +1,39 @@
 package com.postech.workshop_service.api.controllers;
 
-import com.postech.workshop_service.api.dtos.*;
-import com.postech.workshop_service.application.usecases.*;
+import com.postech.workshop_service.api.dtos.EstoqueResponse;
+import com.postech.workshop_service.api.dtos.MovimentacaoRequest;
+import com.postech.workshop_service.api.dtos.MovimentacaoResponse;
+import com.postech.workshop_service.application.usecases.BuscarEstoquePorIdUseCase;
+import com.postech.workshop_service.application.usecases.ListarEstoquesPorPecaUseCase;
+import com.postech.workshop_service.application.usecases.RegistrarMovimentacaoUseCase;
 import com.postech.workshop_service.domain.entities.Estoque;
 import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Controller responsavel por estoques e movimentacoes.
+ */
 @RestController
 @RequestMapping("/api/v1/estoques")
 @Tag(name = "Estoques", description = "Gerenciamento de estoques e movimentacoes")
+@SecurityRequirement(name = "bearerAuth")
 public class EstoqueController {
 
 	private final BuscarEstoquePorIdUseCase buscarEstoquePorIdUseCase;
@@ -47,6 +63,7 @@ public class EstoqueController {
 	 */
 	@PostMapping("/movimentacoes")
 	@Operation(summary = "Registrar uma movimentacao de estoque")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MECANICO')")
 	public ResponseEntity<MovimentacaoResponse> registrarMovimentacao(@RequestBody @Valid MovimentacaoRequest request) {
 		MovimentacaoEstoque movimentacao = registrarMovimentacaoUseCase.executar(request.getEstoqueId(),
 				request.getTipo(), request.getQuantidade(), request.getMotivo());
@@ -60,6 +77,7 @@ public class EstoqueController {
 	 */
 	@GetMapping("/{id}")
 	@Operation(summary = "Buscar estoque por ID")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
 	public ResponseEntity<EstoqueResponse> buscarPorId(@PathVariable UUID id,
 			@RequestParam(defaultValue = "false") boolean incluirInativos) {
 		return buscarEstoquePorIdUseCase.executar(id, incluirInativos)
@@ -74,6 +92,7 @@ public class EstoqueController {
 	 */
 	@GetMapping("/peca/{pecaInsumoId}")
 	@Operation(summary = "Listar estoques de uma peca")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
 	public ResponseEntity<List<EstoqueResponse>> listarPorPeca(@PathVariable UUID pecaInsumoId,
 			@RequestParam(defaultValue = "false") boolean incluirInativos) {
 		List<EstoqueResponse> lista = listarEstoquesPorPecaUseCase.executar(pecaInsumoId, incluirInativos)

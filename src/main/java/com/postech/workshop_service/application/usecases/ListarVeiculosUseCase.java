@@ -44,7 +44,7 @@ public class ListarVeiculosUseCase {
 		if (clienteId != null && clienteRepository.buscarPorId(clienteId, false).isEmpty()) {
 			throw new RecursoNaoEncontradoException("Cliente não encontrado com o ID informado.");
 		}
-		String placaNormalizada = placaRaw != null && !placaRaw.isBlank() ? new Placa(placaRaw).getValor() : null;
+		String placaNormalizada = placaRaw != null && !placaRaw.isBlank() ? Placa.normalizar(placaRaw) : null;
 		return veiculoRepository.listar(pagina, tamanho, placaNormalizada, clienteId, incluirInativos);
 	}
 

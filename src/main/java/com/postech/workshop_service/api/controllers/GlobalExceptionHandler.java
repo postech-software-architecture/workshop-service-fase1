@@ -1,13 +1,18 @@
 package com.postech.workshop_service.api.controllers;
 
 import com.postech.workshop_service.api.dtos.ErrorResponse;
-import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.application.exceptions.AcessoNegadoException;
+import com.postech.workshop_service.application.exceptions.ContaInativaException;
+import com.postech.workshop_service.application.exceptions.CredenciaisInvalidasException;
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.application.exceptions.TokenInvalidoException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -69,6 +74,68 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
+	 * Trata falhas de autenticacao e refresh token invalido.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 401.
+	 */
+	@ExceptionHandler({ CredenciaisInvalidasException.class, ContaInativaException.class,
+			TokenInvalidoException.class })
+	public ResponseEntity<ErrorResponse> handleUnauthorized(RuntimeException ex, HttpServletRequest request) {
+
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.UNAUTHORIZED.value())
+			.error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+			.message(ex.getMessage())
+			.path(request.getRequestURI())
+			.build();
+
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+	}
+
+	/**
+	 * Trata falhas de ownership e acessos negados fora do pipeline de filtros.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 403.
+	 */
+	@ExceptionHandler(AcessoNegadoException.class)
+	public ResponseEntity<ErrorResponse> handleAccessDenied(AcessoNegadoException ex, HttpServletRequest request) {
+
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.FORBIDDEN.value())
+			.error(HttpStatus.FORBIDDEN.getReasonPhrase())
+			.message(ex.getMessage())
+			.path(request.getRequestURI())
+			.build();
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+	}
+
+	/**
+	 * Trata acessos negados disparados pelo Spring Security fora do filtro HTTP.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 403.
+	 */
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<ErrorResponse> handleSpringSecurityAccessDenied(AccessDeniedException ex,
+			HttpServletRequest request) {
+
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.FORBIDDEN.value())
+			.error(HttpStatus.FORBIDDEN.getReasonPhrase())
+			.message("Usuário autenticado sem permissão para acessar este recurso.")
+			.path(request.getRequestURI())
+			.build();
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+	}
+
+	/**
 	 * Trata erros de Bean Validation no payload de entrada.
 	 * @param ex excecao capturada.
 	 * @param request requisicao corrente.
@@ -88,7 +155,7 @@ public class GlobalExceptionHandler {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.BAD_REQUEST.value())
 			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-			.message("Erro de validação estrutural no payload.")
+			.message("Erro de validacao estrutural no payload.")
 			.path(request.getRequestURI())
 			.fieldErrors(fieldErrors)
 			.build();
@@ -133,7 +200,7 @@ public class GlobalExceptionHandler {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.BAD_REQUEST.value())
 			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-			.message("Payload inválido ou mal formado.")
+			.message("Payload invalido ou mal formado.")
 			.path(request.getRequestURI())
 			.build();
 
@@ -154,7 +221,7 @@ public class GlobalExceptionHandler {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.BAD_REQUEST.value())
 			.error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-			.message("Parâmetro '" + ex.getName() + "' tem formato inválido.")
+			.message("Parametro '" + ex.getName() + "' tem formato invalido.")
 			.path(request.getRequestURI())
 			.build();
 
@@ -221,7 +288,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleMissingRequestParameter(MissingServletRequestParameterException ex,
 			HttpServletRequest request) {
 
-		String message = String.format("Parâmetro obrigatório '%s' ausente na requisição.", ex.getParameterName());
+		String message = String.format("Parametro obrigatorio '%s' ausente na requisicao.", ex.getParameterName());
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
 			.timestamp(LocalDateTime.now())
@@ -247,7 +314,7 @@ public class GlobalExceptionHandler {
 			.timestamp(LocalDateTime.now())
 			.status(HttpStatus.SERVICE_UNAVAILABLE.value())
 			.error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
-			.message("Serviço de banco de dados temporariamente indisponível. Tente novamente em alguns instantes.")
+			.message("Servico de banco de dados temporariamente indisponivel. Tente novamente em alguns instantes.")
 			.path(request.getRequestURI())
 			.build();
 
