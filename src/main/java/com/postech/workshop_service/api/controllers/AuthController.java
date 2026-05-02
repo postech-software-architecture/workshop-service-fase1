@@ -80,7 +80,6 @@ public class AuthController {
 	@PostMapping("/logout")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@Operation(summary = "Encerrar uma sessao autenticada")
-	@SecurityRequirement(name = "bearerAuth")
 	public void logout(@RequestBody @Valid LogoutRequest request) {
 		encerrarSessaoUseCase.executar(request.getRefreshToken());
 	}

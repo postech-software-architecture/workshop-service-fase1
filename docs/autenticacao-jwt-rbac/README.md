@@ -439,7 +439,7 @@ Tudo que nao esta nessa lista cai em:
 
 - `.anyRequest().authenticated()`
 
-Entao, por configuracao, `POST /api/auth/logout` e `GET /api/auth/me` sao rotas protegidas.
+Entao, por configuracao, `GET /api/auth/me` e rota protegida. `POST /api/auth/logout` permanece publico e depende apenas do `refresh token` informado.
 
 ## Matriz De Acesso Atual
 
@@ -447,7 +447,7 @@ Entao, por configuracao, `POST /api/auth/logout` e `GET /api/auth/me` sao rotas 
 
 - `POST /api/auth/login`: publico
 - `POST /api/auth/refresh`: publico
-- `POST /api/auth/logout`: autenticado
+- `POST /api/auth/logout`: publico
 - `GET /api/auth/me`: autenticado
 
 ### Clientes
@@ -529,7 +529,7 @@ Esse e um gap funcional importante da entrega atual.
 - Falta revogacao imediata de `access token`. Logout e bloqueio afetam refresh token, nao o JWT ja emitido.
 - O papel `CLIENTE` ja existe, mas sua superficie funcional ainda e pequena.
 - O papel `MECANICO` ainda nao foi conectado aos fluxos de ordem de servico previstos na spec.
-- O `logout` esta documentado e configurado como rota protegida, mas os testes atuais exercitam esse fluxo sem `Bearer token`. Vale revisar esse alinhamento entre contrato, teste e `SecurityConfig`.
+- O `logout` revoga a sessao pelo `refresh token`, sem exigir `Bearer token`. Isso simplifica o cliente, mas significa que a posse do refresh token ja basta para encerrar aquela sessao especifica.
 
 ## Arquivos Principais Para Revisao
 
