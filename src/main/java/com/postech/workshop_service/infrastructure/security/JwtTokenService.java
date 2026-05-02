@@ -20,10 +20,15 @@ import java.util.UUID;
 @Service
 public class JwtTokenService {
 
+	private static final int TAMANHO_MINIMO_SECRET_EM_BYTES = 32;
+
 	private final JwtSecurityProperties properties;
+
+	private final SecretKey secretKey;
 
 	public JwtTokenService(JwtSecurityProperties properties) {
 		this.properties = properties;
+		this.secretKey = criarSecretKey(properties.getSecret());
 	}
 
 	/**
@@ -94,7 +99,20 @@ public class JwtTokenService {
 	}
 
 	private SecretKey obterSecretKey() {
-		return Keys.hmacShaKeyFor(properties.getSecret().getBytes(StandardCharsets.UTF_8));
+		return secretKey;
+	}
+
+	private SecretKey criarSecretKey(String secret) {
+		if (secret == null || secret.isBlank()) {
+			throw new IllegalStateException("O segredo JWT deve ser configurado antes de inicializar o servico.");
+		}
+
+		byte[] secretBytes = secret.trim().getBytes(StandardCharsets.UTF_8);
+		if (secretBytes.length < TAMANHO_MINIMO_SECRET_EM_BYTES) {
+			throw new IllegalStateException("O segredo JWT deve possuir ao menos 32 bytes para uso com chaves HMAC.");
+		}
+
+		return Keys.hmacShaKeyFor(secretBytes);
 	}
 
 }

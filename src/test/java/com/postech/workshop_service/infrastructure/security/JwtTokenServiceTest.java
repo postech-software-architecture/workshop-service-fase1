@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JwtTokenServiceTest {
 
@@ -24,6 +25,27 @@ class JwtTokenServiceTest {
 
 		assertThat(jwtTokenService.extrairUsuarioId(token)).isEqualTo(usuario.getId());
 		assertThat(jwtTokenService.validarAccessToken(token, usuario.getId())).isTrue();
+	}
+
+	@Test
+	void shouldFailFastWhenJwtSecretIsMissing() {
+		JwtSecurityProperties properties = new JwtSecurityProperties();
+		properties.setExpiracaoAccessSegundos(3600);
+		properties.setExpiracaoRefreshDias(7);
+
+		assertThatThrownBy(() -> new JwtTokenService(properties)).isInstanceOf(IllegalStateException.class)
+			.hasMessage("O segredo JWT deve ser configurado antes de inicializar o servico.");
+	}
+
+	@Test
+	void shouldFailFastWhenJwtSecretIsTooShort() {
+		JwtSecurityProperties properties = new JwtSecurityProperties();
+		properties.setSecret("segredo-curto");
+		properties.setExpiracaoAccessSegundos(3600);
+		properties.setExpiracaoRefreshDias(7);
+
+		assertThatThrownBy(() -> new JwtTokenService(properties)).isInstanceOf(IllegalStateException.class)
+			.hasMessage("O segredo JWT deve possuir ao menos 32 bytes para uso com chaves HMAC.");
 	}
 
 }
