@@ -115,7 +115,7 @@ class EncerrarComposicaoTecnicaUseCaseTest {
 						TipoItemComposicaoTecnica.SERVICO),
 						new ItemComposicaoTecnica("Filtro de oleo", new BigDecimal("45.00"),
 								TipoItemComposicaoTecnica.PECA)),
-				LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
+				"OS-2026-00001", null, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
 	}
 
 }

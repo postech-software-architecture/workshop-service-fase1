@@ -54,8 +54,7 @@ public class CancelarOrcamentoUseCase {
 					"A ordem de servico deve estar aguardando resposta do cliente para cancelar o orcamento.");
 		}
 
-		orcamento.cancelar();
-		ordemServico.cancelar();
+		orcamento.cancelar(ordemServico);
 
 		ordemServicoRepository.salvar(ordemServico);
 		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);

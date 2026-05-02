@@ -82,16 +82,22 @@ public class Orcamento extends EntidadeBase {
 	}
 
 	/**
-	 * Aprova o orcamento pendente de aprovacao.
+	 * Aprova o orcamento pendente de aprovacao. Quando o tipo for
+	 * {@link TipoOrcamento#SERVICO_ORIGINAL}, avanca a ordem de servico vinculada para
+	 * aguardando execucao.
+	 * @param ordemServico ordem de servico vinculada a este orcamento.
 	 * @throws RegraDeNegocioException quando o orcamento nao estiver pendente de
 	 * aprovacao.
 	 */
-	public void aprovar() {
+	public void aprovar(OrdemServico ordemServico) {
 		if (this.status != StatusOrcamento.PENDENTE_APROVACAO) {
 			throw new RegraDeNegocioException("Nao e permitido aprovar um orcamento com status " + this.status + ".");
 		}
 		this.status = StatusOrcamento.APROVADO;
 		atualizarDataUltimaAtualizacao();
+		if (this.tipo == TipoOrcamento.SERVICO_ORIGINAL) {
+			ordemServico.marcarComoAguardandoExecucao();
+		}
 	}
 
 	/**
@@ -108,15 +114,22 @@ public class Orcamento extends EntidadeBase {
 	}
 
 	/**
-	 * Cancela o orcamento pendente de aprovacao.
+	 * Cancela o orcamento quando o status atual for criado, pendente de aprovacao ou
+	 * aprovado. Quando o tipo for {@link TipoOrcamento#SERVICO_ORIGINAL} e a ordem de
+	 * servico vinculada ainda puder ser cancelada, cancela tambem a ordem.
+	 * @param ordemServico ordem de servico vinculada a este orcamento.
 	 * @throws RegraDeNegocioException quando o orcamento nao puder ser cancelado.
 	 */
-	public void cancelar() {
-		if (this.status != StatusOrcamento.PENDENTE_APROVACAO) {
+	public void cancelar(OrdemServico ordemServico) {
+		if (this.status != StatusOrcamento.CRIADO && this.status != StatusOrcamento.PENDENTE_APROVACAO
+				&& this.status != StatusOrcamento.APROVADO) {
 			throw new RegraDeNegocioException("Nao e permitido cancelar um orcamento com status " + this.status + ".");
 		}
 		this.status = StatusOrcamento.CANCELADO;
 		atualizarDataUltimaAtualizacao();
+		if (this.tipo == TipoOrcamento.SERVICO_ORIGINAL && ordemServico.podeSerCancelada()) {
+			ordemServico.cancelar();
+		}
 	}
 
 	private UUID validarIdentificador(UUID idOrdemServico) {

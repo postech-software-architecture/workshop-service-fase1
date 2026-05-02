@@ -49,8 +49,7 @@ public class AprovarOrcamentoUseCase {
 		OrdemServico ordemServico = buscarOrdemVinculada(orcamento);
 
 		validarOrdemAguardandoResposta(ordemServico);
-		orcamento.aprovar();
-		ordemServico.marcarComoAguardandoExecucao();
+		orcamento.aprovar(ordemServico);
 
 		ordemServicoRepository.salvar(ordemServico);
 		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);

@@ -24,4 +24,11 @@ public interface OrdemServicoRepository {
 	 */
 	Optional<OrdemServico> buscarPorId(UUID id);
 
+	/**
+	 * Gera o proximo numero sequencial disponivel para o ano informado.
+	 * @param ano ano de referencia (ex: 2026).
+	 * @return numero formatado no padrao OS-{ANO}-{NNNNN}.
+	 */
+	String gerarProximoNumero(int ano);
+
 }

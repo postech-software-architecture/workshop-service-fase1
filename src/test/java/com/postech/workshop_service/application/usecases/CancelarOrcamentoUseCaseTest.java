@@ -76,7 +76,7 @@ class CancelarOrcamentoUseCaseTest {
 	}
 
 	private OrdemServico criarOrdemServico(StatusOrdemServico status, UUID idOrdemServico) {
-		return new OrdemServico(idOrdemServico, UUID.randomUUID(), UUID.randomUUID(), status, List.of(),
+		return new OrdemServico(idOrdemServico, UUID.randomUUID(), UUID.randomUUID(), status, List.of(), null, null,
 				LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
 	}
 

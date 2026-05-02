@@ -41,4 +41,11 @@ public class OrdemServicoRepositoryImpl implements OrdemServicoRepository {
 		return jpaOrdemServicoRepository.findById(id).map(ordemServicoMapper::toDomain);
 	}
 
+	@Override
+	public String gerarProximoNumero(int ano) {
+		String prefixo = "OS-" + ano + "-%";
+		int sequencial = jpaOrdemServicoRepository.buscarProximoSequencial(prefixo);
+		return String.format("OS-%d-%05d", ano, sequencial);
+	}
+
 }

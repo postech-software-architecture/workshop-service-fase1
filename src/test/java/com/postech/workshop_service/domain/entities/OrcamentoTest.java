@@ -111,17 +111,42 @@ class OrcamentoTest {
 	@Test
 	void shouldApprovePendingBudget() {
 		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
 
-		orcamento.aprovar();
+		orcamento.aprovar(ordemServico);
 
 		assertEquals(StatusOrcamento.APROVADO, orcamento.getStatus());
 	}
 
 	@Test
+	void shouldApproveServiceOriginalAndAdvanceOrderToExecution() {
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+
+		orcamento.aprovar(ordemServico);
+
+		assertEquals(StatusOrcamento.APROVADO, orcamento.getStatus());
+		assertEquals(StatusOrdemServico.AGUARDANDO_EXECUCAO, ordemServico.getStatus());
+	}
+
+	@Test
+	void shouldApproveAddedServiceBudgetWithoutChangingOrder() {
+		Orcamento orcamento = criarOrcamentoAdicaoServico(StatusOrcamento.PENDENTE_APROVACAO);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_EXECUCAO);
+
+		orcamento.aprovar(ordemServico);
+
+		assertEquals(StatusOrcamento.APROVADO, orcamento.getStatus());
+		assertEquals(StatusOrdemServico.AGUARDANDO_EXECUCAO, ordemServico.getStatus());
+	}
+
+	@Test
 	void shouldRejectApprovalWhenStatusIsInvalid() {
 		Orcamento orcamento = criarOrcamentoServicoOriginal();
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
 
-		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class, orcamento::aprovar);
+		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
+				() -> orcamento.aprovar(ordemServico));
 
 		assertEquals("Nao e permitido aprovar um orcamento com status CRIADO.", exception.getMessage());
 	}
@@ -148,22 +173,81 @@ class OrcamentoTest {
 	}
 
 	@Test
-	void shouldCancelPendingBudget() {
-		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
+	void shouldCancelCreatedBudget() {
+		Orcamento orcamento = criarOrcamentoServicoOriginal();
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
 
-		orcamento.cancelar();
+		orcamento.cancelar(ordemServico);
 
 		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
 	}
 
 	@Test
+	void shouldCancelPendingBudget() {
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+
+		orcamento.cancelar(ordemServico);
+
+		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
+	}
+
+	@Test
+	void shouldCancelApprovedBudgetWhenOrderIsAlreadyInExecution() {
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.APROVADO);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_EXECUCAO);
+
+		orcamento.cancelar(ordemServico);
+
+		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
+		assertEquals(StatusOrdemServico.AGUARDANDO_EXECUCAO, ordemServico.getStatus());
+	}
+
+	@Test
+	void shouldCancelServiceOriginalBudgetAndCancelOrderWhenOrderIsCancellable() {
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+
+		orcamento.cancelar(ordemServico);
+
+		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
+		assertEquals(StatusOrdemServico.CANCELADA, ordemServico.getStatus());
+	}
+
+	@Test
+	void shouldCancelServiceOriginalBudgetWithoutCancellingOrderWhenOrderIsNotCancellable() {
+		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_EXECUCAO);
+
+		orcamento.cancelar(ordemServico);
+
+		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
+		assertEquals(StatusOrdemServico.AGUARDANDO_EXECUCAO, ordemServico.getStatus());
+	}
+
+	@Test
+	void shouldCancelAddedServiceBudgetWithoutCancellingOrder() {
+		Orcamento orcamento = criarOrcamentoAdicaoServico(StatusOrcamento.PENDENTE_APROVACAO);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+
+		orcamento.cancelar(ordemServico);
+
+		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
+		assertEquals(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, ordemServico.getStatus());
+	}
+
+	@Test
 	void shouldRejectCancelWhenStatusIsInvalid() {
 		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.REJEITADO);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
 
-		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class, orcamento::cancelar);
+		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
+				() -> orcamento.cancelar(ordemServico));
 
 		assertEquals("Nao e permitido cancelar um orcamento com status REJEITADO.", exception.getMessage());
 	}
+
+	// --- helpers ---
 
 	private Orcamento criarOrcamentoServicoOriginal() {
 		return new Orcamento(null, UUID.randomUUID(), new BigDecimal("120.00"),
@@ -176,6 +260,23 @@ class OrcamentoTest {
 		return new Orcamento(UUID.randomUUID(), UUID.randomUUID(), new BigDecimal("120.00"),
 				List.of(new ItemOrcamento("Troca de oleo", new BigDecimal("120.00"))), TipoOrcamento.SERVICO_ORIGINAL,
 				status, criacao, atualizacao, null);
+	}
+
+	private Orcamento criarOrcamentoAdicaoServico(StatusOrcamento status) {
+		LocalDateTime criacao = LocalDateTime.now().minusDays(2);
+		LocalDateTime atualizacao = LocalDateTime.now().minusDays(1);
+		return new Orcamento(UUID.randomUUID(), UUID.randomUUID(), new BigDecimal("120.00"),
+				List.of(new ItemOrcamento("Revisao adicional", new BigDecimal("120.00"))), TipoOrcamento.ADICAO_SERVICO,
+				status, criacao, atualizacao, null);
+	}
+
+	private OrdemServico criarOrdemServicoComStatus(StatusOrdemServico status) {
+		LocalDateTime criacao = LocalDateTime.now().minusDays(2);
+		LocalDateTime atualizacao = LocalDateTime.now().minusDays(1);
+		return new OrdemServico(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), status,
+				List.of(new ItemComposicaoTecnica("Troca de oleo", new BigDecimal("120.00"),
+						TipoItemComposicaoTecnica.SERVICO)),
+				"OS-2026-00001", null, criacao, atualizacao, null);
 	}
 
 }

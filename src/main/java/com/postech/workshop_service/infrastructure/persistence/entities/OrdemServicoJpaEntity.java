@@ -46,6 +46,12 @@ public class OrdemServicoJpaEntity extends BaseJpaEntity {
 	@Column(nullable = false, length = 40)
 	private StatusOrdemServico status;
 
+	@Column(name = "numero", nullable = false, length = 20, unique = true)
+	private String numero;
+
+	@Column(name = "observacoes", columnDefinition = "TEXT")
+	private String observacoes;
+
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "ordens_servico_itens", joinColumns = @JoinColumn(name = "ordem_servico_id"),
 			foreignKey = @ForeignKey(name = "fk_ordens_servico_itens_ordem_servico"))

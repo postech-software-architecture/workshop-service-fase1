@@ -45,13 +45,15 @@ class OrdemServicoTest {
 				TipoItemComposicaoTecnica.SERVICO));
 
 		OrdemServico ordemServico = new OrdemServico(ordemId, clienteId, veiculoId,
-				StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, itens, criacao, atualizacao, remocao);
+				StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, itens, "OS-2026-00001", null, criacao, atualizacao,
+				remocao);
 
 		assertEquals(ordemId, ordemServico.getId());
 		assertEquals(clienteId, ordemServico.getIdCliente());
 		assertEquals(veiculoId, ordemServico.getIdVeiculo());
 		assertEquals(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, ordemServico.getStatus());
 		assertEquals(itens, ordemServico.getItensComposicao());
+		assertEquals("OS-2026-00001", ordemServico.getNumero());
 		assertEquals(criacao, ordemServico.getDataCriacao());
 		assertEquals(atualizacao, ordemServico.getDataUltimaAtualizacao());
 		assertEquals(remocao, ordemServico.getDataRemocao());
@@ -65,10 +67,41 @@ class OrdemServicoTest {
 
 		assertThrows(IllegalArgumentException.class, () -> new OrdemServico(null, null, veiculoId));
 		assertThrows(IllegalArgumentException.class, () -> new OrdemServico(null, clienteId, null));
-		assertThrows(IllegalArgumentException.class,
-				() -> new OrdemServico(UUID.randomUUID(), clienteId, veiculoId, null, List.of(), agora, agora, null));
 		assertThrows(IllegalArgumentException.class, () -> new OrdemServico(UUID.randomUUID(), clienteId, veiculoId,
-				StatusOrdemServico.EM_COMPOSICAO, Arrays.asList((ItemComposicaoTecnica) null), agora, agora, null));
+				null, List.of(), "OS-2026-00001", null, agora, agora, null));
+		assertThrows(IllegalArgumentException.class,
+				() -> new OrdemServico(UUID.randomUUID(), clienteId, veiculoId, StatusOrdemServico.EM_COMPOSICAO,
+						Arrays.asList((ItemComposicaoTecnica) null), "OS-2026-00001", null, agora, agora, null));
+	}
+
+	@Test
+	void shouldCreateOrdemServicoWithNumeroAndItems() {
+		UUID clienteId = UUID.randomUUID();
+		UUID veiculoId = UUID.randomUUID();
+		List<ItemComposicaoTecnica> itens = List.of(new ItemComposicaoTecnica("Troca de oleo", new BigDecimal("100.00"),
+				TipoItemComposicaoTecnica.SERVICO));
+
+		OrdemServico os = new OrdemServico(null, clienteId, veiculoId, "OS-2026-00001", "Barulho no motor", itens);
+
+		assertEquals("OS-2026-00001", os.getNumero());
+		assertEquals("Barulho no motor", os.getObservacoes());
+		assertEquals(StatusOrdemServico.EM_COMPOSICAO, os.getStatus());
+		assertEquals(1, os.getItensComposicao().size());
+	}
+
+	@Test
+	void shouldRejectBlankNumero() {
+		UUID clienteId = UUID.randomUUID();
+		UUID veiculoId = UUID.randomUUID();
+		List<ItemComposicaoTecnica> itens = List
+			.of(new ItemComposicaoTecnica("Servico", new BigDecimal("50.00"), TipoItemComposicaoTecnica.SERVICO));
+
+		assertThrows(IllegalArgumentException.class,
+				() -> new OrdemServico(null, clienteId, veiculoId, "", null, itens));
+		assertThrows(IllegalArgumentException.class,
+				() -> new OrdemServico(null, clienteId, veiculoId, "  ", null, itens));
+		assertThrows(IllegalArgumentException.class,
+				() -> new OrdemServico(null, clienteId, veiculoId, null, null, itens));
 	}
 
 	@Test
@@ -146,6 +179,19 @@ class OrdemServicoTest {
 	}
 
 	@Test
+	void shouldReportIfOrderCanBeCancelledBasedOnStatus() {
+		OrdemServico cancelavel = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of());
+		OrdemServico emComposicao = criarOrdemServico(StatusOrdemServico.EM_COMPOSICAO, List.of());
+		OrdemServico aguardandoExecucao = criarOrdemServico(StatusOrdemServico.AGUARDANDO_EXECUCAO, List.of());
+		OrdemServico cancelada = criarOrdemServico(StatusOrdemServico.CANCELADA, List.of());
+
+		assertTrue(cancelavel.podeSerCancelada());
+		assertFalse(emComposicao.podeSerCancelada());
+		assertFalse(aguardandoExecucao.podeSerCancelada());
+		assertFalse(cancelada.podeSerCancelada());
+	}
+
+	@Test
 	void shouldRejectStateTransitionsOutsideWaitingClientResponse() {
 		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.EM_COMPOSICAO, List.of());
 
@@ -167,8 +213,8 @@ class OrdemServicoTest {
 	private OrdemServico criarOrdemServico(StatusOrdemServico status, List<ItemComposicaoTecnica> itens) {
 		LocalDateTime criacao = LocalDateTime.now().minusDays(2);
 		LocalDateTime atualizacao = LocalDateTime.now().minusDays(1);
-		return new OrdemServico(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), status, itens, criacao,
-				atualizacao, null);
+		return new OrdemServico(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), status, itens, "OS-2026-00001",
+				null, criacao, atualizacao, null);
 	}
 
 }
