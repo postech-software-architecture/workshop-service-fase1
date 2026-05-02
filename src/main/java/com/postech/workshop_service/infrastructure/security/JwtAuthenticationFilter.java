@@ -43,11 +43,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			UUID usuarioId = jwtTokenService.extrairUsuarioId(token);
 			if (SecurityContextHolder.getContext().getAuthentication() == null) {
 				UsuarioAutenticadoPrincipal principal = detalhesUsuarioService.carregarPorId(usuarioId);
-				if (jwtTokenService.validarAccessToken(token, principal.getId())) {
+				if (jwtTokenService.validarAccessToken(token, principal.getId()) && principal.isEnabled()
+						&& principal.isAccountNonLocked()) {
 					UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
 							principal, null, principal.getAuthorities());
 					authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+				}
+				else {
+					SecurityContextHolder.clearContext();
 				}
 			}
 		}
