@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.Map;
 import java.util.Set;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,7 +55,7 @@ class SecurityAccessIT extends PostgresTestContainer {
 		String accessToken = fazerLogin("atendente", "senha123").get("accessToken").asText();
 
 		mockMvc
-			.perform(post("/api/v1/servicos/00000000-0000-0000-0000-000000000001/remocao").header("Authorization",
+			.perform(delete("/api/v1/servicos/00000000-0000-0000-0000-000000000001").header("Authorization",
 					"Bearer " + accessToken))
 			.andExpect(status().isForbidden());
 	}

@@ -12,6 +12,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -107,6 +108,27 @@ public class GlobalExceptionHandler {
 			.status(HttpStatus.FORBIDDEN.value())
 			.error(HttpStatus.FORBIDDEN.getReasonPhrase())
 			.message(ex.getMessage())
+			.path(request.getRequestURI())
+			.build();
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+	}
+
+	/**
+	 * Trata acessos negados disparados pelo Spring Security fora do filtro HTTP.
+	 * @param ex excecao capturada.
+	 * @param request requisicao corrente.
+	 * @return payload padronizado de erro HTTP 403.
+	 */
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<ErrorResponse> handleSpringSecurityAccessDenied(AccessDeniedException ex,
+			HttpServletRequest request) {
+
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.timestamp(LocalDateTime.now())
+			.status(HttpStatus.FORBIDDEN.value())
+			.error(HttpStatus.FORBIDDEN.getReasonPhrase())
+			.message("Usuário autenticado sem permissão para acessar este recurso.")
 			.path(request.getRequestURI())
 			.build();
 
@@ -217,7 +239,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex,
 			HttpServletRequest request) {
 
-		String message = String.format("Recurso nao encontrado: %s /%s. Verifique a URL informada.",
+		String message = String.format("Recurso não encontrado: %s /%s. Verifique a URL informada.",
 				request.getMethod(), ex.getResourcePath());
 
 		ErrorResponse errorResponse = ErrorResponse.builder()
@@ -242,7 +264,7 @@ public class GlobalExceptionHandler {
 			HttpServletRequest request) {
 
 		String supported = ex.getSupportedHttpMethods() == null ? "" : ex.getSupportedHttpMethods().toString();
-		String message = String.format("Metodo %s nao suportado neste recurso. Metodos permitidos: %s.", ex.getMethod(),
+		String message = String.format("Método %s não suportado neste recurso. Métodos permitidos: %s.", ex.getMethod(),
 				supported);
 
 		ErrorResponse errorResponse = ErrorResponse.builder()

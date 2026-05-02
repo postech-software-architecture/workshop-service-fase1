@@ -59,7 +59,7 @@ public class SecurityConfig {
 				.accessDeniedHandler(jwtAccessDeniedHandler))
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/auth/login", "/api/auth/refresh",
-						"/api/public/**")
+						"/api/auth/logout", "/api/public/**")
 				.permitAll()
 				.anyRequest()
 				.authenticated())
