@@ -32,26 +32,14 @@
 		<maven.compiler.target>21</maven.compiler.target>
 		<maven.compiler.release>21</maven.compiler.release>
 		<testcontainers.version>2.0.4</testcontainers.version>
-		<!-- SonarCloud (sonarqube.io) -->
-		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
-		<sonar.projectKey>${env.SONAR_PROJECT_KEY}</sonar.projectKey>
+		<!-- SonarQube (execução local: sonarqube:community via docker compose) -->
+		<sonar.projectKey>workshop-service</sonar.projectKey>
 		<sonar.projectName>workshop-service</sonar.projectName>
 		<sonar.java.source>21</sonar.java.source>
 		<sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
-		<sonar.coverage.jacoco.xmlReportPaths>
-			${project.reporting.outputDirectory}/jacoco/jacoco.xml
-		</sonar.coverage.jacoco.xmlReportPaths>
-		<sonar.exclusions>
-			**/dtos/**,
-			**/config/**,
-			**/WorkshopServiceApplication.java
-		</sonar.exclusions>
-		<sonar.coverage.exclusions>
-			**/dtos/**,
-			**/config/**,
-			**/WorkshopServiceApplication.java
-		</sonar.coverage.exclusions>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.exclusions>**/api/dtos/**,**/infrastructure/config/**,**/WorkshopServiceApplication.java</sonar.exclusions>
+		<sonar.coverage.exclusions>**/api/dtos/**,**/infrastructure/config/**,**/WorkshopServiceApplication.java</sonar.coverage.exclusions>
 	</properties>
 	<dependencies>
 		<dependency>
