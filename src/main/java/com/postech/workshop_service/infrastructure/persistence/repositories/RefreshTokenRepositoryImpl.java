@@ -33,12 +33,10 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
 
 	@Override
 	public RefreshToken salvar(RefreshToken refreshToken) {
-		RefreshTokenJpaEntity entity = refreshToken.getId() != null
-				? jpaRefreshTokenRepository.findById(refreshToken.getId()).map(existing -> {
-					refreshTokenMapper.updateEntityFromDomain(refreshToken, existing);
-					return existing;
-				}).orElseGet(() -> refreshTokenMapper.toEntity(refreshToken))
-				: refreshTokenMapper.toEntity(refreshToken);
+		RefreshTokenJpaEntity entity = jpaRefreshTokenRepository.findById(refreshToken.getId()).map(existing -> {
+			refreshTokenMapper.updateEntityFromDomain(refreshToken, existing);
+			return existing;
+		}).orElseGet(() -> refreshTokenMapper.toEntity(refreshToken));
 
 		entity.setUsuario(entityManager.getReference(UsuarioJpaEntity.class, refreshToken.getUsuarioId()));
 		RefreshTokenJpaEntity salvo = jpaRefreshTokenRepository.save(entity);

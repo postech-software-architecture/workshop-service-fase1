@@ -60,10 +60,9 @@ public class MovimentacaoEstoqueRepositoryImpl implements MovimentacaoEstoqueRep
 	@Transactional(readOnly = true)
 	public List<MovimentacaoEstoque> listarPorEstoque(UUID estoqueId, TipoMovimentacao tipo, LocalDateTime dataInicio,
 			LocalDateTime dataFim) {
-		String tipoStr = tipo != null ? tipo.name() : null;
 		List<MovimentacaoEstoqueJpaEntity> entities = jpaMovimentacaoEstoqueRepository
-			.findByEstoqueIdWithFilters(estoqueId, tipoStr, dataInicio, dataFim);
-		return entities.stream().map(movimentacaoEstoqueMapper::toDomain).toList();
+			.findByEstoqueIdOrderByDataMovimentacaoDesc(estoqueId);
+		return filtrar(entities, tipo, dataInicio, dataFim).stream().map(movimentacaoEstoqueMapper::toDomain).toList();
 	}
 
 	/**
@@ -73,10 +72,18 @@ public class MovimentacaoEstoqueRepositoryImpl implements MovimentacaoEstoqueRep
 	@Transactional(readOnly = true)
 	public List<MovimentacaoEstoque> listarPorPeca(UUID pecaInsumoId, TipoMovimentacao tipo, LocalDateTime dataInicio,
 			LocalDateTime dataFim) {
-		String tipoStr = tipo != null ? tipo.name() : null;
 		List<MovimentacaoEstoqueJpaEntity> entities = jpaMovimentacaoEstoqueRepository
-			.findByPecaInsumoIdWithFilters(pecaInsumoId, tipoStr, dataInicio, dataFim);
-		return entities.stream().map(movimentacaoEstoqueMapper::toDomain).toList();
+			.findByPecaInsumoIdOrderByDataMovimentacaoDesc(pecaInsumoId);
+		return filtrar(entities, tipo, dataInicio, dataFim).stream().map(movimentacaoEstoqueMapper::toDomain).toList();
+	}
+
+	private List<MovimentacaoEstoqueJpaEntity> filtrar(List<MovimentacaoEstoqueJpaEntity> entities,
+			TipoMovimentacao tipo, LocalDateTime dataInicio, LocalDateTime dataFim) {
+		return entities.stream()
+			.filter(entity -> tipo == null || entity.getTipo().equals(tipo.name()))
+			.filter(entity -> dataInicio == null || !entity.getDataMovimentacao().isBefore(dataInicio))
+			.filter(entity -> dataFim == null || !entity.getDataMovimentacao().isAfter(dataFim))
+			.toList();
 	}
 
 }
