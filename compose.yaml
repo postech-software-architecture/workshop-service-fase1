@@ -44,8 +44,38 @@ services:
       retries: 3
       start_period: 60s
 
+  postgres-sonar:
+    image: 'postgres:15-alpine'
+    environment:
+      - 'POSTGRES_DB=sonarqube'
+      - 'POSTGRES_PASSWORD=sonar_secret'
+      - 'POSTGRES_USER=sonaruser'
+    ports:
+      - '5434:5432'
+    volumes:
+      - postgres_sonar_data:/var/lib/postgresql/data
+
+  sonarqube:
+    image: 'sonarqube:community'
+    environment:
+      - 'SONAR_JDBC_URL=${SONAR_JDBC_URL}'
+      - 'SONAR_JDBC_USERNAME=${SONAR_JDBC_USERNAME}'
+      - 'SONAR_JDBC_PASSWORD=${SONAR_JDBC_PASSWORD}'
+    ports:
+      - '9000:9000'
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    depends_on:
+      - postgres-sonar
+
 volumes:
   postgres-data:
+  postgres_sonar_data:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
 
 networks:
   workshop-network:
