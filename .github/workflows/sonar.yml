@@ -1,4 +1,4 @@
-name: SonarCloud Analysis
+name: CI — Build, Tests, Coverage & SonarCloud
 
 on:
   push:
@@ -7,10 +7,11 @@ on:
     branches: [ main ]
 
 jobs:
-  sonar:
+  build-and-analyze:
+    name: Build, test and analyze
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -19,15 +20,26 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'maven'
 
       - name: Cache SonarCloud packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-      - name: Build and analyze
+      - name: Build, test (unit + integration) and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./mvnw verify sonar:sonar
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
+        run: |
+          chmod +x mvnw
+          # 'verify' roda surefire (unit) + failsafe (IT) + jacoco-check (>=80%).
+          # 'sonar:sonar' envia análise para sonarqube.io.
+          ./mvnw -B verify sonar:sonar \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.organization="${SONAR_ORGANIZATION}" \
+            -Dsonar.projectKey="${SONAR_PROJECT_KEY}"

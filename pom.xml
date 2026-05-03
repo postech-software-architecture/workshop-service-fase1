@@ -32,9 +32,11 @@
 		<maven.compiler.target>21</maven.compiler.target>
 		<maven.compiler.release>21</maven.compiler.release>
 		<testcontainers.version>2.0.4</testcontainers.version>
-		<!-- SonarQube -->
-		<sonar.projectKey>Rule-274</sonar.projectKey>
-		<sonar.projectName>Rule-274</sonar.projectName>
+		<!-- SonarCloud (sonarqube.io) -->
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
+		<sonar.projectKey>${env.SONAR_PROJECT_KEY}</sonar.projectKey>
+		<sonar.projectName>workshop-service</sonar.projectName>
 		<sonar.java.source>21</sonar.java.source>
 		<sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
 		<sonar.coverage.jacoco.xmlReportPaths>
