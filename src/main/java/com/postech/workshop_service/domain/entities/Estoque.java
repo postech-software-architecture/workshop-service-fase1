@@ -130,29 +130,18 @@ public class Estoque {
 		this.dataUltimaAtualizacao = LocalDateTime.now();
 	}
 
-	/**
-	 * Atualiza a localizacao do estoque.
-	 * @param novaLocalizacao nova localizacao.
-	 */
-	public void atualizarLocalizacao(String novaLocalizacao) {
-		this.localizacao = sanitizarObrigatorio(novaLocalizacao, "A localizacao do estoque e obrigatoria.");
-		this.dataUltimaAtualizacao = LocalDateTime.now();
-	}
-
 	private MovimentacaoEstoque criarMovimentacao(TipoMovimentacao tipo, BigDecimal quantidadeMovimentada,
 			String motivo) {
 		BigDecimal quantidadeAnterior = this.quantidade;
 
-		switch (tipo) {
-			case ENTRADA:
-				this.quantidade = this.quantidade.add(quantidadeMovimentada);
-				break;
-			case SAIDA:
-				this.quantidade = this.quantidade.subtract(quantidadeMovimentada);
-				break;
-			case AJUSTE:
-				this.quantidade = validarQuantidade(quantidadeMovimentada);
-				break;
+		if (tipo == TipoMovimentacao.ENTRADA) {
+			this.quantidade = this.quantidade.add(quantidadeMovimentada);
+		}
+		else if (tipo == TipoMovimentacao.SAIDA) {
+			this.quantidade = this.quantidade.subtract(quantidadeMovimentada);
+		}
+		else {
+			this.quantidade = validarQuantidade(quantidadeMovimentada);
 		}
 
 		this.dataUltimaAtualizacao = LocalDateTime.now();
