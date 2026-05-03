@@ -179,7 +179,6 @@ buildNumber.properties
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/java,visualstudiocode,intellij,maven
-.mvn
 scratch/
 # Local secrets
 .env
