@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -113,6 +114,10 @@ class RegistrarMovimentacaoUseCaseTest {
 
 		assertThrows(RegraDeNegocioException.class,
 				() -> useCase.executar(estoqueId, "INVALIDO", new BigDecimal("5"), "Teste"));
+		assertThrows(RegraDeNegocioException.class,
+				() -> useCase.executar(estoqueId, null, new BigDecimal("5"), "Teste"));
+		assertThrows(RegraDeNegocioException.class,
+				() -> useCase.executar(estoqueId, " ", new BigDecimal("5"), "Teste"));
 	}
 
 	@Test
@@ -137,6 +142,20 @@ class RegistrarMovimentacaoUseCaseTest {
 
 		assertThrows(RegraDeNegocioException.class,
 				() -> useCase.executar(estoqueId, "AJUSTE", new BigDecimal("20"), null));
+	}
+
+	@Test
+	void deveConverterFalhaDeConcorrencia() {
+		UUID estoqueId = UUID.randomUUID();
+		LocalDateTime agora = LocalDateTime.now();
+		Estoque estoque = new Estoque(estoqueId, UUID.randomUUID(), "Prateleira A1", new BigDecimal("10"), true, 0,
+				agora, agora);
+		when(estoqueRepository.buscarPorId(estoqueId, false)).thenReturn(Optional.of(estoque));
+		when(estoqueRepository.salvar(any(Estoque.class)))
+			.thenThrow(new ObjectOptimisticLockingFailureException(Estoque.class, estoqueId));
+
+		assertThrows(RegraDeNegocioException.class,
+				() -> useCase.executar(estoqueId, "ENTRADA", BigDecimal.ONE, "Reposicao"));
 	}
 
 }

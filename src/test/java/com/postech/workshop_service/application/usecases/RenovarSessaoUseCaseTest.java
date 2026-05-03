@@ -1,6 +1,7 @@
 package com.postech.workshop_service.application.usecases;
 
 import com.postech.workshop_service.application.exceptions.TokenInvalidoException;
+import com.postech.workshop_service.application.exceptions.ContaInativaException;
 import com.postech.workshop_service.domain.entities.RefreshToken;
 import com.postech.workshop_service.domain.entities.Usuario;
 import com.postech.workshop_service.domain.enums.Role;
@@ -67,6 +68,31 @@ class RenovarSessaoUseCaseTest {
 		when(refreshTokenRepository.buscarPorToken("refresh-revogado")).thenReturn(Optional.of(refreshToken));
 
 		assertThrows(TokenInvalidoException.class, () -> useCase.executar("refresh-revogado"));
+	}
+
+	@Test
+	void shouldRejectUnknownRefreshTokenOrUser() {
+		when(refreshTokenRepository.buscarPorToken("inexistente")).thenReturn(Optional.empty());
+		assertThrows(TokenInvalidoException.class, () -> useCase.executar("inexistente"));
+
+		RefreshToken refreshToken = new RefreshToken(UUID.randomUUID(), "refresh", UUID.randomUUID(),
+				LocalDateTime.now().plusDays(1), false, null, LocalDateTime.now(), LocalDateTime.now(), null);
+		when(refreshTokenRepository.buscarPorToken("refresh")).thenReturn(Optional.of(refreshToken));
+		when(usuarioRepository.buscarPorId(refreshToken.getUsuarioId())).thenReturn(Optional.empty());
+
+		assertThrows(TokenInvalidoException.class, () -> useCase.executar("refresh"));
+	}
+
+	@Test
+	void shouldRejectInactiveUser() {
+		Usuario usuario = new Usuario(UUID.randomUUID(), "admin", "admin@teste.com", "hash", Set.of(Role.ADMINISTRADOR),
+				null, false, false, LocalDateTime.now(), LocalDateTime.now(), null);
+		RefreshToken refreshToken = new RefreshToken(UUID.randomUUID(), "refresh", usuario.getId(),
+				LocalDateTime.now().plusDays(1), false, null, LocalDateTime.now(), LocalDateTime.now(), null);
+		when(refreshTokenRepository.buscarPorToken("refresh")).thenReturn(Optional.of(refreshToken));
+		when(usuarioRepository.buscarPorId(usuario.getId())).thenReturn(Optional.of(usuario));
+
+		assertThrows(ContaInativaException.class, () -> useCase.executar("refresh"));
 	}
 
 }

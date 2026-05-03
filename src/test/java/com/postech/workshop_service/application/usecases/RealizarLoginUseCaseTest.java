@@ -1,6 +1,7 @@
 package com.postech.workshop_service.application.usecases;
 
 import com.postech.workshop_service.application.exceptions.CredenciaisInvalidasException;
+import com.postech.workshop_service.application.exceptions.ContaInativaException;
 import com.postech.workshop_service.domain.entities.RefreshToken;
 import com.postech.workshop_service.domain.entities.Usuario;
 import com.postech.workshop_service.domain.enums.Role;
@@ -15,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
@@ -76,6 +79,29 @@ class RealizarLoginUseCaseTest {
 			.thenThrow(new BadCredentialsException("Credenciais invalidas."));
 
 		assertThrows(CredenciaisInvalidasException.class, () -> useCase.executar("admin", "senhaErrada"));
+	}
+
+	@Test
+	void shouldThrowWhenPrincipalUserDoesNotExist() {
+		Usuario usuario = new Usuario(UUID.randomUUID(), "admin", "admin@teste.com", "hash", Set.of(Role.ADMINISTRADOR),
+				null, true, false, LocalDateTime.now(), LocalDateTime.now(), null);
+		UsuarioAutenticadoPrincipal principal = UsuarioAutenticadoPrincipal.fromDomain(usuario);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null,
+				principal.getAuthorities());
+
+		when(authenticationManager.authenticate(any())).thenReturn(authentication);
+		when(usuarioRepository.buscarPorId(usuario.getId())).thenReturn(Optional.empty());
+
+		assertThrows(CredenciaisInvalidasException.class, () -> useCase.executar("admin", "senha123"));
+	}
+
+	@Test
+	void shouldThrowWhenAccountIsInactiveOrLocked() {
+		when(authenticationManager.authenticate(any())).thenThrow(new DisabledException("disabled"))
+			.thenThrow(new LockedException("locked"));
+
+		assertThrows(ContaInativaException.class, () -> useCase.executar("admin", "senha123"));
+		assertThrows(ContaInativaException.class, () -> useCase.executar("admin", "senha123"));
 	}
 
 }
