@@ -58,4 +58,28 @@ class CriarVeiculoUseCaseTest {
 				2020, null, null, List.of(clienteId)));
 	}
 
+	@Test
+	void shouldRequireAtLeastOneExistingClient() {
+		UUID clienteId = UUID.randomUUID();
+
+		assertThrows(RegraDeNegocioException.class,
+				() -> criarVeiculoUseCase.executar("BRA1D23", "Toyota", "Corolla", 2020, null, null, null));
+		assertThrows(RegraDeNegocioException.class,
+				() -> criarVeiculoUseCase.executar("BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of()));
+
+		when(clienteRepository.buscarPorId(clienteId, false)).thenReturn(Optional.empty());
+		assertThrows(RegraDeNegocioException.class, () -> criarVeiculoUseCase.executar("BRA1D23", "Toyota", "Corolla",
+				2020, null, null, List.of(clienteId)));
+	}
+
+	@Test
+	void shouldConvertInvalidPlateToBusinessException() {
+		UUID clienteId = UUID.randomUUID();
+		when(clienteRepository.buscarPorId(clienteId, false)).thenReturn(
+				Optional.of(new Cliente(clienteId, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
+
+		assertThrows(RegraDeNegocioException.class, () -> criarVeiculoUseCase.executar("invalida", "Toyota", "Corolla",
+				2020, null, null, List.of(clienteId)));
+	}
+
 }

@@ -47,4 +47,13 @@ class EncerrarSessaoUseCaseTest {
 		assertThrows(TokenInvalidoException.class, () -> useCase.executar("invalido"));
 	}
 
+	@Test
+	void shouldRejectExpiredRefreshTokenOnLogout() {
+		RefreshToken refreshToken = new RefreshToken(UUID.randomUUID(), "refresh-expirado", UUID.randomUUID(),
+				LocalDateTime.now().minusDays(1), false, null, LocalDateTime.now(), LocalDateTime.now(), null);
+		when(refreshTokenRepository.buscarPorToken("refresh-expirado")).thenReturn(Optional.of(refreshToken));
+
+		assertThrows(TokenInvalidoException.class, () -> useCase.executar("refresh-expirado"));
+	}
+
 }
