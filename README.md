@@ -64,6 +64,22 @@ src/main/java/com/postech/workshop_service/
 docker compose up -d
 ```
 
+## Rodando com Docker
+
+Copie `.env.example` para `.env` se quiser ajustar credenciais locais.
+
+```bash
+docker compose up -d
+```
+
+A aplicacao fica disponivel em `http://localhost:8080`.
+
+Health check:
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+
 ### Testes
 
 ```bash
