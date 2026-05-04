@@ -1,6 +1,27 @@
 # Workshop Service - Fase 1
 
-Servico Spring Boot para gestao de cadastros base de uma oficina, com foco atual em clientes e veiculos vinculados a um ou mais clientes.
+Serviço desenvolvido em Spring Boot para gestão de uma oficina mecânica, com foco na organização do atendimento, rastreabilidade das operações e consistência das regras de domínio.
+
+Este projeto aplica conceitos de Domain-Driven Design (DDD) para estruturar regras de negócio, entidades e fluxos operacionais de forma clara e evolutiva.
+
+## Objetivo
+Centralizar o gerenciamento de clientes e veículos, garantindo:
+- Consistência dos dados
+- Rastreabilidade das operações
+- Base sólida para evolução do domínio (ordens de serviço, orçamento, execução)
+
+## Modelagem de Domínio
+O sistema é estruturado com base em DDD, incluindo:
+- Linguagem Ubíqua definida para alinhar negócio e desenvolvimento
+- Separação clara entre Core Domain e Supporting Domain
+- Organização por camadas: domain, application, infrastructure e api
+- Organização dos eventos esperados (comandos, eventos e políticas)
+
+Documentação de domínio:
+- [Dicionário de Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
+- [Diagramas Domain Storytelling](/docs/DDD_storytelling)
+- [Event Storming](em construção)
+
 
 ## Tecnologias
 
@@ -21,6 +42,7 @@ Servico Spring Boot para gestao de cadastros base de uma oficina, com foco atual
 - JaCoCo
 
 ## Estrutura
+O projeto segue um modelo em camadas inspirado em Clean Architecture:
 
 ```text
 src/main/java/com/postech/workshop_service/
@@ -43,16 +65,23 @@ src/main/java/com/postech/workshop_service/
 
 ## Funcionalidades Atuais
 
-- Cadastro, consulta, atualizacao e remocao de clientes
-- Cadastro, consulta, atualizacao e remocao logica de veiculos
-- Vinculo de um veiculo com multiplos clientes equivalentes
-- Busca de veiculos por ID, placa e cliente
-- Listagem paginada de veiculos com filtro de inativos
-- Reutilizacao de placa apos remocao logica do cadastro anterior
+- Cadastro, consulta, atualização e remoção de clientes
+- Cadastro, consulta, atualização e remoção logica de veículos
+- Vínculo de um veículo com múltiplos clientes equivalentes
+- Busca de veículos por ID, placa e cliente
+- Listagem paginada de veículos com filtro de inativos
+- Reutilização de placa após remoção logica do cadastro anterior
 
-## Execucao Local
+## Segurança
+- Autenticação baseada em JWT
+- Configuração obrigatória de segredo (JWT_SECRET)
+- Estrutura preparada para RBAC (Role-Based Access Control)
 
-### Pre-requisitos
+Detalhes: [Fluxo de autenticação e autorização JWT](docs/autenticacao-jwt-rbac/README.md)
+
+## Execução Local
+
+### Pré-requisitos
 
 - Java 21
 - Maven 3.9+
@@ -86,7 +115,7 @@ curl http://localhost:8080/actuator/health
 mvn test
 ```
 
-### Aplicacao
+### Aplicação
 
 Antes de iniciar a API, defina a variavel de ambiente `JWT_SECRET` com um segredo de pelo menos 32 caracteres.
 
@@ -97,7 +126,7 @@ $env:JWT_SECRET="defina-um-segredo-com-pelo-menos-32-caracteres"
 mvn spring-boot:run
 ```
 
-Sem essa variavel a aplicacao falha no startup por seguranca.
+Sem essa variavel a aplicação falha no startup por segurança.
 
 Exemplo alternativo passando pela linha de comando:
 
@@ -109,15 +138,12 @@ mvn spring-boot:run "-Dspring-boot.run.arguments=--JWT_SECRET=defina-um-segredo-
 mvn spring-boot:run
 ```
 
-### Documentacao OpenAPI
+### Documentação OpenAPI
 
 - `http://localhost:8080/swagger-ui/index.html`
 
-## Observacoes do MVP
+## Observações do MVP
 
-- Os endpoints de veiculos estao liberados no MVP e preparados para futura restricao de acesso.
-- A remocao de veiculos e logica, preservando rastreabilidade e referencias historicas.
+- Os endpoints de veículos estão liberados no MVP e preparados para futura restrição de acesso.
+- A remoção de veículos e lógica, preservando rastreabilidade e referências históricas.
 
-## Documentacao
-
-- Fluxo detalhado de autenticacao e autorizacao JWT: [docs/autenticacao-jwt-rbac/README.md](docs/autenticacao-jwt-rbac/README.md)
