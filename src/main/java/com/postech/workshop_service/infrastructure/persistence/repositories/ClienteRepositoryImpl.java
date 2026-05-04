@@ -30,16 +30,10 @@ public class ClienteRepositoryImpl implements ClienteRepository {
 
 	@Override
 	public Cliente salvar(Cliente cliente) {
-		ClienteJpaEntity entity;
-		if (cliente.getId() != null) {
-			entity = jpaClienteRepository.findById(cliente.getId()).map(existing -> {
-				clienteMapper.updateEntityFromDomain(cliente, existing);
-				return existing;
-			}).orElseGet(() -> clienteMapper.toEntity(cliente));
-		}
-		else {
-			entity = clienteMapper.toEntity(cliente);
-		}
+		ClienteJpaEntity entity = jpaClienteRepository.findById(cliente.getId()).map(existing -> {
+			clienteMapper.updateEntityFromDomain(cliente, existing);
+			return existing;
+		}).orElseGet(() -> clienteMapper.toEntity(cliente));
 
 		ClienteJpaEntity saved = jpaClienteRepository.save(entity);
 		return clienteMapper.toDomain(saved);

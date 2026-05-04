@@ -70,4 +70,37 @@ class CriarPecaUseCaseTest {
 		assertEquals("Obs", resultado.getObservacoes());
 	}
 
+	@Test
+	void deveNormalizarSkuEEnums() {
+		when(repository.existeSkuAtivo("FIL-001", null)).thenReturn(false);
+		when(repository.salvar(any(PecaInsumo.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		PecaInsumo resultado = useCase.executar(" fil-001 ", "Filtro de Oleo", new BigDecimal("45.90"),
+				new BigDecimal("5"), " un ", " peca ", null, null, null, null, null, null);
+
+		assertEquals("FIL-001", resultado.getSku());
+		assertEquals("UN", resultado.getUnidadeMedida().name());
+		assertEquals("PECA", resultado.getTipoItem().name());
+	}
+
+	@Test
+	void deveLancarExcecaoParaDadosInvalidos() {
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar(null, "Filtro de Oleo",
+				new BigDecimal("45.90"), new BigDecimal("5"), "UN", "PECA", null, null, null, null, null, null));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar(" ", "Filtro de Oleo",
+				new BigDecimal("45.90"), new BigDecimal("5"), "UN", "PECA", null, null, null, null, null, null));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar("FIL-001", "Filtro de Oleo",
+				new BigDecimal("45.90"), new BigDecimal("5"), null, "PECA", null, null, null, null, null, null));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar("FIL-001", "Filtro de Oleo",
+				new BigDecimal("45.90"), new BigDecimal("5"), "INVALIDA", "PECA", null, null, null, null, null, null));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar("FIL-001", "Filtro de Oleo",
+				new BigDecimal("45.90"), new BigDecimal("5"), "UN", null, null, null, null, null, null, null));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar("FIL-001", "Filtro de Oleo",
+				new BigDecimal("45.90"), new BigDecimal("5"), "UN", "INVALIDO", null, null, null, null, null, null));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar("FIL-001", "Filtro de Oleo",
+				new BigDecimal("45.90"), new BigDecimal("5"), " ", "PECA", null, null, null, null, null, null));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar("FIL-001", "Filtro de Oleo",
+				new BigDecimal("45.90"), new BigDecimal("5"), "UN", " ", null, null, null, null, null, null));
+	}
+
 }

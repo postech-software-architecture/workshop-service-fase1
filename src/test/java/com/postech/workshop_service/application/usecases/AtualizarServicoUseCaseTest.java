@@ -68,6 +68,18 @@ class AtualizarServicoUseCaseTest {
 				"Descricao", new BigDecimal("100.00"), null, null, null, null));
 	}
 
+	@Test
+	void shouldConvertInvalidDataOnUpdate() {
+		UUID id = UUID.randomUUID();
+		Servico servico = criarServico(id, "Nome original", "Descricao", new BigDecimal("100.00"));
+
+		when(servicoRepository.buscarPorId(id, true)).thenReturn(Optional.of(servico));
+		when(servicoRepository.existeNomeAtivo(" ", id)).thenReturn(false);
+
+		assertThrows(RegraDeNegocioException.class, () -> atualizarServicoUseCase.executar(id, " ", "Descricao",
+				new BigDecimal("100.00"), null, null, null, null));
+	}
+
 	private Servico criarServico(UUID id, String nome, String descricao, BigDecimal valor) {
 		return new Servico(id, nome, descricao, valor, null, null, null, null);
 	}

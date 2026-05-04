@@ -34,11 +34,10 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
 
 	@Override
 	public Usuario salvar(Usuario usuario) {
-		UsuarioJpaEntity entity = usuario.getId() != null
-				? jpaUsuarioRepository.findById(usuario.getId()).map(existing -> {
-					usuarioMapper.updateEntityFromDomain(usuario, existing);
-					return existing;
-				}).orElseGet(() -> usuarioMapper.toEntity(usuario)) : usuarioMapper.toEntity(usuario);
+		UsuarioJpaEntity entity = jpaUsuarioRepository.findById(usuario.getId()).map(existing -> {
+			usuarioMapper.updateEntityFromDomain(usuario, existing);
+			return existing;
+		}).orElseGet(() -> usuarioMapper.toEntity(usuario));
 
 		entity.setCliente(obterClienteReferencia(usuario.getClienteId()));
 		UsuarioJpaEntity salvo = jpaUsuarioRepository.save(entity);

@@ -2,6 +2,7 @@ package com.postech.workshop_service.infrastructure.security;
 
 import com.postech.workshop_service.domain.entities.Usuario;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
@@ -74,8 +75,13 @@ public class JwtTokenService {
 	 * @return true quando o token for valido para o usuario.
 	 */
 	public boolean validarAccessToken(String token, UUID usuarioId) {
-		Claims claims = extrairClaims(token);
-		return claims.getSubject().equals(usuarioId.toString()) && claims.getExpiration().after(new Date());
+		try {
+			Claims claims = extrairClaims(token);
+			return claims.getSubject().equals(usuarioId.toString());
+		}
+		catch (JwtException | IllegalArgumentException ex) {
+			return false;
+		}
 	}
 
 	/**

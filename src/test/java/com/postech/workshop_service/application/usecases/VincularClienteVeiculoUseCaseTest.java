@@ -74,4 +74,20 @@ class VincularClienteVeiculoUseCaseTest {
 				() -> vincularClienteVeiculoUseCase.executar(UUID.randomUUID(), UUID.randomUUID()));
 	}
 
+	@Test
+	void shouldConvertDuplicatedClientLinkToBusinessException() {
+		UUID clienteAtual = UUID.randomUUID();
+		UUID veiculoId = UUID.randomUUID();
+		LocalDateTime agora = LocalDateTime.now();
+		Veiculo veiculo = new Veiculo(veiculoId, "BRA1D23", "Toyota", "Corolla", 2020, null, null,
+				List.of(clienteAtual), true, agora, agora, null);
+
+		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
+		when(clienteRepository.buscarPorId(clienteAtual, false)).thenReturn(Optional
+			.of(new Cliente(clienteAtual, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
+
+		assertThrows(RegraDeNegocioException.class,
+				() -> vincularClienteVeiculoUseCase.executar(veiculoId, clienteAtual));
+	}
+
 }
