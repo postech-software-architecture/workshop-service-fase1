@@ -1,45 +1,97 @@
 # Workshop Service - Fase 1
 
-Serviço desenvolvido em Spring Boot para gestão de uma oficina mecânica, com foco na organização do atendimento, rastreabilidade das operações e consistência das regras de domínio.
+> MVP de back-end para gestão de oficinas mecânicas, desenvolvido com foco em Domain-Driven Design (DDD), rastreabilidade operacional e evolução contínua do domínio.
 
-Este projeto aplica conceitos de Domain-Driven Design (DDD) para estruturar regras de negócio, entidades e fluxos operacionais de forma clara e evolutiva.
+---
 
-## Objetivo
-Centralizar o gerenciamento de clientes e veículos, garantindo:
+## Sobre o Projeto
+
+O Workshop Service foi desenvolvido como parte do **Tech Challenge - Fase 1** da Pós-Graduação em Software Architecture da POSTECH.
+
+O projeto busca estruturar digitalmente processos operacionais de oficinas mecânicas, reduzindo problemas relacionados à rastreabilidade, controle de informações e padronização dos atendimentos.
+
+A solução foi construída como um MVP de back-end voltado à gestão de clientes e veículos, estabelecendo uma base arquitetural preparada para futuras expansões do domínio, como:
+
+- Ordens de Serviço
+- Diagnóstico técnico
+- Orçamentos
+- Controle de estoque
+- Fluxo de execução
+- Rastreamento operacional
+
+---
+
+## Objetivo do Projeto
+
+Centralizar o gerenciamento de clientes e veículos em um sistema estruturado, garantindo:
+
 - Consistência dos dados
 - Rastreabilidade das operações
-- Base sólida para evolução do domínio (ordens de serviço, orçamento, execução)
+- Padronização das informações
+- Base sólida para evolução contínua do domínio
 
-## Modelagem de Domínio
-O sistema é estruturado com base em DDD, incluindo:
-- Linguagem Ubíqua definida para alinhar negócio e desenvolvimento
-- Separação clara entre Core Domain e Supporting Domain
-- Organização por camadas: domain, application, infrastructure e api
-- Organização dos eventos esperados (comandos, eventos e políticas)
+---
 
-Documentação de domínio:
+## Arquitetura e Modelagem de Domínio
+
+O projeto foi estruturado com base em conceitos de **Domain-Driven Design (DDD)**, buscando alinhar regras de negócio, comunicação técnica e evolução arquitetural.
+
+### Conceitos aplicados
+
+- Linguagem Ubíqua
+- Separação entre Core Domain e Supporting Domain
+- Arquitetura em camadas
+- Organização orientada à evolução do domínio
+- Preservação de histórico através de remoção lógica
+
+### Arquitetura em Camadas
+
+```text
+┌─────────────────────────────────┐
+│ API / Presentation Layer        │
+├─────────────────────────────────┤
+│ Application Layer               │
+├─────────────────────────────────┤
+│ Domain Layer                    │
+├─────────────────────────────────┤
+│ Infrastructure Layer            │
+└─────────────────────────────────┘
+```
+
+---
+
+## Artefatos de Domínio
 - [Dicionário de Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
 - [Diagramas Domain Storytelling](/docs/DDD_storytelling)
 - [Event Storming](em construção)
 
+---
+## Funcionalidades Principais
 
-## Tecnologias
+- Gestão de Clientes e Veículos
+- Gestão de Ordens de Serviço
+- Diagnóstico e Orçamento
+- Fluxo de Aprovação e Execução
+- Acompanhamento Operacional
+- Gestão Administrativa
+- Autenticação e Segurança
 
-- Java 21
-- Spring Boot 3.4.1
-- Spring Web
-- Spring Data JPA
-- Spring Validation
-- Spring Security
-- SpringDoc OpenAPI
-- PostgreSQL
-- Flyway
-- Lombok
-- MapStruct
-- JUnit 5
-- Mockito
-- Testcontainers
-- JaCoCo
+---
+
+## Tecnologias Utilizadas
+### Backend:
+[![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.java.com/) [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.1-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot) [![Spring Web](https://img.shields.io/badge/Spring_Web-6DB33F?style=for-the-badge)](https://spring.io/projects/spring-framework) [![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge)](https://spring.io/projects/spring-data-jpa) [![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
+
+### Qualidade e Testes:
+[![JUnit5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white)](https://junit.org/junit5/) [![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge)](https://site.mockito.org/) [![Testcontainers](https://img.shields.io/badge/Testcontainers-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://testcontainers.com/) [![JaCoCo](https://img.shields.io/badge/JaCoCo-Coverage-red?style=for-the-badge)](https://www.jacoco.org/)
+
+### Banco de Dados:
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/) [![Flyway](https://img.shields.io/badge/Flyway-CC0200?style=for-the-badge&logo=flyway&logoColor=white)](https://flywaydb.org/)
+
+### Produtividade:
+[![Lombok](https://img.shields.io/badge/Lombok-BC4521?style=for-the-badge)](https://projectlombok.org/) [![MapStruct](https://img.shields.io/badge/MapStruct-009688?style=for-the-badge)](https://mapstruct.org/)
+
+---
 
 ## Estrutura
 O projeto segue um modelo em camadas inspirado em Clean Architecture:
@@ -62,15 +114,7 @@ src/main/java/com/postech/workshop_service/
         ├── mappers/
         └── repositories/
 ```
-
-## Funcionalidades Atuais
-
-- Cadastro, consulta, atualização e remoção de clientes
-- Cadastro, consulta, atualização e remoção logica de veículos
-- Vínculo de um veículo com múltiplos clientes equivalentes
-- Busca de veículos por ID, placa e cliente
-- Listagem paginada de veículos com filtro de inativos
-- Reutilização de placa após remoção logica do cadastro anterior
+---
 
 ## Segurança
 - Autenticação baseada em JWT
@@ -101,7 +145,7 @@ Copie `.env.example` para `.env` se quiser ajustar credenciais locais.
 docker compose up -d
 ```
 
-A aplicacao fica disponivel em `http://localhost:8080`.
+A aplicação fica disponível em `http://localhost:8080`.
 
 Health check:
 
@@ -117,7 +161,7 @@ mvn test
 
 ### Aplicação
 
-Antes de iniciar a API, defina a variavel de ambiente `JWT_SECRET` com um segredo de pelo menos 32 caracteres.
+Antes de iniciar a API, defina a variável de ambiente `JWT_SECRET` com um segredo de pelo menos 32 caracteres.
 
 Exemplo no PowerShell:
 
@@ -126,7 +170,7 @@ $env:JWT_SECRET="defina-um-segredo-com-pelo-menos-32-caracteres"
 mvn spring-boot:run
 ```
 
-Sem essa variavel a aplicação falha no startup por segurança.
+Sem essa variável a aplicação falha no startup por segurança.
 
 Exemplo alternativo passando pela linha de comando:
 
@@ -145,5 +189,61 @@ mvn spring-boot:run
 ## Observações do MVP
 
 - Os endpoints de veículos estão liberados no MVP e preparados para futura restrição de acesso.
-- A remoção de veículos e lógica, preservando rastreabilidade e referências históricas.
+- A remoção de veículos é lógica, preservando rastreabilidade e referências históricas.
+- O projeto representa a primeira fase da construção do domínio da oficina mecânica.
 
+---
+## Equipe
+
+Projeto desenvolvido como parte do Tech Challenge da POSTECH da Turma 15SOAT.
+
+<p align="center">
+<a href="https://github.com/jeanrabello" title="@jeanrabello"><img src="https://github.com/jeanrabello.png" width="80px;" alt="Jean"/></a>&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/MahAmorim" title="@MahAmorim"><img src="https://github.com/MahAmorim.png" width="80px;" alt="Marcela"/></a>&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/tassyo" title="@tassyo"><img src="https://github.com/tassyo.png" width="80px;" alt="Tassyo"/></a>&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/ssayori" title="@ssayori"><img src="https://github.com/ssayori.png" width="80px;" alt="Suzana"/></a>&nbsp;&nbsp;&nbsp;
+<a href="https://github.com/mateus-paz" title="@mateus-paz"><img src="https://github.com/mateus-paz.png" width="80px;" alt="Mateus"/></a>
+</p>
+
+<p align="center">
+<sub>
+Jean Paes Rabello •
+Marcela Amorim •
+Tassyo Monteiro •
+Suzana Sayori •
+Mateus Paz de Oliveira
+</sub>
+</p>
+
+---
+
+## Demonstração
+
+Em breve: vídeo demonstrativo da aplicação e dos fluxos principais do sistema.
+
+---
+
+## Artefatos e Documentação
+
+- [Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
+- [Domain Storytelling](/docs/DDD_storytelling)
+- [Fluxo JWT e RBAC](docs/autenticacao-jwt-rbac/README.md)
+- [Event Storming](em construção)
+- [Documento de Entrega](em construção)
+
+---
+
+## Suporte
+
+Caso encontre algum problema ou deseje contribuir com sugestões:
+
+- Abra uma issue no repositório
+- Entre em contato com a equipe
+
+---
+
+<p align="center">
+  <sub>
+    Desenvolvido pelo Grupo 267 • Turma 15SOAT • POSTECH
+  </sub>
+</p>
