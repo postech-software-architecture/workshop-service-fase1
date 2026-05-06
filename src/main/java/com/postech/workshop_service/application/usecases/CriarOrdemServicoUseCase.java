@@ -4,8 +4,10 @@ import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.Cliente;
+import com.postech.workshop_service.domain.entities.Estoque;
 import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.ItemOrcamento;
+import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.PecaInsumo;
@@ -15,6 +17,7 @@ import com.postech.workshop_service.domain.entities.TipoOrcamento;
 import com.postech.workshop_service.domain.entities.Veiculo;
 import com.postech.workshop_service.domain.repositories.ClienteRepository;
 import com.postech.workshop_service.domain.repositories.EstoqueRepository;
+import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import com.postech.workshop_service.domain.repositories.PecaInsumoRepository;
@@ -52,6 +55,8 @@ public class CriarOrdemServicoUseCase {
 
 	private final EstoqueRepository estoqueRepository;
 
+	private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+
 	private final OrdemServicoRepository ordemServicoRepository;
 
 	private final OrcamentoRepository orcamentoRepository;
@@ -63,13 +68,15 @@ public class CriarOrdemServicoUseCase {
 	 */
 	public CriarOrdemServicoUseCase(ClienteRepository clienteRepository, VeiculoRepository veiculoRepository,
 			ServicoRepository servicoRepository, PecaInsumoRepository pecaInsumoRepository,
-			EstoqueRepository estoqueRepository, OrdemServicoRepository ordemServicoRepository,
-			OrcamentoRepository orcamentoRepository, ClienteNotificationService clienteNotificationService) {
+			EstoqueRepository estoqueRepository, MovimentacaoEstoqueRepository movimentacaoEstoqueRepository,
+			OrdemServicoRepository ordemServicoRepository, OrcamentoRepository orcamentoRepository,
+			ClienteNotificationService clienteNotificationService) {
 		this.clienteRepository = clienteRepository;
 		this.veiculoRepository = veiculoRepository;
 		this.servicoRepository = servicoRepository;
 		this.pecaInsumoRepository = pecaInsumoRepository;
 		this.estoqueRepository = estoqueRepository;
+		this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.orcamentoRepository = orcamentoRepository;
 		this.clienteNotificationService = clienteNotificationService;
@@ -129,6 +136,8 @@ public class CriarOrdemServicoUseCase {
 			OrdemServico osSalva = ordemServicoRepository.salvar(os);
 			Orcamento orcamentoSalvo = orcamentoRepository.salvar(orcamento);
 
+			reservarEstoque(pecas != null ? pecas : List.of(), osSalva.getNumero());
+
 			clienteNotificationService.notificarOrcamentoPendente(osSalva, orcamentoSalvo);
 
 			return new ResultadoCriacaoOrdemServico(osSalva, orcamentoSalvo, cliente, veiculo);
@@ -138,6 +147,24 @@ public class CriarOrdemServicoUseCase {
 		}
 		catch (IllegalArgumentException ex) {
 			throw new RegraDeNegocioException(ex.getMessage());
+		}
+	}
+
+	private void reservarEstoque(List<ItemPecaSolicitada> pecas, String numeroOs) {
+		String motivo = "Reserva para OS " + numeroOs;
+		for (ItemPecaSolicitada p : pecas) {
+			BigDecimal aReservar = p.quantidade();
+			List<Estoque> estoques = estoqueRepository.listarPorPeca(p.pecaId(), false);
+			for (Estoque estoque : estoques) {
+				if (aReservar.compareTo(BigDecimal.ZERO) <= 0) {
+					break;
+				}
+				BigDecimal desteEstoque = estoque.getQuantidade().min(aReservar);
+				MovimentacaoEstoque mov = estoque.reservar(desteEstoque, motivo);
+				estoqueRepository.salvar(estoque);
+				movimentacaoEstoqueRepository.salvar(mov);
+				aReservar = aReservar.subtract(desteEstoque);
+			}
 		}
 	}
 
@@ -219,7 +246,8 @@ public class CriarOrdemServicoUseCase {
 						+ estoqueDisponivel + ", solicitado: " + p.quantidade() + ".");
 			}
 			BigDecimal valorTotal = peca.getValorUnitario().multiply(p.quantidade());
-			itens.add(new ItemComposicaoTecnica(peca.getNome(), valorTotal, TipoItemComposicaoTecnica.PECA));
+			itens.add(new ItemComposicaoTecnica(peca.getNome(), valorTotal, TipoItemComposicaoTecnica.PECA,
+					peca.getId()));
 		}
 		return itens;
 	}

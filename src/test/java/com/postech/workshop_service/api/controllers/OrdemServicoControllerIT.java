@@ -318,7 +318,7 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 	// --- helpers ---
 
 	private UUID criarOsEObterOrcamentoId() throws Exception {
-		criarCliente("Cliente Orcamento", "33200738039");
+		criarCliente("Cliente Orcamento", "33200738006");
 		UUID servicoId = criarServico("Servico Orcamento", new BigDecimal("150.00"));
 
 		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()

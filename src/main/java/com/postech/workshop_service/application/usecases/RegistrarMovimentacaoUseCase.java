@@ -55,6 +55,8 @@ public class RegistrarMovimentacaoUseCase {
 				case ENTRADA -> estoque.registrarEntrada(quantidade, motivo);
 				case SAIDA -> estoque.registrarSaida(quantidade, motivo);
 				case AJUSTE -> estoque.ajustar(quantidade, motivo);
+				case RESERVA, LIBERACAO -> throw new RegraDeNegocioException(
+						"Os tipos RESERVA e LIBERACAO sao gerenciados internamente pelo sistema e nao podem ser registrados manualmente.");
 			};
 
 			estoqueRepository.salvar(estoque);

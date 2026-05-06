@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Objeto de dominio que representa um item da composicao tecnica da ordem de servico.
@@ -21,6 +22,8 @@ public final class ItemComposicaoTecnica {
 	@EqualsAndHashCode.Include
 	private final TipoItemComposicaoTecnica tipo;
 
+	private final UUID idPecaInsumo;
+
 	/**
 	 * Cria um item de composicao tecnica com os dados obrigatorios.
 	 * @param descricao descricao do item.
@@ -28,9 +31,23 @@ public final class ItemComposicaoTecnica {
 	 * @param tipo classificacao do item.
 	 */
 	public ItemComposicaoTecnica(String descricao, BigDecimal valor, TipoItemComposicaoTecnica tipo) {
+		this(descricao, valor, tipo, null);
+	}
+
+	/**
+	 * Cria um item de composicao tecnica vinculado a uma peca do catalogo.
+	 * @param descricao descricao do item.
+	 * @param valor valor monetario do item.
+	 * @param tipo classificacao do item.
+	 * @param idPecaInsumo identificador da peca (obrigatorio para itens do tipo PECA).
+	 */
+	@Default
+	public ItemComposicaoTecnica(String descricao, BigDecimal valor, TipoItemComposicaoTecnica tipo,
+			UUID idPecaInsumo) {
 		this.descricao = validarDescricao(descricao);
 		this.valor = validarValor(valor);
 		this.tipo = validarTipo(tipo);
+		this.idPecaInsumo = idPecaInsumo;
 	}
 
 	private String validarDescricao(String descricao) {

@@ -17,6 +17,8 @@ tags:
     description: Controle de estoque e movimentações
   - name: Ordens de Serviço
     description: Gerenciamento do ciclo de vida das ordens de serviço
+  - name: Orçamentos
+    description: Aprovação e rejeição de orçamentos vinculados a ordens de serviço
 
 paths:
 
@@ -726,6 +728,62 @@ paths:
             - estoque insuficiente para a peça solicitada
             - serviço inativo no catálogo
 
+  # ─── Orçamentos ───────────────────────────────────────────────────────────────
+
+  /api/v1/orcamentos/{id}/aprovar:
+    patch:
+      tags: [Orçamentos]
+      summary: Aprovar orçamento
+      description: >
+        Registra a aprovação do cliente para o orçamento pendente.
+        A ordem de serviço avança para o status AGUARDANDO_EXECUCAO.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Identificador único do orçamento
+      responses:
+        '200':
+          description: Orçamento aprovado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrcamentoResponse'
+        '404':
+          description: Orçamento não encontrado
+        '422':
+          description: Orçamento não está pendente de aprovação ou OS em estado inválido
+
+  /api/v1/orcamentos/{id}/rejeitar:
+    patch:
+      tags: [Orçamentos]
+      summary: Rejeitar orçamento
+      description: >
+        Registra a rejeição do cliente para o orçamento pendente.
+        A ordem de serviço retorna ao status EM_COMPOSICAO para revisão.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Identificador único do orçamento
+      responses:
+        '200':
+          description: Orçamento rejeitado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrcamentoResponse'
+        '404':
+          description: Orçamento não encontrado
+        '422':
+          description: Orçamento não está pendente de aprovação ou OS em estado inválido
+
 components:
   schemas:
 
@@ -1179,3 +1237,46 @@ components:
         dataCriacao:
           type: string
           format: date-time
+
+    # ── Orçamentos ────────────────────────────────────────────────────────────
+
+    OrcamentoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        idOrdemServico:
+          type: string
+          format: uuid
+        valorTotal:
+          type: number
+          example: 310.00
+        status:
+          type: string
+          enum: [CRIADO, PENDENTE_APROVACAO, APROVADO, REJEITADO, CANCELADO]
+          example: APROVADO
+        tipo:
+          type: string
+          enum: [SERVICO_ORIGINAL, ADICAO_SERVICO]
+          example: SERVICO_ORIGINAL
+        itens:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemOrcamentoResponse'
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+
+    ItemOrcamentoResponse:
+      type: object
+      properties:
+        descricao:
+          type: string
+          example: Troca de óleo
+        valor:
+          type: number
+          example: 100.00

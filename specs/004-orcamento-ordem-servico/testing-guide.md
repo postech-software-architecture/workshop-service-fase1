@@ -360,7 +360,86 @@ curl -s -X POST http://localhost:8080/api/v1/ordens-servico \
 
 ---
 
+## 4b. Fluxo — Aprovação e Rejeição de Orçamento
+
+Após criar a OS (seção 3), o `id` do orçamento vem no campo `orcamento.id` da resposta.
+
+### Comportamento de reserva de estoque
+
+Ao criar a OS, as peças solicitadas são **imediatamente reservadas** no estoque com movimentação do tipo `RESERVA`. O saldo disponível é decrementado no ato — impedindo que outra OS consuma a mesma quantidade antes da aprovação.
+
+| Evento | Tipo de movimentação | Efeito no estoque |
+|--------|---------------------|-------------------|
+| OS criada (orçamento gerado) | `RESERVA` | Decrementa quantidade disponível |
+| Orçamento aprovado | *(nenhuma — reserva permanece)* | Estoque permanece reservado até execução |
+| Orçamento rejeitado | `LIBERACAO` | Devolve quantidade ao saldo disponível |
+| Orçamento cancelado | `LIBERACAO` | Devolve quantidade ao saldo disponível |
+
+---
+
+### Aprovar orçamento
+
+```bash
+curl -s -X PATCH http://localhost:8080/api/v1/orcamentos/$ORCAMENTO_ID/aprovar | jq .
+```
+
+**Resposta esperada (200):**
+```json
+{
+  "id": "<ORCAMENTO_ID>",
+  "idOrdemServico": "<OS_ID>",
+  "valorTotal": 200.00,
+  "status": "APROVADO",
+  "tipo": "SERVICO_ORIGINAL",
+  "itens": [
+    { "descricao": "Troca de óleo", "valor": 100.00 },
+    { "descricao": "Óleo 5W30 × 2", "valor": 100.00 }
+  ]
+}
+```
+
+**Efeitos colaterais:**
+- Status da OS avança para `AGUARDANDO_EXECUCAO`
+- Estoque permanece com a reserva (será debitado na execução do serviço)
+
+---
+
+### Rejeitar orçamento
+
+```bash
+curl -s -X PATCH http://localhost:8080/api/v1/orcamentos/$ORCAMENTO_ID/rejeitar | jq .
+```
+
+**Resposta esperada (200):**
+```json
+{
+  "id": "<ORCAMENTO_ID>",
+  "status": "REJEITADO"
+}
+```
+
+**Efeitos colaterais:**
+- Status da OS retorna para `EM_COMPOSICAO`
+- Quantidade de cada peça é devolvida ao estoque com movimentação `LIBERACAO`
+
+---
+
+### Erros esperados
+
+```bash
+# 404 — orçamento não encontrado
+curl -s -X PATCH http://localhost:8080/api/v1/orcamentos/00000000-0000-0000-0000-000000000000/aprovar | jq .
+
+# 422 — orçamento já aprovado (tentar aprovar novamente)
+curl -s -X PATCH http://localhost:8080/api/v1/orcamentos/$ORCAMENTO_ID/aprovar | jq .
+curl -s -X PATCH http://localhost:8080/api/v1/orcamentos/$ORCAMENTO_ID/aprovar | jq .
+```
+
+---
+
 ## 5. Mapa de Status HTTP × Causa
+
+### POST /api/v1/ordens-servico
 
 | Status | Causa |
 |--------|-------|
@@ -368,6 +447,14 @@ curl -s -X POST http://localhost:8080/api/v1/ordens-servico \
 | `400 Bad Request` | Campos obrigatórios ausentes ou com formato inválido |
 | `404 Not Found` | Cliente não cadastrado ou serviço não existe no catálogo |
 | `422 Unprocessable Entity` | Veículo de outro cliente, veículo novo sem dados, estoque insuficiente, serviço inativo |
+
+### PATCH /api/v1/orcamentos/{id}/aprovar e /rejeitar
+
+| Status | Causa |
+|--------|-------|
+| `200 OK` | Orçamento aprovado ou rejeitado com sucesso |
+| `404 Not Found` | Orçamento não encontrado para o ID informado |
+| `422 Unprocessable Entity` | Orçamento não está `PENDENTE_APROVACAO`, ou OS em estado inválido |
 
 ---
 
@@ -403,8 +490,7 @@ Após criar a OS com sucesso, validar:
 | FR-020 | aprovar(OS) SERVICO_ORIGINAL → OS.AGUARDANDO_EXECUCAO | ✅ |
 | FR-021 | Cancelar orcamento APROVADO não cancela OS em execução | ✅ |
 
-> **Nota:** FR-008 a FR-021 estão implementados no domínio (`Orcamento.aprovar/cancelar`)
-> mas ainda não expostos via endpoint HTTP — serão adicionados em feature futura.
+> FR-008 a FR-011 agora estão expostos via `PATCH /api/v1/orcamentos/{id}/aprovar` e `PATCH /api/v1/orcamentos/{id}/rejeitar`.
 
 ---
 
@@ -412,7 +498,7 @@ Após criar a OS com sucesso, validar:
 
 ```bash
 # Rodar apenas os testes da feature OS
-./mvnw test -pl . -Dtest="CriarOrdemServicoUseCaseTest,OrdemServicoControllerIT,OrdemServicoTest,OrcamentoTest"
+./mvnw test -pl . -Dtest="CriarOrdemServicoUseCaseTest,AprovarOrcamentoUseCaseTest,RejeitarOrcamentoUseCaseTest,OrdemServicoControllerIT,OrdemServicoTest,OrcamentoTest"
 
 # Rodar tudo com cobertura
 ./mvnw verify
@@ -425,4 +511,6 @@ Após criar a OS com sucesso, validar:
 | `OrdemServicoTest` | Unitário | 12 testes — domínio, transições de estado, `podeSerCancelada()` |
 | `OrcamentoTest` | Unitário | 18 testes — criação, aprovação, rejeição, cancelamento com coordenação |
 | `CriarOrdemServicoUseCaseTest` | Unitário | 11 testes — todos os caminhos do use case com mocks |
-| `OrdemServicoControllerIT` | Integração | 9 testes — round-trip real com PostgreSQL + Testcontainers |
+| `AprovarOrcamentoUseCaseTest` | Unitário | testes do use case de aprovação com mocks |
+| `RejeitarOrcamentoUseCaseTest` | Unitário | testes do use case de rejeição com mocks |
+| `OrdemServicoControllerIT` | Integração | 14 testes — criação de OS (9) + aprovação e rejeição de orçamento (5) |
