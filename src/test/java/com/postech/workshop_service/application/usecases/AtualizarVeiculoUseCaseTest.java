@@ -1,15 +1,16 @@
 package com.postech.workshop_service.application.usecases;
 
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.Veiculo;
 import com.postech.workshop_service.domain.repositories.VeiculoRepository;
-import com.postech.workshop_service.domain.valueobjects.Placa;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,8 +33,9 @@ class AtualizarVeiculoUseCaseTest {
 	void shouldUpdateVeiculoWithoutChangingClientes() {
 		UUID clienteId = UUID.randomUUID();
 		UUID veiculoId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteId));
+		LocalDateTime agora = LocalDateTime.now();
+		Veiculo veiculo = new Veiculo(veiculoId, "BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId),
+				true, agora, agora, null);
 
 		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
 		when(veiculoRepository.existePlacaAtiva("ABC1234", veiculoId)).thenReturn(false);
@@ -55,6 +57,24 @@ class AtualizarVeiculoUseCaseTest {
 	void shouldThrowWhenVeiculoDoesNotExist() {
 		assertThrows(RecursoNaoEncontradoException.class, () -> atualizarVeiculoUseCase.executar(UUID.randomUUID(),
 				"BRA1D23", "Toyota", "Corolla", 2020, null, null));
+	}
+
+	@Test
+	void shouldRejectDuplicatedPlateOrInvalidData() {
+		UUID clienteId = UUID.randomUUID();
+		UUID veiculoId = UUID.randomUUID();
+		LocalDateTime agora = LocalDateTime.now();
+		Veiculo veiculo = new Veiculo(veiculoId, "BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId),
+				true, agora, agora, null);
+		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
+		when(veiculoRepository.existePlacaAtiva("ABC1234", veiculoId)).thenReturn(true);
+
+		assertThrows(RegraDeNegocioException.class,
+				() -> atualizarVeiculoUseCase.executar(veiculoId, "ABC1234", "Ford", "Focus", 2019, null, null));
+
+		when(veiculoRepository.existePlacaAtiva("XYZ9999", veiculoId)).thenReturn(false);
+		assertThrows(RegraDeNegocioException.class,
+				() -> atualizarVeiculoUseCase.executar(veiculoId, "XYZ9999", " ", "Focus", 2019, null, null));
 	}
 
 }

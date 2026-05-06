@@ -140,21 +140,6 @@ public class PecaInsumo extends EntidadeBase {
 		registrarRemocaoLogica();
 	}
 
-	/**
-	 * Incrementa a versao para optimistic locking.
-	 */
-	public void incrementarVersao() {
-		this.versao++;
-	}
-
-	/**
-	 * Retorna o SKU normalizado para busca.
-	 * @return SKU em maiusculas sem espacos.
-	 */
-	public String getSkuNormalizado() {
-		return sku != null ? sku.trim().toUpperCase() : null;
-	}
-
 	private void aplicarDados(String sku, String nome, BigDecimal valorUnitario, BigDecimal estoqueMinimo,
 			UnidadeMedida unidadeMedida, TipoItem tipoItem, String fornecedor, String codigoBarras, String marca,
 			String categoria, String aplicacao, String observacoes) {

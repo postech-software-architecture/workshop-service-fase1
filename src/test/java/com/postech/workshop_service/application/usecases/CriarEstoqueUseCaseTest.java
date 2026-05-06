@@ -97,4 +97,20 @@ class CriarEstoqueUseCaseTest {
 		assertEquals(BigDecimal.ZERO, resultado.getQuantidade());
 	}
 
+	@Test
+	void deveNormalizarLocalizacaoEConverterErroDeValidacao() {
+		UUID pecaId = UUID.randomUUID();
+		PecaInsumo peca = new PecaInsumo(pecaId, "FIL-001", "Filtro de Oleo", new BigDecimal("45.90"),
+				new BigDecimal("5"), UnidadeMedida.UN, TipoItem.PECA);
+		when(pecaRepository.buscarPorId(pecaId, false)).thenReturn(Optional.of(peca));
+		when(estoqueRepository.existeLocalizacao(pecaId, "Prateleira A1", null)).thenReturn(false);
+		when(estoqueRepository.salvar(any(Estoque.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		Estoque resultado = useCase.executar(pecaId, "  Prateleira A1  ", BigDecimal.ONE);
+
+		assertEquals("Prateleira A1", resultado.getLocalizacao());
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar(pecaId, null, BigDecimal.ONE));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar(pecaId, " ", BigDecimal.ONE));
+	}
+
 }

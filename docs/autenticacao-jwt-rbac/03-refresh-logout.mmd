@@ -1,0 +1,35 @@
+sequenceDiagram
+    autonumber
+    actor U as Usuario / Swagger
+    participant AC as AuthController
+    participant RSU as RenovarSessaoUseCase
+    participant ESU as EncerrarSessaoUseCase
+    participant RTR as RefreshTokenRepository
+    participant UR as UsuarioRepository
+    participant JTS as JwtTokenService
+
+    U->>AC: POST /api/auth/refresh\nrefreshToken
+    AC->>RSU: executar(refreshToken)
+    RSU->>RTR: buscarPorToken(refreshToken)
+    RTR-->>RSU: refresh token persistido
+    RSU->>RSU: validar ativo / nao expirado / nao revogado
+    RSU->>UR: buscarPorId(usuarioId)
+    UR-->>RSU: Usuario
+    RSU->>RSU: validar usuario pode autenticar
+    RSU->>RTR: revogar refresh token antigo
+    RSU->>JTS: gerarAccessToken(usuario)
+    JTS-->>RSU: novo accessToken
+    RSU->>JTS: gerarRefreshToken()
+    JTS-->>RSU: novo refreshToken
+    RSU->>RTR: salvar novo refresh token
+    RSU-->>AC: novos tokens
+    AC-->>U: 200 OK com novos tokens
+
+    U->>AC: POST /api/auth/logout\nrefreshToken
+    AC->>ESU: executar(refreshToken)
+    ESU->>RTR: buscarPorToken(refreshToken)
+    RTR-->>ESU: refresh token persistido
+    ESU->>ESU: validar ativo / nao expirado / nao revogado
+    ESU->>RTR: marcar revogado = true
+    ESU-->>AC: sessao encerrada
+    AC-->>U: 204 No Content

@@ -4,13 +4,13 @@ import com.postech.workshop_service.application.exceptions.RegraDeNegocioExcepti
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.domain.entities.Veiculo;
 import com.postech.workshop_service.domain.repositories.VeiculoRepository;
-import com.postech.workshop_service.domain.valueobjects.Placa;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,8 +34,9 @@ class DesvincularClienteVeiculoUseCaseTest {
 		UUID clienteA = UUID.randomUUID();
 		UUID clienteB = UUID.randomUUID();
 		UUID veiculoId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteA, clienteB));
+		LocalDateTime agora = LocalDateTime.now();
+		Veiculo veiculo = new Veiculo(veiculoId, "BRA1D23", "Toyota", "Corolla", 2020, null, null,
+				List.of(clienteA, clienteB), true, agora, agora, null);
 
 		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
 		when(veiculoRepository.salvar(any(Veiculo.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -49,8 +50,9 @@ class DesvincularClienteVeiculoUseCaseTest {
 	void shouldThrowWhenRemovingLastCliente() {
 		UUID clienteId = UUID.randomUUID();
 		UUID veiculoId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteId));
+		LocalDateTime agora = LocalDateTime.now();
+		Veiculo veiculo = new Veiculo(veiculoId, "BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId),
+				true, agora, agora, null);
 
 		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
 

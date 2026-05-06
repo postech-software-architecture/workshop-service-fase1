@@ -5,7 +5,6 @@ import com.postech.workshop_service.domain.entities.Cliente;
 import com.postech.workshop_service.domain.entities.Veiculo;
 import com.postech.workshop_service.domain.repositories.PaginaResultado;
 import com.postech.workshop_service.domain.valueobjects.Documento;
-import com.postech.workshop_service.domain.valueobjects.Placa;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +29,10 @@ class VeiculoRepositoryImplIT extends PostgresTestContainer {
 		UUID clienteId = criarCliente("Cliente Repo", "98765432100");
 		UUID segundoClienteId = criarCliente("Cliente Repo 2", "11144477735");
 
-		Veiculo veiculo = new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, "Prata", "Obs",
-				List.of(clienteId));
+		Veiculo veiculo = new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, "Prata", "Obs", List.of(clienteId));
 		Veiculo salvo = veiculoRepository.salvar(veiculo);
 
-		salvo.atualizarDados(new Placa("ABC1234"), "Ford", "Focus", 2019, "Azul", "Atualizado");
+		salvo.atualizarDados("ABC1234", "Ford", "Focus", 2019, "Azul", "Atualizado");
 		salvo.vincularCliente(segundoClienteId);
 		veiculoRepository.salvar(salvo);
 
@@ -50,9 +48,9 @@ class VeiculoRepositoryImplIT extends PostgresTestContainer {
 		UUID outroClienteId = criarCliente("Outro Cliente", "52998224725");
 
 		Veiculo veiculoAtivo = veiculoRepository
-			.salvar(new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null, List.of(clienteId)));
-		Veiculo veiculoInativo = veiculoRepository.salvar(
-				new Veiculo(null, new Placa("ABC1234"), "Ford", "Focus", 2018, null, null, List.of(outroClienteId)));
+			.salvar(new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId)));
+		Veiculo veiculoInativo = veiculoRepository
+			.salvar(new Veiculo("ABC1234", "Ford", "Focus", 2018, null, null, List.of(outroClienteId)));
 		veiculoInativo.removerLogicamente();
 		veiculoRepository.salvar(veiculoInativo);
 
@@ -72,7 +70,7 @@ class VeiculoRepositoryImplIT extends PostgresTestContainer {
 		UUID clienteId = criarCliente("Cliente Reuso", "86288366757");
 
 		Veiculo original = veiculoRepository
-			.salvar(new Veiculo(null, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null, List.of(clienteId)));
+			.salvar(new Veiculo("BRA1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId)));
 		assertTrue(veiculoRepository.existePlacaAtiva("BRA1D23", null));
 
 		original.removerLogicamente();

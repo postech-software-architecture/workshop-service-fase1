@@ -17,10 +17,12 @@ import com.postech.workshop_service.domain.enums.CategoriaServico;
 import com.postech.workshop_service.domain.repositories.PaginaResultado;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +42,8 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/v1/servicos")
-@Tag(name = "Servicos", description = "Gerenciamento do catálogo de serviços da oficina")
+@Tag(name = "Servicos", description = "Gerenciamento do catalogo de servicos da oficina")
+@SecurityRequirement(name = "bearerAuth")
 public class ServicoController {
 
 	private final CriarServicoUseCase criarServicoUseCase;
@@ -86,7 +89,8 @@ public class ServicoController {
 	 * @return servico persistido.
 	 */
 	@PostMapping
-	@Operation(summary = "Cadastrar serviço no catálogo")
+	@Operation(summary = "Cadastrar servico no catalogo")
+	@PreAuthorize("hasRole('ADMINISTRADOR')")
 	public ResponseEntity<ServicoResponse> criar(@RequestBody @Valid CadastroServicoRequest request) {
 		Servico servico = criarServicoUseCase.executar(request.getNome(), request.getDescricao(), request.getValor(),
 				request.getCategoria(), request.getNivelComplexidade(), request.getGarantiaDias(),
@@ -104,16 +108,17 @@ public class ServicoController {
 	 * @return pagina de servicos.
 	 */
 	@GetMapping
-	@Operation(summary = "Listar serviços com paginação e filtros")
+	@Operation(summary = "Listar servicos com paginacao e filtros")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
 	public ResponseEntity<PaginaServicosResponse> listar(
-			@RequestParam(defaultValue = "0") @Parameter(description = "Página solicitada (base zero)") int pagina,
+			@RequestParam(defaultValue = "0") @Parameter(description = "Pagina solicitada (base zero)") int pagina,
 			@RequestParam(defaultValue = "20") @Parameter(
-					description = "Quantidade de registros por página") int tamanho,
-			@RequestParam(required = false) @Parameter(description = "Filtro parcial pelo nome do serviço") String nome,
+					description = "Quantidade de registros por pagina") int tamanho,
+			@RequestParam(required = false) @Parameter(description = "Filtro parcial pelo nome do servico") String nome,
 			@RequestParam(required = false) @Parameter(
-					description = "Filtro por categoria do serviço") CategoriaServico categoria,
+					description = "Filtro por categoria do servico") CategoriaServico categoria,
 			@RequestParam(defaultValue = "false") @Parameter(
-					description = "Indica se serviços inativos devem ser considerados") boolean incluirInativos) {
+					description = "Indica se servicos inativos devem ser considerados") boolean incluirInativos) {
 		PaginaResultado<Servico> resultado = listarServicosUseCase.executar(pagina, tamanho, nome, categoria,
 				incluirInativos);
 		return ResponseEntity.ok(PaginaServicosResponse.builder()
@@ -132,12 +137,13 @@ public class ServicoController {
 	 * @return servico encontrado.
 	 */
 	@GetMapping("/{id}")
-	@Operation(summary = "Buscar serviço por identificador")
+	@Operation(summary = "Buscar servico por identificador")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
 	public ResponseEntity<ServicoResponse> buscarPorId(@PathVariable UUID id,
 			@RequestParam(defaultValue = "false") @Parameter(
-					description = "Indica se serviços inativos devem ser considerados") boolean incluirInativos) {
+					description = "Indica se servicos inativos devem ser considerados") boolean incluirInativos) {
 		Servico servico = buscarServicoPorIdUseCase.executar(id, incluirInativos)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado com o ID informado."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Servico nao encontrado com o ID informado."));
 		return ResponseEntity.ok(toResponse(servico));
 	}
 
@@ -148,10 +154,11 @@ public class ServicoController {
 	 * @return lista de servicos da categoria.
 	 */
 	@GetMapping("/categoria/{categoria}")
-	@Operation(summary = "Listar serviços por categoria")
+	@Operation(summary = "Listar servicos por categoria")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
 	public ResponseEntity<List<ServicoResponse>> listarPorCategoria(@PathVariable CategoriaServico categoria,
 			@RequestParam(defaultValue = "false") @Parameter(
-					description = "Indica se serviços inativos devem ser considerados") boolean incluirInativos) {
+					description = "Indica se servicos inativos devem ser considerados") boolean incluirInativos) {
 		List<ServicoResponse> respostas = listarServicosPorCategoriaUseCase.executar(categoria, incluirInativos)
 			.stream()
 			.map(this::toResponse)
@@ -166,7 +173,8 @@ public class ServicoController {
 	 * @return servico atualizado.
 	 */
 	@PutMapping("/{id}")
-	@Operation(summary = "Atualizar serviço do catálogo")
+	@Operation(summary = "Atualizar servico do catalogo")
+	@PreAuthorize("hasRole('ADMINISTRADOR')")
 	public ResponseEntity<ServicoResponse> atualizar(@PathVariable UUID id,
 			@RequestBody @Valid AtualizarServicoRequest request) {
 		Servico servico = atualizarServicoUseCase.executar(id, request.getNome(), request.getDescricao(),
@@ -180,8 +188,9 @@ public class ServicoController {
 	 * @param id identificador do servico.
 	 */
 	@DeleteMapping("/{id}")
-	@Operation(summary = "Remover serviço logicamente")
+	@Operation(summary = "Remover servico logicamente")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasRole('ADMINISTRADOR')")
 	public void remover(@PathVariable UUID id) {
 		removerServicoUseCase.executar(id);
 	}
@@ -192,7 +201,8 @@ public class ServicoController {
 	 * @return servico reativado.
 	 */
 	@PostMapping("/{id}/reativar")
-	@Operation(summary = "Reativar serviço previamente removido")
+	@Operation(summary = "Reativar servico previamente removido")
+	@PreAuthorize("hasRole('ADMINISTRADOR')")
 	public ResponseEntity<ServicoResponse> reativar(@PathVariable UUID id) {
 		Servico servico = reativarServicoUseCase.executar(id);
 		return ResponseEntity.ok(toResponse(servico));

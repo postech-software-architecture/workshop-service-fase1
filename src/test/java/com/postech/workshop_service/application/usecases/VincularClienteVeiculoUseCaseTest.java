@@ -7,13 +7,13 @@ import com.postech.workshop_service.domain.entities.Veiculo;
 import com.postech.workshop_service.domain.repositories.ClienteRepository;
 import com.postech.workshop_service.domain.repositories.VeiculoRepository;
 import com.postech.workshop_service.domain.valueobjects.Documento;
-import com.postech.workshop_service.domain.valueobjects.Placa;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,8 +40,9 @@ class VincularClienteVeiculoUseCaseTest {
 		UUID clienteAtual = UUID.randomUUID();
 		UUID novoCliente = UUID.randomUUID();
 		UUID veiculoId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteAtual));
+		LocalDateTime agora = LocalDateTime.now();
+		Veiculo veiculo = new Veiculo(veiculoId, "BRA1D23", "Toyota", "Corolla", 2020, null, null,
+				List.of(clienteAtual), true, agora, agora, null);
 
 		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
 		when(clienteRepository.buscarPorId(novoCliente, false)).thenReturn(Optional
@@ -58,8 +59,9 @@ class VincularClienteVeiculoUseCaseTest {
 		UUID veiculoId = UUID.randomUUID();
 		UUID clienteAtual = UUID.randomUUID();
 		UUID clienteId = UUID.randomUUID();
-		Veiculo veiculo = new Veiculo(veiculoId, new Placa("BRA1D23"), "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteAtual));
+		LocalDateTime agora = LocalDateTime.now();
+		Veiculo veiculo = new Veiculo(veiculoId, "BRA1D23", "Toyota", "Corolla", 2020, null, null,
+				List.of(clienteAtual), true, agora, agora, null);
 
 		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
 
@@ -70,6 +72,22 @@ class VincularClienteVeiculoUseCaseTest {
 	void shouldThrowWhenVeiculoDoesNotExist() {
 		assertThrows(RecursoNaoEncontradoException.class,
 				() -> vincularClienteVeiculoUseCase.executar(UUID.randomUUID(), UUID.randomUUID()));
+	}
+
+	@Test
+	void shouldConvertDuplicatedClientLinkToBusinessException() {
+		UUID clienteAtual = UUID.randomUUID();
+		UUID veiculoId = UUID.randomUUID();
+		LocalDateTime agora = LocalDateTime.now();
+		Veiculo veiculo = new Veiculo(veiculoId, "BRA1D23", "Toyota", "Corolla", 2020, null, null,
+				List.of(clienteAtual), true, agora, agora, null);
+
+		when(veiculoRepository.buscarPorId(veiculoId, true)).thenReturn(Optional.of(veiculo));
+		when(clienteRepository.buscarPorId(clienteAtual, false)).thenReturn(Optional
+			.of(new Cliente(clienteAtual, "Cliente", new Documento("98765432100"), "email@teste.com", null)));
+
+		assertThrows(RegraDeNegocioException.class,
+				() -> vincularClienteVeiculoUseCase.executar(veiculoId, clienteAtual));
 	}
 
 }

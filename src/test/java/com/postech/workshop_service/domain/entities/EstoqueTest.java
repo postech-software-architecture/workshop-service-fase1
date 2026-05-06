@@ -4,6 +4,7 @@ import com.postech.workshop_service.domain.valueobjects.TipoMovimentacao;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -168,6 +169,49 @@ class EstoqueTest {
 		Estoque estoque = new Estoque(null, pecaId, "Prateleira A1", new BigDecimal("10"));
 
 		assertThrows(IllegalArgumentException.class, () -> estoque.registrarEntrada(new BigDecimal("-5"), "Teste"));
+	}
+
+	@Test
+	void deveReconstituirEstoquePersistido() {
+		UUID id = UUID.randomUUID();
+		UUID pecaId = UUID.randomUUID();
+		LocalDateTime dataCriacao = LocalDateTime.now().minusDays(2);
+		LocalDateTime dataAtualizacao = LocalDateTime.now().minusDays(1);
+
+		Estoque estoque = new Estoque(id, pecaId, "  Rua  A1  ", new BigDecimal("4"), false, 3, dataCriacao,
+				dataAtualizacao);
+
+		assertEquals(id, estoque.getId());
+		assertEquals(pecaId, estoque.getPecaInsumoId());
+		assertEquals("Rua A1", estoque.getLocalizacao());
+		assertFalse(estoque.isAtivo());
+		assertEquals(3, estoque.getVersao());
+		assertEquals(dataCriacao, estoque.getDataCriacao());
+		assertEquals(dataAtualizacao, estoque.getDataUltimaAtualizacao());
+	}
+
+	@Test
+	void deveRemoverLogicamenteComIdempotencia() {
+		Estoque estoque = new Estoque(null, UUID.randomUUID(), "Prateleira A1", new BigDecimal("10"));
+
+		estoque.removerLogicamente();
+		var primeiraAtualizacao = estoque.getDataUltimaAtualizacao();
+		estoque.removerLogicamente();
+
+		assertFalse(estoque.isAtivo());
+		assertEquals(primeiraAtualizacao, estoque.getDataUltimaAtualizacao());
+	}
+
+	@Test
+	void deveLancarExcecaoAoReconstituirComDatasInvalidas() {
+		UUID id = UUID.randomUUID();
+		UUID pecaId = UUID.randomUUID();
+		LocalDateTime agora = LocalDateTime.now();
+
+		assertThrows(NullPointerException.class,
+				() -> new Estoque(id, pecaId, "A1", BigDecimal.ONE, true, 0, null, agora));
+		assertThrows(NullPointerException.class,
+				() -> new Estoque(id, pecaId, "A1", BigDecimal.ONE, true, 0, agora, null));
 	}
 
 }

@@ -1,25 +1,51 @@
 package com.postech.workshop_service.api.controllers;
 
-import com.postech.workshop_service.api.dtos.*;
-import com.postech.workshop_service.application.usecases.*;
+import com.postech.workshop_service.api.dtos.AtualizarPecaRequest;
+import com.postech.workshop_service.api.dtos.CadastroPecaRequest;
+import com.postech.workshop_service.api.dtos.CriarEstoqueRequest;
+import com.postech.workshop_service.api.dtos.EstoqueResponse;
+import com.postech.workshop_service.api.dtos.PaginaPecasResponse;
+import com.postech.workshop_service.api.dtos.PecaResponse;
+import com.postech.workshop_service.application.usecases.AtualizarPecaUseCase;
+import com.postech.workshop_service.application.usecases.BuscarPecaPorIdUseCase;
+import com.postech.workshop_service.application.usecases.BuscarPecaPorSkuUseCase;
+import com.postech.workshop_service.application.usecases.CriarEstoqueUseCase;
+import com.postech.workshop_service.application.usecases.CriarPecaUseCase;
+import com.postech.workshop_service.application.usecases.ListarPecasUseCase;
+import com.postech.workshop_service.application.usecases.RemoverPecaUseCase;
 import com.postech.workshop_service.domain.entities.Estoque;
 import com.postech.workshop_service.domain.entities.PecaInsumo;
 import com.postech.workshop_service.domain.repositories.PaginaResultado;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Controller responsavel por pecas, insumos e criacao de estoques.
+ */
 @RestController
 @RequestMapping("/api/v1/pecas")
 @Tag(name = "Pecas e Insumos", description = "Gerenciamento de pecas e insumos da oficina")
+@SecurityRequirement(name = "bearerAuth")
 public class PecaInsumoController {
 
 	private final CriarPecaUseCase criarPecaUseCase;
@@ -66,6 +92,7 @@ public class PecaInsumoController {
 	 */
 	@PostMapping
 	@Operation(summary = "Criar uma nova peca ou insumo")
+	@PreAuthorize("hasRole('ADMINISTRADOR')")
 	public ResponseEntity<PecaResponse> criar(@RequestBody @Valid CadastroPecaRequest request) {
 		PecaInsumo peca = criarPecaUseCase.executar(request.getSku(), request.getNome(), request.getValorUnitario(),
 				request.getEstoqueMinimo(), request.getUnidadeMedida(), request.getTipoItem(), request.getFornecedor(),
@@ -82,6 +109,7 @@ public class PecaInsumoController {
 	 */
 	@PutMapping("/{id}")
 	@Operation(summary = "Atualizar dados de uma peca")
+	@PreAuthorize("hasRole('ADMINISTRADOR')")
 	public ResponseEntity<PecaResponse> atualizar(@PathVariable UUID id,
 			@RequestBody @Valid AtualizarPecaRequest request) {
 		PecaInsumo peca = atualizarPecaUseCase.executar(id, request.getNome(), request.getValorUnitario(),
@@ -99,6 +127,7 @@ public class PecaInsumoController {
 	 */
 	@GetMapping("/{id}")
 	@Operation(summary = "Buscar peca por ID")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
 	public ResponseEntity<PecaResponse> buscarPorId(@PathVariable UUID id,
 			@RequestParam(defaultValue = "false") boolean incluirInativos) {
 		return buscarPecaPorIdUseCase.executar(id, incluirInativos).map(peca -> {
@@ -114,6 +143,7 @@ public class PecaInsumoController {
 	 */
 	@GetMapping("/sku/{sku}")
 	@Operation(summary = "Buscar peca por SKU")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
 	public ResponseEntity<PecaResponse> buscarPorSku(@PathVariable String sku,
 			@RequestParam(defaultValue = "false") boolean incluirInativos) {
 		return buscarPecaPorSkuUseCase.executar(sku, incluirInativos).map(peca -> {
@@ -132,6 +162,7 @@ public class PecaInsumoController {
 	 */
 	@GetMapping
 	@Operation(summary = "Listar pecas com paginacao e filtros")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
 	public ResponseEntity<PaginaPecasResponse> listar(@RequestParam(defaultValue = "0") int pagina,
 			@RequestParam(defaultValue = "20") int tamanho, @RequestParam(required = false) String nome,
 			@RequestParam(required = false) String categoria,
@@ -158,11 +189,10 @@ public class PecaInsumoController {
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Remover uma peca (soft delete)")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasRole('ADMINISTRADOR')")
 	public void remover(@PathVariable UUID id) {
 		removerPecaUseCase.executar(id);
 	}
-
-	// ==================== Estoques ====================
 
 	/**
 	 * Endpoint para criar um novo estoque para uma peca.
@@ -171,6 +201,7 @@ public class PecaInsumoController {
 	 */
 	@PostMapping("/estoques")
 	@Operation(summary = "Criar um novo estoque para uma peca")
+	@PreAuthorize("hasRole('ADMINISTRADOR')")
 	public ResponseEntity<EstoqueResponse> criarEstoque(@RequestBody @Valid CriarEstoqueRequest request) {
 		Estoque estoque = criarEstoqueUseCase.executar(request.getPecaInsumoId(), request.getLocalizacao(),
 				request.getQuantidade());
