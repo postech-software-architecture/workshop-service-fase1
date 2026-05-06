@@ -359,8 +359,8 @@ class CriarOrdemServicoUseCaseTest {
 	}
 
 	private Veiculo criarVeiculoVinculado(UUID clienteId) {
-		return new Veiculo(UUID.randomUUID(), "ABC1D23", "Toyota", "Corolla", 2020, null, null,
-				List.of(clienteId), true, LocalDateTime.now(), LocalDateTime.now(), null);
+		return new Veiculo(UUID.randomUUID(), "ABC1D23", "Toyota", "Corolla", 2020, null, null, List.of(clienteId),
+				true, LocalDateTime.now(), LocalDateTime.now(), null);
 	}
 
 	private Servico criarServico(BigDecimal valor) {
