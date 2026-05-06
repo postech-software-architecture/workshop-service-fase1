@@ -47,7 +47,7 @@ public final class ItemComposicaoTecnica {
 		this.descricao = validarDescricao(descricao);
 		this.valor = validarValor(valor);
 		this.tipo = validarTipo(tipo);
-		this.idPecaInsumo = idPecaInsumo;
+		this.idPecaInsumo = validarIdPecaInsumo(this.tipo, idPecaInsumo);
 	}
 
 	private String validarDescricao(String descricao) {
@@ -74,6 +74,13 @@ public final class ItemComposicaoTecnica {
 			throw new IllegalArgumentException("O tipo do item de composicao tecnica e obrigatorio.");
 		}
 		return tipo;
+	}
+
+	private UUID validarIdPecaInsumo(TipoItemComposicaoTecnica tipo, UUID idPecaInsumo) {
+		if (tipo == TipoItemComposicaoTecnica.PECA && idPecaInsumo == null) {
+			throw new IllegalArgumentException("O identificador da peca/insumo e obrigatorio para itens do tipo PECA.");
+		}
+		return idPecaInsumo;
 	}
 
 }

@@ -59,7 +59,7 @@ public class OrcamentoResponse {
 		@Schema(description = "Descricao do servico ou peca", example = "Troca de oleo")
 		private String descricao;
 
-		@Schema(description = "Valor unitario do item", example = "100.00")
+		@Schema(description = "Valor total do item na composicao do orcamento", example = "100.00")
 		private BigDecimal valor;
 
 	}

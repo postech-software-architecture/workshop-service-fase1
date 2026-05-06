@@ -4,9 +4,9 @@ import com.postech.workshop_service.application.exceptions.RegraDeNegocioExcepti
 import com.postech.workshop_service.domain.entities.Estoque;
 import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.ItemOrcamento;
+import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
-import com.postech.workshop_service.domain.entities.PecaInsumo;
 import com.postech.workshop_service.domain.entities.StatusOrcamento;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
 import com.postech.workshop_service.domain.entities.TipoItemComposicaoTecnica;
@@ -15,9 +15,7 @@ import com.postech.workshop_service.domain.repositories.EstoqueRepository;
 import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
-import com.postech.workshop_service.domain.repositories.PecaInsumoRepository;
-import com.postech.workshop_service.domain.valueobjects.TipoItem;
-import com.postech.workshop_service.domain.valueobjects.UnidadeMedida;
+import com.postech.workshop_service.domain.valueobjects.TipoMovimentacao;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,9 +50,6 @@ class CancelarOrcamentoUseCaseTest {
 	private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
 
 	@Mock
-	private PecaInsumoRepository pecaInsumoRepository;
-
-	@Mock
 	private MecanicoNotificationService mecanicoNotificationService;
 
 	@InjectMocks
@@ -79,26 +74,32 @@ class CancelarOrcamentoUseCaseTest {
 	@Test
 	void shouldReleaseStockReservationOnCancellation() {
 		UUID pecaId = UUID.randomUUID();
-		PecaInsumo peca = new PecaInsumo(pecaId, "REF-001", "Filtro de ar", new BigDecimal("30.00"), BigDecimal.ZERO,
-				UnidadeMedida.UN, TipoItem.PECA);
 		ItemComposicaoTecnica itemPeca = new ItemComposicaoTecnica("Filtro de ar", new BigDecimal("60.00"),
 				TipoItemComposicaoTecnica.PECA, pecaId);
-		Estoque estoque = new Estoque(UUID.randomUUID(), pecaId, "Prateleira B", BigDecimal.ZERO);
+		UUID estoqueId = UUID.randomUUID();
+		Estoque estoque = new Estoque(estoqueId, pecaId, "Prateleira B", new BigDecimal("5"));
+		BigDecimal quantidadeReservada = new BigDecimal("2");
 
 		Orcamento orcamento = criarOrcamento(StatusOrcamento.PENDENTE_APROVACAO);
 		OrdemServico ordemServico = new OrdemServico(orcamento.getIdOrdemServico(), UUID.randomUUID(),
 				UUID.randomUUID(), StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of(itemPeca), "OS-2026-00002",
 				null, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
+		MovimentacaoEstoque reservaOriginal = new MovimentacaoEstoque(UUID.randomUUID(), estoqueId,
+				TipoMovimentacao.RESERVA, quantidadeReservada, new BigDecimal("5"), new BigDecimal("3"),
+				"Reserva para OS " + ordemServico.getNumero());
 
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
-		when(pecaInsumoRepository.buscarPorId(pecaId, true)).thenReturn(Optional.of(peca));
-		when(estoqueRepository.listarPorPeca(pecaId, false)).thenReturn(List.of(estoque));
+		when(movimentacaoEstoqueRepository.listarPorPeca(pecaId, TipoMovimentacao.RESERVA, null, null))
+			.thenReturn(List.of(reservaOriginal));
+		when(estoqueRepository.buscarPorId(estoqueId, true)).thenReturn(Optional.of(estoque));
 		when(orcamentoRepository.salvar(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
 		cancelarOrcamentoUseCase.executar(orcamento.getId());
 
-		verify(estoqueRepository).listarPorPeca(pecaId, false);
+		verify(movimentacaoEstoqueRepository).listarPorPeca(pecaId, TipoMovimentacao.RESERVA, null, null);
+		verify(estoqueRepository).buscarPorId(estoqueId, true);
+		verify(estoqueRepository).salvar(estoque);
 		verify(movimentacaoEstoqueRepository).salvar(any());
 	}
 

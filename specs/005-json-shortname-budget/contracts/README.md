@@ -1,15 +1,11 @@
 # Contracts
 
-Esta fase nao adiciona contrato HTTP novo.
+O escopo desta feature passou a expor o fluxo de ordem de servico e orcamento via API REST,
+alem dos casos de uso e contratos de repositorio internos.
 
-O escopo desta feature e interno a aplicacao e compreende:
+Casos de uso e services internos:
 
-- casos de uso transacionais para encerrar composicao tecnica e decidir orcamento;
-- contratos de repositorio de dominio para ordem de servico e orcamento;
-- services de notificacao por log para cliente e mecanico.
-
-Classes principais implementadas nesta fase:
-
+- `CriarOrdemServicoUseCase`
 - `EncerrarComposicaoTecnicaUseCase`
 - `AprovarOrcamentoUseCase`
 - `RejeitarOrcamentoUseCase`
@@ -18,8 +14,13 @@ Classes principais implementadas nesta fase:
 - `MecanicoNotificationService` com implementacao `LogMecanicoNotificationService`
 - `OrdemServicoRepository` e `OrcamentoRepository` com adaptadores JPA
 
-Como nao ha controller nem endpoint solicitados nesta etapa:
+Contornos HTTP introduzidos nesta fase:
 
-- nenhum `openapi.yaml` novo sera criado agora;
-- nenhuma alteracao de request/response publica e obrigatoria nesta fase;
-- a exposicao externa do fluxo pode ser planejada em um incremento posterior, reaproveitando os casos de uso definidos aqui.
+- `OrdemServicoController` (POST `/ordens-servico`) consumindo `CriarOrdemServicoRequest` e
+  retornando `OrdemServicoResponse`;
+- `OrcamentoController` com endpoints de aprovacao, rejeicao e cancelamento, retornando
+  `OrcamentoResponse`;
+- DTOs em `api/dtos/` cobrem os contornos de entrada e saida.
+
+A documentacao OpenAPI e gerada via springdoc a partir das anotacoes `@Schema` aplicadas aos
+DTOs, sem necessidade de manter um `openapi.yaml` estatico nesta pasta.

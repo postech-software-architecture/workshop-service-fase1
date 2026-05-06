@@ -114,7 +114,7 @@ class EncerrarComposicaoTecnicaUseCaseTest {
 				List.of(new ItemComposicaoTecnica("Troca de oleo", new BigDecimal("120.00"),
 						TipoItemComposicaoTecnica.SERVICO),
 						new ItemComposicaoTecnica("Filtro de oleo", new BigDecimal("45.00"),
-								TipoItemComposicaoTecnica.PECA)),
+								TipoItemComposicaoTecnica.PECA, UUID.randomUUID())),
 				"OS-2026-00001", null, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
 	}
 

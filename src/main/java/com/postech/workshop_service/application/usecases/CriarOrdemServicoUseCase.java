@@ -24,6 +24,7 @@ import com.postech.workshop_service.domain.repositories.PecaInsumoRepository;
 import com.postech.workshop_service.domain.repositories.ServicoRepository;
 import com.postech.workshop_service.domain.repositories.VeiculoRepository;
 import com.postech.workshop_service.domain.valueobjects.Placa;
+import com.postech.workshop_service.domain.valueobjects.TipoItem;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,17 +155,18 @@ public class CriarOrdemServicoUseCase {
 		String motivo = "Reserva para OS " + numeroOs;
 		for (ItemPecaSolicitada p : pecas) {
 			BigDecimal aReservar = p.quantidade();
-			List<Estoque> estoques = estoqueRepository.listarPorPeca(p.pecaId(), false);
-			for (Estoque estoque : estoques) {
-				if (aReservar.compareTo(BigDecimal.ZERO) <= 0) {
-					break;
-				}
-				BigDecimal desteEstoque = estoque.getQuantidade().min(aReservar);
-				MovimentacaoEstoque mov = estoque.reservar(desteEstoque, motivo);
-				estoqueRepository.salvar(estoque);
-				movimentacaoEstoqueRepository.salvar(mov);
-				aReservar = aReservar.subtract(desteEstoque);
+			if (aReservar == null || aReservar.compareTo(BigDecimal.ZERO) <= 0) {
+				continue;
 			}
+			Estoque estoqueSelecionado = estoqueRepository.listarPorPeca(p.pecaId(), false)
+				.stream()
+				.filter(e -> e.getQuantidade().compareTo(aReservar) >= 0)
+				.findFirst()
+				.orElseThrow(() -> new RegraDeNegocioException(
+						"Nenhum estoque possui saldo suficiente para reservar a quantidade solicitada da peca."));
+			MovimentacaoEstoque mov = estoqueSelecionado.reservar(aReservar, motivo);
+			estoqueRepository.salvar(estoqueSelecionado);
+			movimentacaoEstoqueRepository.salvar(mov);
 		}
 	}
 
@@ -246,8 +248,9 @@ public class CriarOrdemServicoUseCase {
 						+ estoqueDisponivel + ", solicitado: " + p.quantidade() + ".");
 			}
 			BigDecimal valorTotal = peca.getValorUnitario().multiply(p.quantidade());
-			itens.add(new ItemComposicaoTecnica(peca.getNome(), valorTotal, TipoItemComposicaoTecnica.PECA,
-					peca.getId()));
+			TipoItemComposicaoTecnica tipoItem = peca.getTipoItem() == TipoItem.INSUMO
+					? TipoItemComposicaoTecnica.INSUMO : TipoItemComposicaoTecnica.PECA;
+			itens.add(new ItemComposicaoTecnica(peca.getNome(), valorTotal, tipoItem, peca.getId()));
 		}
 		return itens;
 	}

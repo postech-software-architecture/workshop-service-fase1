@@ -108,7 +108,8 @@ class OrdemServicoTest {
 	void shouldExposeIfOrderHasCompositionItems() {
 		OrdemServico ordemSemItens = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
 		OrdemServico ordemComItens = criarOrdemServico(StatusOrdemServico.EM_COMPOSICAO,
-				List.of(new ItemComposicaoTecnica("Filtro", new BigDecimal("30.00"), TipoItemComposicaoTecnica.PECA)));
+				List.of(new ItemComposicaoTecnica("Filtro", new BigDecimal("30.00"), TipoItemComposicaoTecnica.PECA,
+						UUID.randomUUID())));
 
 		assertFalse(ordemSemItens.possuiItensComposicao());
 		assertTrue(ordemComItens.possuiItensComposicao());
