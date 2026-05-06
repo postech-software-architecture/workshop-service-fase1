@@ -325,7 +325,7 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 		UUID servicoId = criarServico("Servico Orcamento", new BigDecimal("150.00"));
 
 		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()
-			.clienteDocumento("33200738039")
+			.clienteDocumento("33200738006")
 			.veiculoPlaca("ORC1A11")
 			.veiculo(
 					CriarOrdemServicoRequest.DadosVeiculoRequest.builder().marca("VW").modelo("Polo").ano(2023).build())
