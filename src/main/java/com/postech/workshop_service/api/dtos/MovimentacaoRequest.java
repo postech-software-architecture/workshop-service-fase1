@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -17,8 +18,8 @@ import java.math.BigDecimal;
 public class MovimentacaoRequest {
 
 	@NotNull(message = "O identificador do estoque e obrigatorio")
-	@Schema(example = "550e8400-e29b-41d4-a716-446655440001", description = "ID do estoque")
-	private java.util.UUID estoqueId;
+	@Schema(description = "ID do estoque", example = "550e8400-e29b-41d4-a716-446655440001")
+	private UUID estoqueId;
 
 	@NotBlank(message = "O tipo de movimentacao e obrigatorio")
 	@Schema(example = "ENTRADA", description = "Tipo: ENTRADA, SAIDA ou AJUSTE")

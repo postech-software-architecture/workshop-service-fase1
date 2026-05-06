@@ -86,7 +86,7 @@ public class CriarOrdemServicoRequest {
 	public static class ItemServicoRequest {
 
 		@NotNull(message = "O identificador do servico e obrigatorio")
-		@Schema(description = "UUID do servico no catalogo")
+		@Schema(description = "UUID do servico no catalogo", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		private UUID servicoId;
 
 		@Positive(message = "A quantidade deve ser maior que zero")
@@ -106,7 +106,7 @@ public class CriarOrdemServicoRequest {
 	public static class ItemPecaRequest {
 
 		@NotNull(message = "O identificador da peca e obrigatorio")
-		@Schema(description = "UUID da peca no catalogo")
+		@Schema(description = "UUID da peca no catalogo", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		private UUID pecaId;
 
 		@NotNull(message = "A quantidade e obrigatoria")

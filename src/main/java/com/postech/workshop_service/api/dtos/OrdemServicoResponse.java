@@ -20,7 +20,7 @@ import java.util.UUID;
 @Schema(description = "Dados da Ordem de Servico criada")
 public class OrdemServicoResponse {
 
-	@Schema(description = "Identificador unico da OS")
+	@Schema(description = "Identificador unico da OS", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 	private UUID id;
 
 	@Schema(description = "Numero sequencial da OS", example = "OS-2026-00001")
@@ -57,6 +57,7 @@ public class OrdemServicoResponse {
 	@Schema(description = "Dados resumidos do cliente")
 	public static class ClienteResumoResponse {
 
+		@Schema(description = "Identificador unico do cliente", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		private UUID id;
 
 		@Schema(example = "Joao da Silva")
@@ -77,6 +78,7 @@ public class OrdemServicoResponse {
 	@Schema(description = "Dados resumidos do veiculo")
 	public static class VeiculoResumoResponse {
 
+		@Schema(description = "Identificador unico do veiculo", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		private UUID id;
 
 		@Schema(example = "ABC1D23")
@@ -103,6 +105,7 @@ public class OrdemServicoResponse {
 	@Schema(description = "Orcamento gerado automaticamente na criacao da OS")
 	public static class OrcamentoResumoResponse {
 
+		@Schema(description = "Identificador unico do orcamento", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
 		private UUID id;
 
 		@Schema(description = "Valor total calculado a partir do catalogo", example = "310.00")

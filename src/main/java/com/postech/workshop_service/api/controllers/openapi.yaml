@@ -697,7 +697,7 @@ paths:
                       quantidade: 1
                   pecas:
                     - pecaId: "00000000-0000-0000-0000-000000000002"
-                      quantidade: "2.0"
+                      quantidade: 2.0
                   observacoes: "Cliente relatou barulho ao frear"
               veiculo_ja_cadastrado:
                 summary: OS com veículo já existente

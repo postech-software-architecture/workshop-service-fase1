@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -42,9 +43,9 @@ public class EstoqueJpaEntity {
 	private Integer versao;
 
 	@Column(name = "data_criacao", nullable = false)
-	private java.time.LocalDateTime dataCriacao;
+	private LocalDateTime dataCriacao;
 
 	@Column(name = "data_ultima_atualizacao", nullable = false)
-	private java.time.LocalDateTime dataUltimaAtualizacao;
+	private LocalDateTime dataUltimaAtualizacao;
 
 }
