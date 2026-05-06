@@ -209,7 +209,7 @@ public class CriarOrdemServicoUseCase {
 			throw new RegraDeNegocioException(
 					"Veiculo nao encontrado pela placa informada. Informe marca, modelo e ano para cadastra-lo.");
 		}
-		Veiculo novo = new Veiculo(null, placa.getValor(), marca, modelo, ano, null, null, List.of(cliente.getId()));
+		Veiculo novo = new Veiculo(placa.getValor(), marca, modelo, ano, null, null, List.of(cliente.getId()));
 		return veiculoRepository.salvar(novo);
 	}
 
