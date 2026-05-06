@@ -1,5 +1,6 @@
 package com.postech.workshop_service.api.dtos;
 
+import com.postech.workshop_service.application.usecases.ResultadoCriacaoOrdemServico;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -93,6 +94,40 @@ public class OrdemServicoResponse {
 		@Schema(example = "2020")
 		private int ano;
 
+	}
+
+	/**
+	 * Constroi a resposta a partir do resultado do caso de uso.
+	 * @param resultado resultado retornado por {@code CriarOrdemServicoUseCase}.
+	 * @return resposta mapeada.
+	 */
+	public static OrdemServicoResponse from(ResultadoCriacaoOrdemServico resultado) {
+		return OrdemServicoResponse.builder()
+			.id(resultado.ordemServico().getId())
+			.numero(resultado.ordemServico().getNumero())
+			.status(resultado.ordemServico().getStatus().name())
+			.cliente(ClienteResumoResponse.builder()
+				.id(resultado.cliente().getId())
+				.nome(resultado.cliente().getNome())
+				.documentoMascarado(resultado.cliente().getDocumento().mascarado())
+				.build())
+			.veiculo(VeiculoResumoResponse.builder()
+				.id(resultado.veiculo().getId())
+				.placa(resultado.veiculo().getPlaca().getValor())
+				.marca(resultado.veiculo().getMarca())
+				.modelo(resultado.veiculo().getModelo())
+				.ano(resultado.veiculo().getAno())
+				.build())
+			.orcamento(OrcamentoResumoResponse.builder()
+				.id(resultado.orcamento().getId())
+				.valorTotal(resultado.orcamento().getValor())
+				.status(resultado.orcamento().getStatus().name())
+				.dataCriacao(resultado.orcamento().getDataCriacao())
+				.build())
+			.observacoes(resultado.ordemServico().getObservacoes())
+			.dataCriacao(resultado.ordemServico().getDataCriacao())
+			.dataUltimaAtualizacao(resultado.ordemServico().getDataUltimaAtualizacao())
+			.build();
 	}
 
 	/**

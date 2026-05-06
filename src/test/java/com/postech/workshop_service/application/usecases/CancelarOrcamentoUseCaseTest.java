@@ -1,14 +1,23 @@
 package com.postech.workshop_service.application.usecases;
 
 import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.entities.Estoque;
+import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.ItemOrcamento;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
+import com.postech.workshop_service.domain.entities.PecaInsumo;
 import com.postech.workshop_service.domain.entities.StatusOrcamento;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
+import com.postech.workshop_service.domain.entities.TipoItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.TipoOrcamento;
+import com.postech.workshop_service.domain.repositories.EstoqueRepository;
+import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
+import com.postech.workshop_service.domain.repositories.PecaInsumoRepository;
+import com.postech.workshop_service.domain.valueobjects.TipoItem;
+import com.postech.workshop_service.domain.valueobjects.UnidadeMedida;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,6 +46,15 @@ class CancelarOrcamentoUseCaseTest {
 	private OrdemServicoRepository ordemServicoRepository;
 
 	@Mock
+	private EstoqueRepository estoqueRepository;
+
+	@Mock
+	private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+
+	@Mock
+	private PecaInsumoRepository pecaInsumoRepository;
+
+	@Mock
 	private MecanicoNotificationService mecanicoNotificationService;
 
 	@InjectMocks
@@ -56,6 +74,32 @@ class CancelarOrcamentoUseCaseTest {
 		assertEquals(StatusOrcamento.CANCELADO, resultado.getStatus());
 		assertEquals(StatusOrdemServico.CANCELADA, ordemServico.getStatus());
 		verify(mecanicoNotificationService).notificarAtualizacaoOrcamento(ordemServico, resultado);
+	}
+
+	@Test
+	void shouldReleaseStockReservationOnCancellation() {
+		UUID pecaId = UUID.randomUUID();
+		PecaInsumo peca = new PecaInsumo(pecaId, "REF-001", "Filtro de ar", new BigDecimal("30.00"), BigDecimal.ZERO,
+				UnidadeMedida.UN, TipoItem.PECA);
+		ItemComposicaoTecnica itemPeca = new ItemComposicaoTecnica("Filtro de ar", new BigDecimal("60.00"),
+				TipoItemComposicaoTecnica.PECA, pecaId);
+		Estoque estoque = new Estoque(UUID.randomUUID(), pecaId, "Prateleira B", BigDecimal.ZERO);
+
+		Orcamento orcamento = criarOrcamento(StatusOrcamento.PENDENTE_APROVACAO);
+		OrdemServico ordemServico = new OrdemServico(orcamento.getIdOrdemServico(), UUID.randomUUID(),
+				UUID.randomUUID(), StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of(itemPeca), "OS-2026-00002",
+				null, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
+
+		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
+		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
+		when(pecaInsumoRepository.buscarPorId(pecaId, true)).thenReturn(Optional.of(peca));
+		when(estoqueRepository.listarPorPeca(pecaId, false)).thenReturn(List.of(estoque));
+		when(orcamentoRepository.salvar(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+		cancelarOrcamentoUseCase.executar(orcamento.getId());
+
+		verify(estoqueRepository).listarPorPeca(pecaId, false);
+		verify(movimentacaoEstoqueRepository).salvar(any());
 	}
 
 	@Test

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Representacao persistente de um item de composicao tecnica da ordem de servico.
@@ -33,5 +34,8 @@ public class ItemComposicaoTecnicaJpaEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 30)
 	private TipoItemComposicaoTecnica tipo;
+
+	@Column(name = "peca_insumo_id")
+	private UUID idPecaInsumo;
 
 }

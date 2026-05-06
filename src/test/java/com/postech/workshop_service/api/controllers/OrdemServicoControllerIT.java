@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -272,7 +273,72 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 			.andExpect(status().isUnprocessableEntity());
 	}
 
+	@Test
+	void shouldApproveOrcamento() throws Exception {
+		UUID orcamentoId = criarOsEObterOrcamentoId();
+
+		mockMvc.perform(patch("/api/v1/orcamentos/{id}/aprovar", orcamentoId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(orcamentoId.toString()))
+			.andExpect(jsonPath("$.status").value("APROVADO"))
+			.andExpect(jsonPath("$.valorTotal").isNumber())
+			.andExpect(jsonPath("$.itens").isArray());
+	}
+
+	@Test
+	void shouldRejectOrcamento() throws Exception {
+		UUID orcamentoId = criarOsEObterOrcamentoId();
+
+		mockMvc.perform(patch("/api/v1/orcamentos/{id}/rejeitar", orcamentoId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(orcamentoId.toString()))
+			.andExpect(jsonPath("$.status").value("REJEITADO"));
+	}
+
+	@Test
+	void shouldReturn404WhenApprovingNonExistentOrcamento() throws Exception {
+		mockMvc.perform(patch("/api/v1/orcamentos/{id}/aprovar", UUID.randomUUID())).andExpect(status().isNotFound());
+	}
+
+	@Test
+	void shouldReturn422WhenApprovingAlreadyApprovedOrcamento() throws Exception {
+		UUID orcamentoId = criarOsEObterOrcamentoId();
+
+		mockMvc.perform(patch("/api/v1/orcamentos/{id}/aprovar", orcamentoId)).andExpect(status().isOk());
+
+		mockMvc.perform(patch("/api/v1/orcamentos/{id}/aprovar", orcamentoId))
+			.andExpect(status().isUnprocessableEntity());
+	}
+
+	@Test
+	void shouldReturn404WhenRejectingNonExistentOrcamento() throws Exception {
+		mockMvc.perform(patch("/api/v1/orcamentos/{id}/rejeitar", UUID.randomUUID())).andExpect(status().isNotFound());
+	}
+
 	// --- helpers ---
+
+	private UUID criarOsEObterOrcamentoId() throws Exception {
+		criarCliente("Cliente Orcamento", "33200738039");
+		UUID servicoId = criarServico("Servico Orcamento", new BigDecimal("150.00"));
+
+		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()
+			.clienteDocumento("33200738039")
+			.veiculoPlaca("ORC1A11")
+			.veiculo(
+					CriarOrdemServicoRequest.DadosVeiculoRequest.builder().marca("VW").modelo("Polo").ano(2023).build())
+			.servicos(List
+				.of(CriarOrdemServicoRequest.ItemServicoRequest.builder().servicoId(servicoId).quantidade(1).build()))
+			.build();
+
+		MvcResult result = mockMvc
+			.perform(post("/api/v1/ordens-servico").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
+		return UUID.fromString(body.get("orcamento").get("id").asText());
+	}
 
 	private UUID criarCliente(String nome, String documento) throws Exception {
 		CadastroClienteRequest req = CadastroClienteRequest.builder()

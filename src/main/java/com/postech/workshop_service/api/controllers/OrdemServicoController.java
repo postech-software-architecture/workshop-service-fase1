@@ -2,12 +2,7 @@ package com.postech.workshop_service.api.controllers;
 
 import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
 import com.postech.workshop_service.api.dtos.OrdemServicoResponse;
-import com.postech.workshop_service.api.dtos.OrdemServicoResponse.ClienteResumoResponse;
-import com.postech.workshop_service.api.dtos.OrdemServicoResponse.OrcamentoResumoResponse;
-import com.postech.workshop_service.api.dtos.OrdemServicoResponse.VeiculoResumoResponse;
 import com.postech.workshop_service.application.usecases.CriarOrdemServicoUseCase;
-import com.postech.workshop_service.application.usecases.ItemPecaSolicitada;
-import com.postech.workshop_service.application.usecases.ItemServicoSolicitado;
 import com.postech.workshop_service.application.usecases.ResultadoCriacaoOrdemServico;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,8 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * Controller responsavel pelas operacoes de Ordens de Servico.
@@ -60,53 +53,8 @@ public class OrdemServicoController {
 			@ApiResponse(responseCode = "422",
 					description = "Regra de negocio violada (veiculo de outro cliente, estoque insuficiente, etc.)") })
 	public ResponseEntity<OrdemServicoResponse> criar(@RequestBody @Valid CriarOrdemServicoRequest request) {
-		List<ItemServicoSolicitado> servicos = request.getServicos()
-			.stream()
-			.map(s -> new ItemServicoSolicitado(s.getServicoId(), s.getQuantidade()))
-			.toList();
-
-		List<ItemPecaSolicitada> pecas = request.getPecas() != null ? request.getPecas()
-			.stream()
-			.map(p -> new ItemPecaSolicitada(p.getPecaId(), p.getQuantidade()))
-			.toList() : List.of();
-
-		CriarOrdemServicoRequest.DadosVeiculoRequest dadosVeiculo = request.getVeiculo();
-
-		ResultadoCriacaoOrdemServico resultado = criarOrdemServicoUseCase.executar(request.getClienteDocumento(),
-				request.getVeiculoPlaca(), dadosVeiculo != null ? dadosVeiculo.getMarca() : null,
-				dadosVeiculo != null ? dadosVeiculo.getModelo() : null,
-				dadosVeiculo != null ? dadosVeiculo.getAno() : null, servicos, pecas, request.getObservacoes());
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(resultado));
-	}
-
-	private OrdemServicoResponse toResponse(ResultadoCriacaoOrdemServico resultado) {
-		return OrdemServicoResponse.builder()
-			.id(resultado.ordemServico().getId())
-			.numero(resultado.ordemServico().getNumero())
-			.status(resultado.ordemServico().getStatus().name())
-			.cliente(ClienteResumoResponse.builder()
-				.id(resultado.cliente().getId())
-				.nome(resultado.cliente().getNome())
-				.documentoMascarado(resultado.cliente().getDocumento().mascarado())
-				.build())
-			.veiculo(VeiculoResumoResponse.builder()
-				.id(resultado.veiculo().getId())
-				.placa(resultado.veiculo().getPlaca().getValor())
-				.marca(resultado.veiculo().getMarca())
-				.modelo(resultado.veiculo().getModelo())
-				.ano(resultado.veiculo().getAno())
-				.build())
-			.orcamento(OrcamentoResumoResponse.builder()
-				.id(resultado.orcamento().getId())
-				.valorTotal(resultado.orcamento().getValor())
-				.status(resultado.orcamento().getStatus().name())
-				.dataCriacao(resultado.orcamento().getDataCriacao())
-				.build())
-			.observacoes(resultado.ordemServico().getObservacoes())
-			.dataCriacao(resultado.ordemServico().getDataCriacao())
-			.dataUltimaAtualizacao(resultado.ordemServico().getDataUltimaAtualizacao())
-			.build();
+		ResultadoCriacaoOrdemServico resultado = criarOrdemServicoUseCase.executar(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(OrdemServicoResponse.from(resultado));
 	}
 
 }

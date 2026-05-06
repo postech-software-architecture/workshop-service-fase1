@@ -1,5 +1,6 @@
 package com.postech.workshop_service.application.usecases;
 
+import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.Cliente;
@@ -76,23 +77,30 @@ public class CriarOrdemServicoUseCase {
 
 	/**
 	 * Executa o fluxo de recepcao e criacao da OS.
-	 * @param clienteDocumento CPF ou CNPJ do cliente (com ou sem mascara).
-	 * @param veiculoPlaca placa do veiculo.
-	 * @param veiculoMarca marca; obrigatorio apenas quando o veiculo precisar ser
-	 * cadastrado.
-	 * @param veiculoModelo modelo; obrigatorio apenas quando o veiculo precisar ser
-	 * cadastrado.
-	 * @param veiculoAno ano; obrigatorio apenas quando o veiculo precisar ser cadastrado.
-	 * @param servicos lista de servicos do catalogo com quantidades.
-	 * @param pecas lista opcional de pecas do catalogo com quantidades.
-	 * @param observacoes observacoes livres do atendente.
+	 * @param request dados da recepcao contendo documento do cliente, placa e dados do
+	 * veiculo (quando novo), servicos, pecas opcionais e observacoes.
 	 * @return resultado com OS, orcamento, cliente e veiculo.
 	 */
 	@Transactional
-	public ResultadoCriacaoOrdemServico executar(String clienteDocumento, String veiculoPlaca, String veiculoMarca,
-			String veiculoModelo, Integer veiculoAno, List<ItemServicoSolicitado> servicos,
-			List<ItemPecaSolicitada> pecas, String observacoes) {
+	public ResultadoCriacaoOrdemServico executar(CriarOrdemServicoRequest request) {
 		try {
+			String clienteDocumento = request.getClienteDocumento();
+			String veiculoPlaca = request.getVeiculoPlaca();
+			String veiculoMarca = request.getVeiculo() != null ? request.getVeiculo().getMarca() : null;
+			String veiculoModelo = request.getVeiculo() != null ? request.getVeiculo().getModelo() : null;
+			Integer veiculoAno = request.getVeiculo() != null ? request.getVeiculo().getAno() : null;
+			String observacoes = request.getObservacoes();
+
+			List<ItemServicoSolicitado> servicos = request.getServicos()
+				.stream()
+				.map(s -> new ItemServicoSolicitado(s.getServicoId(), s.getQuantidade()))
+				.toList();
+
+			List<ItemPecaSolicitada> pecas = request.getPecas() != null ? request.getPecas()
+				.stream()
+				.map(p -> new ItemPecaSolicitada(p.getPecaId(), p.getQuantidade()))
+				.toList() : List.of();
+
 			validarServicos(servicos);
 
 			Cliente cliente = resolverCliente(clienteDocumento);
