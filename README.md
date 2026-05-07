@@ -63,7 +63,7 @@ O projeto foi estruturado com base em conceitos de **Domain-Driven Design (DDD)*
 ## Artefatos de Domínio
 - [Dicionário de Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
 - [Diagramas Domain Storytelling](/docs/DDD_storytelling)
-- [Event Storming](em construção)
+- [Diagramas Event Storming](docs/event_storming/README.md)
 
 ---
 ## Funcionalidades Principais
@@ -122,6 +122,12 @@ src/main/java/com/postech/workshop_service/
 - Estrutura preparada para RBAC (Role-Based Access Control)
 
 Detalhes: [Fluxo de autenticação e autorização JWT](docs/autenticacao-jwt-rbac/README.md)
+
+## Event Storming
+- Diagramas de apoio para modelagem dos fluxos centrais do domínio
+- Visões separadas entre fluxo de negócio e análise com agregados
+
+Detalhes: [Artefatos de Event Storming](docs/event_storming/README.md)
 
 ## Execução Local
 
@@ -228,7 +234,7 @@ Em breve: vídeo demonstrativo da aplicação e dos fluxos principais do sistema
 - [Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
 - [Domain Storytelling](/docs/DDD_storytelling)
 - [Fluxo JWT e RBAC](docs/autenticacao-jwt-rbac/README.md)
-- [Event Storming](em construção)
+- [Event Storming](docs/event_storming/README.md)
 - [Documento de Entrega](em construção)
 
 ---
@@ -244,6 +250,6 @@ Caso encontre algum problema ou deseje contribuir com sugestões:
 
 <p align="center">
   <sub>
-    Desenvolvido pelo Grupo 267 • Turma 15SOAT • POSTECH
+    Desenvolvido pelo Grupo 274 • Turma 15SOAT • POSTECH
   </sub>
 </p>
