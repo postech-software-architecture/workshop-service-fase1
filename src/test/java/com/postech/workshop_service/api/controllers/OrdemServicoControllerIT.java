@@ -8,14 +8,15 @@ import com.postech.workshop_service.api.dtos.CadastroServicoRequest;
 import com.postech.workshop_service.api.dtos.CriarEstoqueRequest;
 import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
 import com.postech.workshop_service.config.PostgresTestContainer;
-import com.postech.workshop_service.config.SecurityTestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -28,8 +29,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(SecurityTestConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@WithMockUser(roles = { "ADMINISTRADOR", "ATENDENTE", "MECANICO" })
 class OrdemServicoControllerIT extends PostgresTestContainer {
 
 	@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
