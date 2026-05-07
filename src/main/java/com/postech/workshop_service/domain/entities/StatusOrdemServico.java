@@ -11,8 +11,12 @@ public enum StatusOrdemServico {
 
 	AGUARDANDO_EXECUCAO,
 
+	EM_EXECUCAO,
+
 	CANCELADA,
 
-	FINALIZADA
+	FINALIZADA,
+
+	ENTREGUE
 
 }
