@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -17,8 +18,8 @@ import java.math.BigDecimal;
 public class CriarEstoqueRequest {
 
 	@NotNull(message = "O identificador da peca e obrigatorio")
-	@Schema(example = "550e8400-e29b-41d4-a716-446655440000", description = "ID da peca")
-	private java.util.UUID pecaInsumoId;
+	@Schema(description = "ID da peca", example = "550e8400-e29b-41d4-a716-446655440000")
+	private UUID pecaInsumoId;
 
 	@NotBlank(message = "A localizacao e obrigatoria")
 	@Size(max = 100, message = "A localizacao deve ter no maximo 100 caracteres")

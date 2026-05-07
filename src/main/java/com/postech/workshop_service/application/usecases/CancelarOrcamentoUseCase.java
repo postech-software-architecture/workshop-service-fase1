@@ -1,0 +1,124 @@
+package com.postech.workshop_service.application.usecases;
+
+import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.entities.Estoque;
+import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
+import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
+import com.postech.workshop_service.domain.entities.Orcamento;
+import com.postech.workshop_service.domain.entities.OrdemServico;
+import com.postech.workshop_service.domain.entities.StatusOrdemServico;
+import com.postech.workshop_service.domain.entities.TipoItemComposicaoTecnica;
+import com.postech.workshop_service.domain.repositories.EstoqueRepository;
+import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
+import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
+import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
+import com.postech.workshop_service.domain.valueobjects.TipoMovimentacao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+/**
+ * Caso de uso responsavel por cancelar um orcamento pendente e a ordem associada.
+ */
+@Service
+public class CancelarOrcamentoUseCase {
+
+	private static final Logger log = LoggerFactory.getLogger(CancelarOrcamentoUseCase.class);
+
+	private final OrcamentoRepository orcamentoRepository;
+
+	private final OrdemServicoRepository ordemServicoRepository;
+
+	private final EstoqueRepository estoqueRepository;
+
+	private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+
+	private final MecanicoNotificationService mecanicoNotificationService;
+
+	/**
+	 * Construtor para injecao das dependencias do caso de uso.
+	 * @param orcamentoRepository repositorio de orcamentos.
+	 * @param ordemServicoRepository repositorio de ordens.
+	 * @param estoqueRepository repositorio de estoques.
+	 * @param movimentacaoEstoqueRepository repositorio de movimentacoes.
+	 * @param mecanicoNotificationService service de notificacao do mecanico.
+	 */
+	public CancelarOrcamentoUseCase(OrcamentoRepository orcamentoRepository,
+			OrdemServicoRepository ordemServicoRepository, EstoqueRepository estoqueRepository,
+			MovimentacaoEstoqueRepository movimentacaoEstoqueRepository,
+			MecanicoNotificationService mecanicoNotificationService) {
+		this.orcamentoRepository = orcamentoRepository;
+		this.ordemServicoRepository = ordemServicoRepository;
+		this.estoqueRepository = estoqueRepository;
+		this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
+		this.mecanicoNotificationService = mecanicoNotificationService;
+	}
+
+	/**
+	 * Cancela um orcamento pendente e encerra a ordem vinculada.
+	 * @param idOrcamento identificador do orcamento.
+	 * @return orcamento cancelado.
+	 */
+	@Transactional
+	public Orcamento executar(UUID idOrcamento) {
+		Orcamento orcamento = orcamentoRepository.buscarPorId(idOrcamento)
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Orcamento nao encontrado."));
+		OrdemServico ordemServico = ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de servico nao encontrada."));
+
+		if (ordemServico.getStatus() != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
+			throw new RegraDeNegocioException(
+					"A ordem de servico deve estar aguardando resposta do cliente para cancelar o orcamento.");
+		}
+
+		orcamento.cancelar(ordemServico);
+
+		liberarReservasDeEstoque(ordemServico);
+
+		ordemServicoRepository.salvar(ordemServico);
+		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);
+		try {
+			mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);
+		}
+		catch (RuntimeException ex) {
+			log.warn("Falha ao notificar mecanico sobre cancelamento do orcamento da OS {}: {}",
+					ordemServico.getNumero(), ex.getMessage());
+		}
+		return orcamentoPersistido;
+	}
+
+	private void liberarReservasDeEstoque(OrdemServico ordemServico) {
+		String motivoReservaOriginal = "Reserva para OS " + ordemServico.getNumero();
+		String motivoLiberacao = "Liberacao de reserva — orcamento cancelado OS " + ordemServico.getNumero();
+		for (ItemComposicaoTecnica item : ordemServico.getItensComposicao()) {
+			if (item.getIdPecaInsumo() == null) {
+				continue;
+			}
+			if (item.getTipo() != TipoItemComposicaoTecnica.PECA
+					&& item.getTipo() != TipoItemComposicaoTecnica.INSUMO) {
+				continue;
+			}
+			MovimentacaoEstoque reservaOriginal = movimentacaoEstoqueRepository
+				.listarPorPeca(item.getIdPecaInsumo(), TipoMovimentacao.RESERVA, null, null)
+				.stream()
+				.filter(mov -> motivoReservaOriginal.equals(mov.getMotivo()))
+				.findFirst()
+				.orElse(null);
+			if (reservaOriginal == null) {
+				continue;
+			}
+			Estoque estoque = estoqueRepository.buscarPorId(reservaOriginal.getEstoqueId(), true).orElse(null);
+			if (estoque == null) {
+				continue;
+			}
+			MovimentacaoEstoque liberacao = estoque.liberarReserva(reservaOriginal.getQuantidade(), motivoLiberacao);
+			estoqueRepository.salvar(estoque);
+			movimentacaoEstoqueRepository.salvar(liberacao);
+		}
+	}
+
+}

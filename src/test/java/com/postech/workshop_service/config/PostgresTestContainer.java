@@ -28,7 +28,7 @@ public abstract class PostgresTestContainer {
 	@BeforeEach
 	void cleanDatabase() {
 		jdbcTemplate.execute(
-				"TRUNCATE TABLE refresh_tokens, usuarios_roles, usuarios, movimentacoes_estoque, estoques, pecas_insumos, veiculos_clientes, veiculos, enderecos, clientes RESTART IDENTITY CASCADE");
+				"TRUNCATE TABLE refresh_tokens, usuarios_roles, usuarios, orcamentos_itens, orcamentos, ordens_servico_itens, ordens_servico, movimentacoes_estoque, estoques, pecas_insumos, veiculos_clientes, veiculos, enderecos, clientes, servicos RESTART IDENTITY CASCADE");
 	}
 
 	@DynamicPropertySource

@@ -106,6 +106,34 @@ public class Estoque {
 	}
 
 	/**
+	 * Reserva uma quantidade do estoque para uma OS pendente de aprovacao de orcamento. A
+	 * quantidade reservada e subtraida do saldo disponivel imediatamente.
+	 * @param quantidadeReserva quantidade a ser reservada.
+	 * @param motivo identificacao da OS ou orcamento que originou a reserva.
+	 * @return movimentacao registrada.
+	 * @throws IllegalArgumentException se quantidade insuficiente.
+	 */
+	public MovimentacaoEstoque reservar(BigDecimal quantidadeReserva, String motivo) {
+		validarQuantidadePositiva(quantidadeReserva, "A quantidade de reserva deve ser positiva.");
+		if (quantidadeReserva.compareTo(this.quantidade) > 0) {
+			throw new IllegalArgumentException("Quantidade insuficiente em estoque para esta reserva.");
+		}
+		return criarMovimentacao(TipoMovimentacao.RESERVA, quantidadeReserva, motivo);
+	}
+
+	/**
+	 * Libera uma quantidade previamente reservada, devolvendo-a ao saldo disponivel.
+	 * Chamado quando o orcamento e rejeitado ou cancelado.
+	 * @param quantidadeLiberacao quantidade a ser devolvida ao estoque.
+	 * @param motivo identificacao do orcamento que originou a liberacao.
+	 * @return movimentacao registrada.
+	 */
+	public MovimentacaoEstoque liberarReserva(BigDecimal quantidadeLiberacao, String motivo) {
+		validarQuantidadePositiva(quantidadeLiberacao, "A quantidade de liberacao deve ser positiva.");
+		return criarMovimentacao(TipoMovimentacao.LIBERACAO, quantidadeLiberacao, motivo);
+	}
+
+	/**
 	 * Registra um ajuste de estoque.
 	 * @param novaQuantidade nova quantidade absoluta.
 	 * @param motivo motivo do ajuste (obrigatorio).
@@ -134,14 +162,18 @@ public class Estoque {
 			String motivo) {
 		BigDecimal quantidadeAnterior = this.quantidade;
 
-		if (tipo == TipoMovimentacao.ENTRADA) {
-			this.quantidade = this.quantidade.add(quantidadeMovimentada);
-		}
-		else if (tipo == TipoMovimentacao.SAIDA) {
-			this.quantidade = this.quantidade.subtract(quantidadeMovimentada);
-		}
-		else {
-			this.quantidade = validarQuantidade(quantidadeMovimentada);
+		switch (tipo) {
+			case ENTRADA:
+			case LIBERACAO:
+				this.quantidade = this.quantidade.add(quantidadeMovimentada);
+				break;
+			case SAIDA:
+			case RESERVA:
+				this.quantidade = this.quantidade.subtract(quantidadeMovimentada);
+				break;
+			case AJUSTE:
+				this.quantidade = validarQuantidade(quantidadeMovimentada);
+				break;
 		}
 
 		this.dataUltimaAtualizacao = LocalDateTime.now();

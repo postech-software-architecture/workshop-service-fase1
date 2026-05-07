@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entidade de associacao entre veiculos e clientes.
@@ -37,7 +38,7 @@ public class VeiculoClienteJpaEntity {
 	private VeiculoJpaEntity veiculo;
 
 	@Column(name = "cliente_id", nullable = false, insertable = false, updatable = false)
-	private java.util.UUID clienteId;
+	private UUID clienteId;
 
 	@Column(name = "data_criacao", nullable = false)
 	private LocalDateTime dataCriacao;
