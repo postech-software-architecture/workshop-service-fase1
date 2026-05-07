@@ -5,6 +5,14 @@
 **Status**: Draft  
 **Input**: User description: "docs\\roadmap-fase1\\bloco-2-ciclo-execucao-os.md"
 
+## Clarifications
+
+### Session 2026-05-07
+
+- Q: O historico de status da OS deve ser consultavel nesta feature? -> A: Adicionar consulta autenticada do historico da OS para perfis internos autorizados.
+- Q: Quais perfis podem consultar o historico de status da OS? -> A: Os mesmos perfis internos que podem executar transicoes tambem podem consultar historico.
+- Q: Como tratar ordens existentes sem historico anterior a esta feature? -> A: Historico comeca a partir da implantacao desta feature; nao ha backfill retroativo.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Iniciar execucao da ordem aprovada (Priority: P1)
@@ -57,26 +65,29 @@ Como atendente ou administrador, quero registrar a entrega de uma ordem finaliza
 
 ### User Story 4 - Auditar historico de status da ordem (Priority: P2)
 
-Como gestor da oficina, quero que cada mudanca relevante de status da ordem fique registrada para que seja possivel auditar o ciclo, entender gargalos e alimentar metricas administrativas.
+Como gestor da oficina, quero consultar o historico de status de uma ordem para auditar o ciclo, entender gargalos e alimentar metricas administrativas.
 
 **Why this priority**: A rastreabilidade das transicoes e necessaria para confianca operacional e para calcular metricas posteriores de tempo medio.
 
-**Independent Test**: Pode ser testada executando o ciclo completo de uma ordem e verificando se todas as transicoes relevantes aparecem em ordem cronologica, com status anterior, status novo, data e responsavel.
+**Independent Test**: Pode ser testada executando o ciclo completo de uma ordem e consultando seu historico; todas as transicoes relevantes devem aparecer em ordem cronologica, com status anterior, status novo, data e responsavel.
 
 **Acceptance Scenarios**:
 
-1. **Given** uma ordem que passa por aprovacao, inicio de execucao, finalizacao e entrega, **When** o historico da ordem e avaliado, **Then** todas as transicoes aparecem em ordem cronologica.
+1. **Given** uma ordem que passa por aprovacao, inicio de execucao, finalizacao e entrega, **When** um usuario interno autorizado consulta o historico da ordem, **Then** todas as transicoes aparecem em ordem cronologica.
 2. **Given** uma tentativa invalida de transicao, **When** a operacao e recusada, **Then** nenhum registro de historico e criado para essa tentativa.
 3. **Given** uma ordem que ja possuia transicoes anteriores ao novo ciclo, **When** novas transicoes acontecem, **Then** o historico preserva a sequencia completa sem sobrescrever registros anteriores.
 
 ### Edge Cases
 
 - Ordem inexistente: a operacao deve informar que a ordem nao foi encontrada.
+- Historico de ordem inexistente: a consulta deve informar que a ordem nao foi encontrada.
 - Ordem em estado incompatavel: a operacao deve ser recusada sem alterar status, datas ou historico.
 - Usuario sem permissao para a etapa solicitada: a operacao deve ser recusada sem alterar a ordem.
+- Usuario sem permissao para consultar historico: a consulta deve ser recusada sem expor dados da ordem.
 - Tentativa repetida da mesma transicao: a operacao deve ser recusada e nao deve duplicar historico.
 - Falha ao identificar o responsavel pela transicao: a mudanca de status nao deve ocorrer sem registro de responsavel auditavel.
 - Consulta de ordem entregue: deve preservar todas as datas relevantes do ciclo completo.
+- Ordens existentes antes desta feature podem nao possuir historico retroativo; a consulta deve retornar apenas transicoes registradas apos a implantacao.
 
 ## Requirements *(mandatory)*
 
@@ -102,6 +113,10 @@ Como gestor da oficina, quero que cada mudanca relevante de status da ordem fiqu
 - **FR-018**: O sistema MUST expor os estados em execucao e entregue nas consultas e respostas que apresentem o status da ordem.
 - **FR-019**: O sistema MUST restringir o inicio e a finalizacao da execucao a perfis operacionais autorizados da oficina.
 - **FR-020**: O sistema MUST restringir a entrega do veiculo a perfis autorizados para atendimento ou administracao.
+- **FR-021**: O sistema MUST permitir que usuarios com perfil de administrador, mecanico ou atendente consultem o historico de status de uma ordem de servico.
+- **FR-022**: A consulta de historico MUST retornar as transicoes em ordem cronologica, contendo status anterior, status novo, data da transicao e usuario responsavel.
+- **FR-023**: O sistema MUST impedir que usuarios sem perfil de administrador, mecanico ou atendente consultem historico de status da ordem.
+- **FR-024**: O sistema MUST iniciar o historico auditavel a partir das transicoes realizadas apos a implantacao desta feature, sem criar registros retroativos artificiais para ordens antigas.
 
 ### Key Entities
 
@@ -120,6 +135,7 @@ Como gestor da oficina, quero que cada mudanca relevante de status da ordem fiqu
 - **SC-004**: Gestores conseguem reconstruir a linha do tempo de uma ordem entregue em ate 1 minuto usando os dados apresentados pelo sistema.
 - **SC-005**: O ciclo separa veiculos em execucao, veiculos prontos e veiculos entregues em consultas operacionais sem ambiguidade de status.
 - **SC-006**: Pelo menos um fluxo completo de ordem de servico, da aprovacao ate a entrega, pode ser demonstrado sem intervencao manual nos dados.
+- **SC-007**: Usuarios internos autorizados conseguem consultar o historico completo de uma ordem entregue e identificar todas as transicoes em ordem cronologica.
 
 ## Assumptions
 
@@ -129,3 +145,4 @@ Como gestor da oficina, quero que cada mudanca relevante de status da ordem fiqu
 - O usuario responsavel pela transicao deve ser identificado pela sessao autenticada.
 - As regras de estoque associadas ao inicio da execucao fazem parte de uma feature posterior e nao bloqueiam esta especificacao.
 - O historico de status desta feature sera a fonte confiavel para metricas futuras de tempo medio.
+- Ordens criadas antes desta feature podem ter historico parcial; isso e aceitavel desde que novas transicoes sejam registradas corretamente.
