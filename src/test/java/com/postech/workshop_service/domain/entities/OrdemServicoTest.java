@@ -180,6 +180,34 @@ class OrdemServicoTest {
 	}
 
 	@Test
+	void shouldExecutePostApprovalCycleWhenStatusAllowsIt() {
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_EXECUCAO, List.of());
+
+		ordemServico.iniciarExecucao();
+		assertEquals(StatusOrdemServico.EM_EXECUCAO, ordemServico.getStatus());
+		assertNotNull(ordemServico.getDataInicioExecucao());
+
+		ordemServico.finalizarExecucao();
+		assertEquals(StatusOrdemServico.FINALIZADA, ordemServico.getStatus());
+		assertNotNull(ordemServico.getDataFinalizacao());
+
+		ordemServico.entregar();
+		assertEquals(StatusOrdemServico.ENTREGUE, ordemServico.getStatus());
+		assertNotNull(ordemServico.getDataEntrega());
+	}
+
+	@Test
+	void shouldRejectPostApprovalCycleTransitionsWhenStatusIsInvalid() {
+		OrdemServico emComposicao = criarOrdemServico(StatusOrdemServico.EM_COMPOSICAO, List.of());
+		OrdemServico aguardandoExecucao = criarOrdemServico(StatusOrdemServico.AGUARDANDO_EXECUCAO, List.of());
+		OrdemServico emExecucao = criarOrdemServico(StatusOrdemServico.EM_EXECUCAO, List.of());
+
+		assertThrows(RegraDeNegocioException.class, emComposicao::iniciarExecucao);
+		assertThrows(RegraDeNegocioException.class, aguardandoExecucao::finalizarExecucao);
+		assertThrows(RegraDeNegocioException.class, emExecucao::entregar);
+	}
+
+	@Test
 	void shouldReportIfOrderCanBeCancelledBasedOnStatus() {
 		OrdemServico cancelavel = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of());
 		OrdemServico emComposicao = criarOrdemServico(StatusOrdemServico.EM_COMPOSICAO, List.of());

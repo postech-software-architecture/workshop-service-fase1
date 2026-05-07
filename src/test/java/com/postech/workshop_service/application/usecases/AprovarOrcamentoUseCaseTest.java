@@ -39,6 +39,9 @@ class AprovarOrcamentoUseCaseTest {
 	@Mock
 	private MecanicoNotificationService mecanicoNotificationService;
 
+	@Mock
+	private RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
+
 	@InjectMocks
 	private AprovarOrcamentoUseCase aprovarOrcamentoUseCase;
 

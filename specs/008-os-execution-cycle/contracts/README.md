@@ -9,7 +9,7 @@ Todos os endpoints exigem usuario autenticado.
 | Metodo | Caminho | Perfis | Resultado |
 |--------|---------|--------|-----------|
 | PATCH | `/api/v1/ordens-servico/{id}/iniciar-execucao` | `ADMINISTRADOR`, `MECANICO` | OS em `EM_EXECUCAO` |
-| PATCH | `/api/v1/ordens-servico/{id}/finalizar` | `ADMINISTRADOR`, `MECANICO` | OS em `FINALIZADA` |
+| PATCH | `/api/v1/ordens-servico/{id}/finalizar-execucao` | `ADMINISTRADOR`, `MECANICO` | OS em `FINALIZADA` |
 | PATCH | `/api/v1/ordens-servico/{id}/entregar` | `ADMINISTRADOR`, `ATENDENTE` | OS em `ENTREGUE` |
 | GET | `/api/v1/ordens-servico/{id}/historico-status` | `ADMINISTRADOR`, `MECANICO`, `ATENDENTE` | Lista cronologica de historico |
 

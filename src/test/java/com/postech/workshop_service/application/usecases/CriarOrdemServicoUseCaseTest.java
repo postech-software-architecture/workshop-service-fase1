@@ -79,6 +79,9 @@ class CriarOrdemServicoUseCaseTest {
 	@Mock
 	private ClienteNotificationService clienteNotificationService;
 
+	@Mock
+	private RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
+
 	@InjectMocks
 	private CriarOrdemServicoUseCase useCase;
 

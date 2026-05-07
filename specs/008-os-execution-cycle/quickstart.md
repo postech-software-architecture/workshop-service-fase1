@@ -46,7 +46,7 @@ mvn "-Dtest=OrdemServicoTest" test
 2. Executar testes dos casos de uso da feature:
 
 ```powershell
-mvn "-Dtest=IniciarExecucaoUseCaseTest,FinalizarExecucaoUseCaseTest,EntregarVeiculoUseCaseTest,ConsultarHistoricoOrdemServicoUseCaseTest" test
+mvn "-Dtest=IniciarExecucaoUseCaseTest,FinalizarExecucaoUseCaseTest,EntregarVeiculoUseCaseTest,ConsultarHistoricoOrdemServicoUseCaseTest,RegistrarHistoricoStatusOrdemServicoUseCaseTest,HistoricoStatusOrdemServicoRepositoryImplIT" test
 ```
 
 3. Executar testes de controller e fluxo completo:
@@ -56,6 +56,12 @@ mvn "-Dtest=OrdemServicoControllerIT" test
 ```
 
 4. Executar validacao final recomendada:
+
+```powershell
+mvn clean "-Dtest=OrdemServicoTest,IniciarExecucaoUseCaseTest,FinalizarExecucaoUseCaseTest,EntregarVeiculoUseCaseTest,ConsultarHistoricoOrdemServicoUseCaseTest,RegistrarHistoricoStatusOrdemServicoUseCaseTest,OrdemServicoControllerIT,HistoricoStatusOrdemServicoRepositoryImplIT" test
+```
+
+5. Executar suite completa:
 
 ```powershell
 mvn test

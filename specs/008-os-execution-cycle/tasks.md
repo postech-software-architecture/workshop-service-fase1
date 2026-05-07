@@ -17,9 +17,9 @@
 
 **Purpose**: Preparar os artefatos de schema e contratos compartilhados da feature
 
-- [ ] T001 Revisar e alinhar os artefatos da feature em specs/008-os-execution-cycle/spec.md, specs/008-os-execution-cycle/plan.md, specs/008-os-execution-cycle/data-model.md e specs/008-os-execution-cycle/contracts/README.md
-- [ ] T002 Criar migration dos timestamps do ciclo da OS em src/main/resources/db/migration/V0.20260507100000__add_execution_cycle_to_ordens_servico.sql
-- [ ] T003 Criar migration da tabela de historico de status em src/main/resources/db/migration/V0.20260507101000__create_table_historico_status_os.sql
+- [X] T001 Revisar e alinhar os artefatos da feature em specs/008-os-execution-cycle/spec.md, specs/008-os-execution-cycle/plan.md, specs/008-os-execution-cycle/data-model.md e specs/008-os-execution-cycle/contracts/README.md
+- [X] T002 Criar migration dos timestamps do ciclo da OS em src/main/resources/db/migration/V0.20260507100000__add_execution_cycle_to_ordens_servico.sql
+- [X] T003 Criar migration da tabela de historico de status em src/main/resources/db/migration/V0.20260507101000__create_table_historico_status_os.sql
 
 ---
 
@@ -29,21 +29,21 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Atualizar os estados do ciclo da OS em src/main/java/com/postech/workshop_service/domain/entities/StatusOrdemServico.java
-- [ ] T005 Atualizar o agregado da OS com timestamps e transicoes em src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java
-- [ ] T006 [P] Atualizar os testes de maquina de estados da OS em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
-- [ ] T007 [P] Criar a entidade de dominio do historico em src/main/java/com/postech/workshop_service/domain/entities/HistoricoStatusOrdemServico.java
-- [ ] T008 [P] Criar o contrato de repositorio de historico em src/main/java/com/postech/workshop_service/domain/repositories/HistoricoStatusOrdemServicoRepository.java
-- [ ] T009 [P] Criar a entidade JPA de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/HistoricoStatusOrdemServicoJpaEntity.java
-- [ ] T010 [P] Criar o repositorio Spring Data de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaHistoricoStatusOrdemServicoRepository.java
-- [ ] T011 [P] Criar o mapper de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/HistoricoStatusOrdemServicoMapper.java
-- [ ] T012 Implementar o adaptador de persistencia de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/HistoricoStatusOrdemServicoRepositoryImpl.java
-- [ ] T013 Atualizar a entidade JPA e mapper da OS com timestamps em src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/OrdemServicoJpaEntity.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrdemServicoMapper.java
-- [ ] T014 [P] Criar DTO de resposta de historico em src/main/java/com/postech/workshop_service/api/dtos/HistoricoStatusOrdemServicoResponse.java
-- [ ] T015 Criar componente para obter responsavel autenticado em src/main/java/com/postech/workshop_service/application/usecases/BuscarResponsavelTransicaoUseCase.java
-- [ ] T016 Criar componente de registro de historico em src/main/java/com/postech/workshop_service/application/usecases/RegistrarHistoricoStatusOrdemServicoUseCase.java
-- [ ] T017 [P] Criar testes do registro de historico em src/test/java/com/postech/workshop_service/application/usecases/RegistrarHistoricoStatusOrdemServicoUseCaseTest.java
-- [ ] T018 [P] Criar testes do repositorio de historico em src/test/java/com/postech/workshop_service/infrastructure/persistence/repositories/HistoricoStatusOrdemServicoRepositoryImplIT.java
+- [X] T004 Atualizar os estados do ciclo da OS em src/main/java/com/postech/workshop_service/domain/entities/StatusOrdemServico.java
+- [X] T005 Atualizar o agregado da OS com timestamps e transicoes em src/main/java/com/postech/workshop_service/domain/entities/OrdemServico.java
+- [X] T006 [P] Atualizar os testes de maquina de estados da OS em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
+- [X] T007 [P] Criar a entidade de dominio do historico em src/main/java/com/postech/workshop_service/domain/entities/HistoricoStatusOrdemServico.java
+- [X] T008 [P] Criar o contrato de repositorio de historico em src/main/java/com/postech/workshop_service/domain/repositories/HistoricoStatusOrdemServicoRepository.java
+- [X] T009 [P] Criar a entidade JPA de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/HistoricoStatusOrdemServicoJpaEntity.java
+- [X] T010 [P] Criar o repositorio Spring Data de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaHistoricoStatusOrdemServicoRepository.java
+- [X] T011 [P] Criar o mapper de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/HistoricoStatusOrdemServicoMapper.java
+- [X] T012 Implementar o adaptador de persistencia de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/HistoricoStatusOrdemServicoRepositoryImpl.java
+- [X] T013 Atualizar a entidade JPA e mapper da OS com timestamps em src/main/java/com/postech/workshop_service/infrastructure/persistence/entities/OrdemServicoJpaEntity.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/mappers/OrdemServicoMapper.java
+- [X] T014 [P] Criar DTO de resposta de historico em src/main/java/com/postech/workshop_service/api/dtos/HistoricoStatusOrdemServicoResponse.java
+- [X] T015 Criar componente para obter responsavel autenticado em src/main/java/com/postech/workshop_service/application/usecases/BuscarResponsavelTransicaoUseCase.java
+- [X] T016 Criar componente de registro de historico em src/main/java/com/postech/workshop_service/application/usecases/RegistrarHistoricoStatusOrdemServicoUseCase.java
+- [X] T017 [P] Criar testes do registro de historico em src/test/java/com/postech/workshop_service/application/usecases/RegistrarHistoricoStatusOrdemServicoUseCaseTest.java
+- [X] T018 [P] Criar testes do repositorio de historico em src/test/java/com/postech/workshop_service/infrastructure/persistence/repositories/HistoricoStatusOrdemServicoRepositoryImplIT.java
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -57,16 +57,16 @@
 
 ### Tests for User Story 1
 
-- [ ] T019 [P] [US1] Criar testes do caso de uso de inicio de execucao em src/test/java/com/postech/workshop_service/application/usecases/IniciarExecucaoUseCaseTest.java
-- [ ] T020 [P] [US1] Expandir testes de dominio para inicio de execucao valido e bloqueios em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
-- [ ] T021 [P] [US1] Criar testes de controller para PATCH iniciar execucao e autorizacao em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
+- [X] T019 [P] [US1] Criar testes do caso de uso de inicio de execucao em src/test/java/com/postech/workshop_service/application/usecases/IniciarExecucaoUseCaseTest.java
+- [X] T020 [P] [US1] Expandir testes de dominio para inicio de execucao valido e bloqueios em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
+- [X] T021 [P] [US1] Criar testes de controller para PATCH iniciar execucao e autorizacao em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
 
 ### Implementation for User Story 1
 
-- [ ] T022 [US1] Implementar o caso de uso de inicio de execucao em src/main/java/com/postech/workshop_service/application/usecases/IniciarExecucaoUseCase.java
-- [ ] T023 [US1] Atualizar OrdemServicoController com endpoint de inicio de execucao em src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java
-- [ ] T024 [US1] Atualizar OrdemServicoResponse com dataInicioExecucao em src/main/java/com/postech/workshop_service/api/dtos/OrdemServicoResponse.java
-- [ ] T025 [US1] Atualizar OpenAPI do endpoint iniciar execucao em src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml
+- [X] T022 [US1] Implementar o caso de uso de inicio de execucao em src/main/java/com/postech/workshop_service/application/usecases/IniciarExecucaoUseCase.java
+- [X] T023 [US1] Atualizar OrdemServicoController com endpoint de inicio de execucao em src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java
+- [X] T024 [US1] Atualizar OrdemServicoResponse com dataInicioExecucao em src/main/java/com/postech/workshop_service/api/dtos/OrdemServicoResponse.java
+- [X] T025 [US1] Atualizar OpenAPI do endpoint iniciar execucao em src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml
 
 **Checkpoint**: User Story 1 funcional e testavel independentemente
 
@@ -80,16 +80,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T026 [P] [US2] Criar testes do caso de uso de finalizacao em src/test/java/com/postech/workshop_service/application/usecases/FinalizarExecucaoUseCaseTest.java
-- [ ] T027 [P] [US2] Expandir testes de dominio para finalizacao valida e bloqueios em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
-- [ ] T028 [P] [US2] Criar testes de controller para PATCH finalizar e autorizacao em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
+- [X] T026 [P] [US2] Criar testes do caso de uso de finalizacao em src/test/java/com/postech/workshop_service/application/usecases/FinalizarExecucaoUseCaseTest.java
+- [X] T027 [P] [US2] Expandir testes de dominio para finalizacao valida e bloqueios em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
+- [X] T028 [P] [US2] Criar testes de controller para PATCH finalizar e autorizacao em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
 
 ### Implementation for User Story 2
 
-- [ ] T029 [US2] Implementar o caso de uso de finalizacao em src/main/java/com/postech/workshop_service/application/usecases/FinalizarExecucaoUseCase.java
-- [ ] T030 [US2] Atualizar OrdemServicoController com endpoint de finalizacao em src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java
-- [ ] T031 [US2] Atualizar OrdemServicoResponse com dataFinalizacao em src/main/java/com/postech/workshop_service/api/dtos/OrdemServicoResponse.java
-- [ ] T032 [US2] Atualizar OpenAPI do endpoint finalizar em src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml
+- [X] T029 [US2] Implementar o caso de uso de finalizacao em src/main/java/com/postech/workshop_service/application/usecases/FinalizarExecucaoUseCase.java
+- [X] T030 [US2] Atualizar OrdemServicoController com endpoint de finalizacao em src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java
+- [X] T031 [US2] Atualizar OrdemServicoResponse com dataFinalizacao em src/main/java/com/postech/workshop_service/api/dtos/OrdemServicoResponse.java
+- [X] T032 [US2] Atualizar OpenAPI do endpoint finalizar em src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml
 
 **Checkpoint**: User Story 2 funcional e testavel independentemente
 
@@ -103,16 +103,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T033 [P] [US3] Criar testes do caso de uso de entrega em src/test/java/com/postech/workshop_service/application/usecases/EntregarVeiculoUseCaseTest.java
-- [ ] T034 [P] [US3] Expandir testes de dominio para entrega valida e bloqueios em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
-- [ ] T035 [P] [US3] Criar testes de controller para PATCH entregar e autorizacao em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
+- [X] T033 [P] [US3] Criar testes do caso de uso de entrega em src/test/java/com/postech/workshop_service/application/usecases/EntregarVeiculoUseCaseTest.java
+- [X] T034 [P] [US3] Expandir testes de dominio para entrega valida e bloqueios em src/test/java/com/postech/workshop_service/domain/entities/OrdemServicoTest.java
+- [X] T035 [P] [US3] Criar testes de controller para PATCH entregar e autorizacao em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Implementar o caso de uso de entrega em src/main/java/com/postech/workshop_service/application/usecases/EntregarVeiculoUseCase.java
-- [ ] T037 [US3] Atualizar OrdemServicoController com endpoint de entrega em src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java
-- [ ] T038 [US3] Atualizar OrdemServicoResponse com dataEntrega em src/main/java/com/postech/workshop_service/api/dtos/OrdemServicoResponse.java
-- [ ] T039 [US3] Atualizar OpenAPI do endpoint entregar em src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml
+- [X] T036 [US3] Implementar o caso de uso de entrega em src/main/java/com/postech/workshop_service/application/usecases/EntregarVeiculoUseCase.java
+- [X] T037 [US3] Atualizar OrdemServicoController com endpoint de entrega em src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java
+- [X] T038 [US3] Atualizar OrdemServicoResponse com dataEntrega em src/main/java/com/postech/workshop_service/api/dtos/OrdemServicoResponse.java
+- [X] T039 [US3] Atualizar OpenAPI do endpoint entregar em src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml
 
 **Checkpoint**: User Story 3 funcional e testavel independentemente
 
@@ -126,19 +126,19 @@
 
 ### Tests for User Story 4
 
-- [ ] T040 [P] [US4] Criar testes do caso de uso de consulta de historico em src/test/java/com/postech/workshop_service/application/usecases/ConsultarHistoricoOrdemServicoUseCaseTest.java
-- [ ] T041 [P] [US4] Criar testes de controller para GET historico-status e autorizacao em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
-- [ ] T042 [P] [US4] Criar teste de fluxo completo com historico cronologico em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
-- [ ] T043 [P] [US4] Criar teste de ausencia de backfill retroativo em src/test/java/com/postech/workshop_service/infrastructure/persistence/repositories/HistoricoStatusOrdemServicoRepositoryImplIT.java
+- [X] T040 [P] [US4] Criar testes do caso de uso de consulta de historico em src/test/java/com/postech/workshop_service/application/usecases/ConsultarHistoricoOrdemServicoUseCaseTest.java
+- [X] T041 [P] [US4] Criar testes de controller para GET historico-status e autorizacao em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
+- [X] T042 [P] [US4] Criar teste de fluxo completo com historico cronologico em src/test/java/com/postech/workshop_service/api/controllers/OrdemServicoControllerIT.java
+- [X] T043 [P] [US4] Criar teste de ausencia de backfill retroativo em src/test/java/com/postech/workshop_service/infrastructure/persistence/repositories/HistoricoStatusOrdemServicoRepositoryImplIT.java
 
 ### Implementation for User Story 4
 
-- [ ] T044 [US4] Implementar consulta por OS no contrato de historico em src/main/java/com/postech/workshop_service/domain/repositories/HistoricoStatusOrdemServicoRepository.java
-- [ ] T045 [US4] Implementar consulta cronologica no repositorio JPA de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaHistoricoStatusOrdemServicoRepository.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/HistoricoStatusOrdemServicoRepositoryImpl.java
-- [ ] T046 [US4] Implementar o caso de uso de consulta de historico em src/main/java/com/postech/workshop_service/application/usecases/ConsultarHistoricoOrdemServicoUseCase.java
-- [ ] T047 [US4] Atualizar fluxos existentes para registrar historico em src/main/java/com/postech/workshop_service/application/usecases/EncerrarComposicaoTecnicaUseCase.java, src/main/java/com/postech/workshop_service/application/usecases/AprovarOrcamentoUseCase.java, src/main/java/com/postech/workshop_service/application/usecases/RejeitarOrcamentoUseCase.java e src/main/java/com/postech/workshop_service/application/usecases/CancelarOrcamentoUseCase.java
-- [ ] T048 [US4] Atualizar OrdemServicoController com endpoint de consulta de historico em src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java
-- [ ] T049 [US4] Atualizar OpenAPI com endpoint e schema de historico em src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml
+- [X] T044 [US4] Implementar consulta por OS no contrato de historico em src/main/java/com/postech/workshop_service/domain/repositories/HistoricoStatusOrdemServicoRepository.java
+- [X] T045 [US4] Implementar consulta cronologica no repositorio JPA de historico em src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/JpaHistoricoStatusOrdemServicoRepository.java e src/main/java/com/postech/workshop_service/infrastructure/persistence/repositories/HistoricoStatusOrdemServicoRepositoryImpl.java
+- [X] T046 [US4] Implementar o caso de uso de consulta de historico em src/main/java/com/postech/workshop_service/application/usecases/ConsultarHistoricoOrdemServicoUseCase.java
+- [X] T047 [US4] Atualizar fluxos existentes para registrar historico em src/main/java/com/postech/workshop_service/application/usecases/EncerrarComposicaoTecnicaUseCase.java, src/main/java/com/postech/workshop_service/application/usecases/AprovarOrcamentoUseCase.java, src/main/java/com/postech/workshop_service/application/usecases/RejeitarOrcamentoUseCase.java e src/main/java/com/postech/workshop_service/application/usecases/CancelarOrcamentoUseCase.java
+- [X] T048 [US4] Atualizar OrdemServicoController com endpoint de consulta de historico em src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java
+- [X] T049 [US4] Atualizar OpenAPI com endpoint e schema de historico em src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml
 
 **Checkpoint**: User Story 4 funcional e testavel independentemente
 
@@ -148,11 +148,11 @@
 
 **Purpose**: Consolidar consistencia, documentacao e validacao final da feature
 
-- [ ] T050 [P] Atualizar quickstart da feature com comandos finais em specs/008-os-execution-cycle/quickstart.md
-- [ ] T051 [P] Atualizar contratos da feature se os nomes finais de DTOs/endpoints mudarem em specs/008-os-execution-cycle/contracts/README.md
-- [ ] T052 Executar formatacao Spring Java Format para os arquivos alterados com mvn spring-javaformat:apply
-- [ ] T053 Executar testes focados da feature com mvn "-Dtest=OrdemServicoTest,IniciarExecucaoUseCaseTest,FinalizarExecucaoUseCaseTest,EntregarVeiculoUseCaseTest,ConsultarHistoricoOrdemServicoUseCaseTest,OrdemServicoControllerIT,HistoricoStatusOrdemServicoRepositoryImplIT" test
-- [ ] T054 Executar suite completa com mvn test
+- [X] T050 [P] Atualizar quickstart da feature com comandos finais em specs/008-os-execution-cycle/quickstart.md
+- [X] T051 [P] Atualizar contratos da feature se os nomes finais de DTOs/endpoints mudarem em specs/008-os-execution-cycle/contracts/README.md
+- [X] T052 Executar formatacao Spring Java Format para os arquivos alterados com mvn spring-javaformat:apply
+- [X] T053 Executar testes focados da feature com mvn "-Dtest=OrdemServicoTest,IniciarExecucaoUseCaseTest,FinalizarExecucaoUseCaseTest,EntregarVeiculoUseCaseTest,ConsultarHistoricoOrdemServicoUseCaseTest,OrdemServicoControllerIT,HistoricoStatusOrdemServicoRepositoryImplIT" test
+- [X] T054 Executar suite completa com mvn test
 
 ---
 

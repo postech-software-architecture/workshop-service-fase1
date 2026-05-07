@@ -52,6 +52,9 @@ class CancelarOrcamentoUseCaseTest {
 	@Mock
 	private MecanicoNotificationService mecanicoNotificationService;
 
+	@Mock
+	private RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
+
 	@InjectMocks
 	private CancelarOrcamentoUseCase cancelarOrcamentoUseCase;
 
