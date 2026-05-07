@@ -727,6 +727,124 @@ paths:
             - veículo não encontrado e dados para cadastro ausentes
             - estoque insuficiente para a peça solicitada
             - serviço inativo no catálogo
+    get:
+      tags: [Ordens de Serviço]
+      summary: Listar Ordens de Serviço
+      description: >
+        Lista paginada de ordens de serviço para perfis administrativos. Aceita
+        filtros opcionais por status, cliente e intervalo de datas de criação.
+      parameters:
+        - name: pagina
+          in: query
+          required: false
+          schema: { type: integer, default: 0, minimum: 0 }
+        - name: tamanho
+          in: query
+          required: false
+          schema: { type: integer, default: 20, minimum: 1, maximum: 200 }
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, CANCELADA, FINALIZADA]
+        - name: idCliente
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+        - name: dataInicio
+          in: query
+          required: false
+          description: Data mínima (inclusiva) de criação, formato ISO-8601.
+          schema: { type: string, format: date-time }
+        - name: dataFim
+          in: query
+          required: false
+          description: Data máxima (exclusiva) de criação, formato ISO-8601.
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Página de ordens de serviço
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaOrdensServicoResponse'
+
+  /api/v1/ordens-servico/{id}:
+    get:
+      tags: [Ordens de Serviço]
+      summary: Buscar Ordem de Serviço por id
+      description: Retorna o detalhe completo de uma OS, incluindo itens da composição técnica.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OS encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoDetalheResponse'
+        '404':
+          description: OS não encontrada
+
+  /api/v1/ordens-servico/minhas:
+    get:
+      tags: [Ordens de Serviço]
+      summary: Listar minhas Ordens de Serviço
+      description: >
+        Retorna a página de ordens de serviço do cliente autenticado.
+        Requer perfil CLIENTE com vínculo de cliente no usuário.
+      parameters:
+        - name: pagina
+          in: query
+          required: false
+          schema: { type: integer, default: 0, minimum: 0 }
+        - name: tamanho
+          in: query
+          required: false
+          schema: { type: integer, default: 20, minimum: 1, maximum: 200 }
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, CANCELADA, FINALIZADA]
+      responses:
+        '200':
+          description: Página com as ordens de serviço do cliente autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaOrdensServicoResponse'
+        '403':
+          description: Conta autenticada sem cliente vinculado
+
+  /api/v1/ordens-servico/{id}/status:
+    get:
+      tags: [Ordens de Serviço]
+      summary: Consultar status da Ordem de Serviço (cliente)
+      description: >
+        Permite que o cliente acompanhe o status atual da sua OS. Retorna 403
+        quando a OS pertence a outro cliente.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Status atual da OS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusOrdemServicoResponse'
+        '403':
+          description: OS pertence a outro cliente
+        '404':
+          description: OS não encontrada
 
   # ─── Orçamentos ───────────────────────────────────────────────────────────────
 
@@ -1237,6 +1355,72 @@ components:
         dataCriacao:
           type: string
           format: date-time
+
+    OrdemServicoDetalheResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        numero: { type: string, example: OS-2026-00001 }
+        status:
+          type: string
+          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, CANCELADA, FINALIZADA]
+        idCliente: { type: string, format: uuid }
+        idVeiculo: { type: string, format: uuid }
+        itens:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemComposicaoResponse'
+        observacoes: { type: string }
+        dataCriacao: { type: string, format: date-time }
+        dataUltimaAtualizacao: { type: string, format: date-time }
+
+    ItemComposicaoResponse:
+      type: object
+      properties:
+        tipo:
+          type: string
+          enum: [SERVICO, PECA, INSUMO]
+        descricao: { type: string }
+        valor: { type: number, example: 150.00 }
+        idPecaInsumo:
+          type: string
+          format: uuid
+          nullable: true
+
+    OrdemServicoResumoResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        numero: { type: string, example: OS-2026-00001 }
+        status:
+          type: string
+          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, CANCELADA, FINALIZADA]
+        idCliente: { type: string, format: uuid }
+        idVeiculo: { type: string, format: uuid }
+        dataCriacao: { type: string, format: date-time }
+        dataUltimaAtualizacao: { type: string, format: date-time }
+
+    PaginaOrdensServicoResponse:
+      type: object
+      properties:
+        conteudo:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrdemServicoResumoResponse'
+        pagina: { type: integer, example: 0 }
+        tamanho: { type: integer, example: 20 }
+        totalElementos: { type: integer, format: int64, example: 42 }
+        totalPaginas: { type: integer, example: 3 }
+
+    StatusOrdemServicoResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        numero: { type: string, example: OS-2026-00001 }
+        status:
+          type: string
+          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, CANCELADA, FINALIZADA]
+        dataUltimaAtualizacao: { type: string, format: date-time }
 
     # ── Orçamentos ────────────────────────────────────────────────────────────
 
