@@ -31,4 +31,14 @@ public interface OrdemServicoRepository {
 	 */
 	String gerarProximoNumero(int ano);
 
+	/**
+	 * Lista ordens de servico aplicando filtros opcionais e paginacao. Resultado ordenado
+	 * por data de criacao decrescente.
+	 * @param pagina pagina solicitada (zero-based).
+	 * @param tamanho tamanho da pagina.
+	 * @param filtros criterios opcionais; campos nulos sao ignorados.
+	 * @return pagina de ordens de servico.
+	 */
+	PaginaResultado<OrdemServico> listar(int pagina, int tamanho, FiltrosOrdemServico filtros);
+
 }
