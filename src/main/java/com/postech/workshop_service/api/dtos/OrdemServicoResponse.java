@@ -1,6 +1,7 @@
 package com.postech.workshop_service.api.dtos;
 
 import com.postech.workshop_service.application.usecases.ResultadoCriacaoOrdemServico;
+import com.postech.workshop_service.domain.entities.OrdemServico;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,6 +48,15 @@ public class OrdemServicoResponse {
 
 	@Schema(description = "Data e hora da ultima atualizacao")
 	private LocalDateTime dataUltimaAtualizacao;
+
+	@Schema(description = "Data e hora de inicio da execucao tecnica")
+	private LocalDateTime dataInicioExecucao;
+
+	@Schema(description = "Data e hora de finalizacao da execucao tecnica")
+	private LocalDateTime dataFinalizacao;
+
+	@Schema(description = "Data e hora de entrega do veiculo ao cliente")
+	private LocalDateTime dataEntrega;
 
 	/**
 	 * Resumo do cliente vinculado a OS.
@@ -127,6 +137,28 @@ public class OrdemServicoResponse {
 			.observacoes(resultado.ordemServico().getObservacoes())
 			.dataCriacao(resultado.ordemServico().getDataCriacao())
 			.dataUltimaAtualizacao(resultado.ordemServico().getDataUltimaAtualizacao())
+			.dataInicioExecucao(resultado.ordemServico().getDataInicioExecucao())
+			.dataFinalizacao(resultado.ordemServico().getDataFinalizacao())
+			.dataEntrega(resultado.ordemServico().getDataEntrega())
+			.build();
+	}
+
+	/**
+	 * Constroi a resposta resumida a partir do agregado de ordem de servico.
+	 * @param ordemServico ordem de servico atualizada.
+	 * @return resposta mapeada.
+	 */
+	public static OrdemServicoResponse from(OrdemServico ordemServico) {
+		return OrdemServicoResponse.builder()
+			.id(ordemServico.getId())
+			.numero(ordemServico.getNumero())
+			.status(ordemServico.getStatus().name())
+			.observacoes(ordemServico.getObservacoes())
+			.dataCriacao(ordemServico.getDataCriacao())
+			.dataUltimaAtualizacao(ordemServico.getDataUltimaAtualizacao())
+			.dataInicioExecucao(ordemServico.getDataInicioExecucao())
+			.dataFinalizacao(ordemServico.getDataFinalizacao())
+			.dataEntrega(ordemServico.getDataEntrega())
 			.build();
 	}
 

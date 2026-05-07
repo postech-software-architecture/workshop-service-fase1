@@ -12,6 +12,7 @@ import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.PecaInsumo;
 import com.postech.workshop_service.domain.entities.Servico;
+import com.postech.workshop_service.domain.entities.StatusOrdemServico;
 import com.postech.workshop_service.domain.entities.TipoItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.TipoOrcamento;
 import com.postech.workshop_service.domain.entities.Veiculo;
@@ -64,6 +65,8 @@ public class CriarOrdemServicoUseCase {
 
 	private final ClienteNotificationService clienteNotificationService;
 
+	private final RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
+
 	/**
 	 * Construtor para injecao de dependencias.
 	 */
@@ -71,7 +74,8 @@ public class CriarOrdemServicoUseCase {
 			ServicoRepository servicoRepository, PecaInsumoRepository pecaInsumoRepository,
 			EstoqueRepository estoqueRepository, MovimentacaoEstoqueRepository movimentacaoEstoqueRepository,
 			OrdemServicoRepository ordemServicoRepository, OrcamentoRepository orcamentoRepository,
-			ClienteNotificationService clienteNotificationService) {
+			ClienteNotificationService clienteNotificationService,
+			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase) {
 		this.clienteRepository = clienteRepository;
 		this.veiculoRepository = veiculoRepository;
 		this.servicoRepository = servicoRepository;
@@ -81,6 +85,7 @@ public class CriarOrdemServicoUseCase {
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.orcamentoRepository = orcamentoRepository;
 		this.clienteNotificationService = clienteNotificationService;
+		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
 	}
 
 	/**
@@ -120,6 +125,7 @@ public class CriarOrdemServicoUseCase {
 
 			String numero = ordemServicoRepository.gerarProximoNumero(LocalDate.now().getYear());
 			OrdemServico os = new OrdemServico(null, cliente.getId(), veiculo.getId(), numero, observacoes, itens);
+			StatusOrdemServico statusAnterior = os.getStatus();
 			os.encerrarComposicao();
 
 			List<ItemOrcamento> itensOrcamento = os.getItensComposicao()
@@ -135,6 +141,7 @@ public class CriarOrdemServicoUseCase {
 			orcamento.enviarParaAprovacao();
 
 			OrdemServico osSalva = ordemServicoRepository.salvar(os);
+			registrarHistoricoUseCase.executar(osSalva.getId(), statusAnterior, osSalva.getStatus());
 			Orcamento orcamentoSalvo = orcamentoRepository.salvar(orcamento);
 
 			reservarEstoque(pecas != null ? pecas : List.of(), osSalva.getNumero());

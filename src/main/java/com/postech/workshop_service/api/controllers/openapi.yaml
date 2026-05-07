@@ -730,6 +730,98 @@ paths:
 
   # ─── Orçamentos ───────────────────────────────────────────────────────────────
 
+  /api/v1/ordens-servico/{id}/iniciar-execucao:
+    patch:
+      tags: [Ordens de ServiÃ§o]
+      summary: Iniciar execucao da OS
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Execucao iniciada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoResponse'
+        '404':
+          description: Ordem de servico nao encontrada
+        '422':
+          description: Ordem de servico nao esta aguardando execucao
+
+  /api/v1/ordens-servico/{id}/finalizar-execucao:
+    patch:
+      tags: [Ordens de ServiÃ§o]
+      summary: Finalizar execucao da OS
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Execucao finalizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoResponse'
+        '404':
+          description: Ordem de servico nao encontrada
+        '422':
+          description: Ordem de servico nao esta em execucao
+
+  /api/v1/ordens-servico/{id}/entregar:
+    patch:
+      tags: [Ordens de ServiÃ§o]
+      summary: Registrar entrega do veiculo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Veiculo entregue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoResponse'
+        '404':
+          description: Ordem de servico nao encontrada
+        '422':
+          description: Ordem de servico nao esta finalizada
+
+  /api/v1/ordens-servico/{id}/historico-status:
+    get:
+      tags: [Ordens de ServiÃ§o]
+      summary: Consultar historico de status da OS
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Historico cronologico da OS
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistoricoStatusOrdemServicoResponse'
+        '404':
+          description: Ordem de servico nao encontrada
+
   /api/v1/orcamentos/{id}/aprovar:
     patch:
       tags: [Orçamentos]
@@ -1176,7 +1268,7 @@ components:
           example: OS-2026-00001
         status:
           type: string
-          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, CANCELADA, FINALIZADA]
+          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, EM_EXECUCAO, CANCELADA, FINALIZADA, ENTREGUE]
           example: AGUARDANDO_RESPOSTA_CLIENTE
         cliente:
           $ref: '#/components/schemas/ClienteResumoResponse'
@@ -1192,6 +1284,39 @@ components:
         dataUltimaAtualizacao:
           type: string
           format: date-time
+        dataInicioExecucao:
+          type: string
+          format: date-time
+        dataFinalizacao:
+          type: string
+          format: date-time
+        dataEntrega:
+          type: string
+          format: date-time
+
+    HistoricoStatusOrdemServicoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        idOrdemServico:
+          type: string
+          format: uuid
+        statusAnterior:
+          type: string
+          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, EM_EXECUCAO, CANCELADA, FINALIZADA, ENTREGUE]
+        statusNovo:
+          type: string
+          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, EM_EXECUCAO, CANCELADA, FINALIZADA, ENTREGUE]
+        dataTransicao:
+          type: string
+          format: date-time
+        idUsuario:
+          type: string
+          format: uuid
+        usernameUsuario:
+          type: string
 
     ClienteResumoResponse:
       type: object
