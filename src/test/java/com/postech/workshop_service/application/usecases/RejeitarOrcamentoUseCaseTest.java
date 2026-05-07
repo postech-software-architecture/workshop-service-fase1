@@ -31,6 +31,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -101,6 +102,25 @@ class RejeitarOrcamentoUseCaseTest {
 		verify(estoqueRepository).buscarPorId(estoqueId, true);
 		verify(estoqueRepository).salvar(estoque);
 		verify(movimentacaoEstoqueRepository).salvar(any());
+	}
+
+	@Test
+	void shouldNotRollbackWhenNotificationFails() {
+		Orcamento orcamento = criarOrcamento(StatusOrcamento.PENDENTE_APROVACAO);
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE,
+				orcamento.getIdOrdemServico());
+		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
+		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
+		when(orcamentoRepository.salvar(any())).thenAnswer(invocation -> invocation.getArgument(0));
+		doThrow(new RuntimeException("falha de canal de notificacao")).when(mecanicoNotificationService)
+			.notificarAtualizacaoOrcamento(any(), any());
+
+		Orcamento resultado = rejeitarOrcamentoUseCase.executar(orcamento.getId());
+
+		assertEquals(StatusOrcamento.REJEITADO, resultado.getStatus());
+		assertEquals(StatusOrdemServico.EM_COMPOSICAO, ordemServico.getStatus());
+		verify(orcamentoRepository).salvar(orcamento);
+		verify(ordemServicoRepository).salvar(ordemServico);
 	}
 
 	@Test

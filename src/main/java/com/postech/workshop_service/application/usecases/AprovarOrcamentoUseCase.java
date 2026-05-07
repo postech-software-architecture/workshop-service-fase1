@@ -7,6 +7,8 @@ import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,8 @@ import java.util.UUID;
  */
 @Service
 public class AprovarOrcamentoUseCase {
+
+	private static final Logger log = LoggerFactory.getLogger(AprovarOrcamentoUseCase.class);
 
 	private final OrcamentoRepository orcamentoRepository;
 
@@ -53,7 +57,13 @@ public class AprovarOrcamentoUseCase {
 
 		ordemServicoRepository.salvar(ordemServico);
 		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);
-		mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);
+		try {
+			mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);
+		}
+		catch (RuntimeException ex) {
+			log.warn("Falha ao notificar mecanico sobre aprovacao do orcamento da OS {}: {}", ordemServico.getNumero(),
+					ex.getMessage());
+		}
 		return orcamentoPersistido;
 	}
 

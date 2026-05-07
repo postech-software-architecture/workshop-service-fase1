@@ -14,6 +14,8 @@ import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepos
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import com.postech.workshop_service.domain.valueobjects.TipoMovimentacao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,8 @@ import java.util.UUID;
  */
 @Service
 public class CancelarOrcamentoUseCase {
+
+	private static final Logger log = LoggerFactory.getLogger(CancelarOrcamentoUseCase.class);
 
 	private final OrcamentoRepository orcamentoRepository;
 
@@ -77,7 +81,13 @@ public class CancelarOrcamentoUseCase {
 
 		ordemServicoRepository.salvar(ordemServico);
 		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);
-		mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);
+		try {
+			mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);
+		}
+		catch (RuntimeException ex) {
+			log.warn("Falha ao notificar mecanico sobre cancelamento do orcamento da OS {}: {}",
+					ordemServico.getNumero(), ex.getMessage());
+		}
 		return orcamentoPersistido;
 	}
 

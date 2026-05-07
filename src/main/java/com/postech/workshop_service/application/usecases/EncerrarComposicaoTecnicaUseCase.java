@@ -9,6 +9,8 @@ import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.TipoOrcamento;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,8 @@ import java.util.UUID;
  */
 @Service
 public class EncerrarComposicaoTecnicaUseCase {
+
+	private static final Logger log = LoggerFactory.getLogger(EncerrarComposicaoTecnicaUseCase.class);
 
 	private final OrdemServicoRepository ordemServicoRepository;
 
@@ -76,7 +80,13 @@ public class EncerrarComposicaoTecnicaUseCase {
 
 		ordemServicoRepository.salvar(ordemServico);
 		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);
-		clienteNotificationService.notificarOrcamentoPendente(ordemServico, orcamentoPersistido);
+		try {
+			clienteNotificationService.notificarOrcamentoPendente(ordemServico, orcamentoPersistido);
+		}
+		catch (RuntimeException ex) {
+			log.warn("Falha ao notificar cliente sobre orcamento pendente da OS {}: {}", ordemServico.getNumero(),
+					ex.getMessage());
+		}
 		return orcamentoPersistido;
 	}
 
