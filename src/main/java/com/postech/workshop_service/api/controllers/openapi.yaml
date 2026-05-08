@@ -626,6 +626,29 @@ paths:
         '422':
           description: Estoque insuficiente para saída
 
+  /api/v1/estoques/movimentacoes/ordem-servico/{ordemServicoId}:
+    get:
+      tags: [Estoques]
+      summary: Consultar movimentacoes de estoque por ordem de servico
+      parameters:
+        - name: ordemServicoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Movimentacoes vinculadas a ordem
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovimentacaoResponse'
+        '404':
+          description: Ordem de servico nao encontrada
+
   /api/v1/estoques/{id}:
     get:
       tags: [Estoques]
@@ -1162,6 +1185,7 @@ components:
         tipo:
           type: string
           enum: [ENTRADA, SAIDA]
+          description: Movimentacoes RESERVA, LIBERACAO e AJUSTE sao internas e nao entram neste endpoint
         quantidade:
           type: number
           example: 2.0
@@ -1177,6 +1201,14 @@ components:
         estoqueId:
           type: string
           format: uuid
+        ordemServicoId:
+          type: string
+          format: uuid
+          nullable: true
+        orcamentoId:
+          type: string
+          format: uuid
+          nullable: true
         tipo:
           type: string
         quantidade:
