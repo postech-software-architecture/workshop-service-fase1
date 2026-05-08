@@ -728,7 +728,7 @@ paths:
             - estoque insuficiente para a peça solicitada
             - serviço inativo no catálogo
 
-  # ─── Orçamentos ───────────────────────────────────────────────────────────────
+  # ─── Ordens de Serviço ────────────────────────────────────────────────────────
 
   /api/v1/ordens-servico/{id}/iniciar-execucao:
     patch:
