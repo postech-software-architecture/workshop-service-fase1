@@ -87,7 +87,21 @@ public class Estoque {
 	 */
 	public MovimentacaoEstoque registrarEntrada(BigDecimal quantidadeEntrada, String motivo) {
 		validarQuantidadePositiva(quantidadeEntrada, "A quantidade de entrada deve ser positiva.");
-		return criarMovimentacao(TipoMovimentacao.ENTRADA, quantidadeEntrada, motivo);
+		return criarMovimentacao(TipoMovimentacao.ENTRADA, quantidadeEntrada, motivo, null, null);
+	}
+
+	/**
+	 * Registra uma entrada de estoque vinculada a contexto tecnico.
+	 * @param quantidadeEntrada quantidade a ser adicionada.
+	 * @param motivo motivo da entrada.
+	 * @param ordemServicoId ordem de servico relacionada, se houver.
+	 * @param orcamentoId orcamento relacionado, se houver.
+	 * @return movimentacao registrada.
+	 */
+	public MovimentacaoEstoque registrarEntrada(BigDecimal quantidadeEntrada, String motivo, UUID ordemServicoId,
+			UUID orcamentoId) {
+		validarQuantidadePositiva(quantidadeEntrada, "A quantidade de entrada deve ser positiva.");
+		return criarMovimentacao(TipoMovimentacao.ENTRADA, quantidadeEntrada, motivo, ordemServicoId, orcamentoId);
 	}
 
 	/**
@@ -102,7 +116,24 @@ public class Estoque {
 		if (quantidadeSaida.compareTo(this.quantidade) > 0) {
 			throw new IllegalArgumentException("Quantidade insuficiente em estoque para esta saida.");
 		}
-		return criarMovimentacao(TipoMovimentacao.SAIDA, quantidadeSaida, motivo);
+		return criarMovimentacao(TipoMovimentacao.SAIDA, quantidadeSaida, motivo, null, null);
+	}
+
+	/**
+	 * Registra uma saida de estoque vinculada a contexto tecnico.
+	 * @param quantidadeSaida quantidade a ser removida.
+	 * @param motivo motivo da saida.
+	 * @param ordemServicoId ordem de servico relacionada, se houver.
+	 * @param orcamentoId orcamento relacionado, se houver.
+	 * @return movimentacao registrada.
+	 */
+	public MovimentacaoEstoque registrarSaida(BigDecimal quantidadeSaida, String motivo, UUID ordemServicoId,
+			UUID orcamentoId) {
+		validarQuantidadePositiva(quantidadeSaida, "A quantidade de saida deve ser positiva.");
+		if (quantidadeSaida.compareTo(this.quantidade) > 0) {
+			throw new IllegalArgumentException("Quantidade insuficiente em estoque para esta saida.");
+		}
+		return criarMovimentacao(TipoMovimentacao.SAIDA, quantidadeSaida, motivo, ordemServicoId, orcamentoId);
 	}
 
 	/**
@@ -118,7 +149,24 @@ public class Estoque {
 		if (quantidadeReserva.compareTo(this.quantidade) > 0) {
 			throw new IllegalArgumentException("Quantidade insuficiente em estoque para esta reserva.");
 		}
-		return criarMovimentacao(TipoMovimentacao.RESERVA, quantidadeReserva, motivo);
+		return criarMovimentacao(TipoMovimentacao.RESERVA, quantidadeReserva, motivo, null, null);
+	}
+
+	/**
+	 * Reserva uma quantidade do estoque para uma OS e um orcamento.
+	 * @param quantidadeReserva quantidade a ser reservada.
+	 * @param motivo identificacao da OS ou orcamento que originou a reserva.
+	 * @param ordemServicoId ordem de servico relacionada.
+	 * @param orcamentoId orcamento relacionado.
+	 * @return movimentacao registrada.
+	 */
+	public MovimentacaoEstoque reservar(BigDecimal quantidadeReserva, String motivo, UUID ordemServicoId,
+			UUID orcamentoId) {
+		validarQuantidadePositiva(quantidadeReserva, "A quantidade de reserva deve ser positiva.");
+		if (quantidadeReserva.compareTo(this.quantidade) > 0) {
+			throw new IllegalArgumentException("Quantidade insuficiente em estoque para esta reserva.");
+		}
+		return criarMovimentacao(TipoMovimentacao.RESERVA, quantidadeReserva, motivo, ordemServicoId, orcamentoId);
 	}
 
 	/**
@@ -130,7 +178,36 @@ public class Estoque {
 	 */
 	public MovimentacaoEstoque liberarReserva(BigDecimal quantidadeLiberacao, String motivo) {
 		validarQuantidadePositiva(quantidadeLiberacao, "A quantidade de liberacao deve ser positiva.");
-		return criarMovimentacao(TipoMovimentacao.LIBERACAO, quantidadeLiberacao, motivo);
+		return criarMovimentacao(TipoMovimentacao.LIBERACAO, quantidadeLiberacao, motivo, null, null);
+	}
+
+	/**
+	 * Libera uma quantidade previamente reservada com contexto tecnico.
+	 * @param quantidadeLiberacao quantidade a ser devolvida ao estoque.
+	 * @param motivo identificacao do orcamento que originou a liberacao.
+	 * @param ordemServicoId ordem de servico relacionada.
+	 * @param orcamentoId orcamento relacionado.
+	 * @return movimentacao registrada.
+	 */
+	public MovimentacaoEstoque liberarReserva(BigDecimal quantidadeLiberacao, String motivo, UUID ordemServicoId,
+			UUID orcamentoId) {
+		validarQuantidadePositiva(quantidadeLiberacao, "A quantidade de liberacao deve ser positiva.");
+		return criarMovimentacao(TipoMovimentacao.LIBERACAO, quantidadeLiberacao, motivo, ordemServicoId, orcamentoId);
+	}
+
+	/**
+	 * Registra o consumo de uma reserva ja descontada do saldo disponivel.
+	 * @param quantidadeConsumida quantidade consumida.
+	 * @param motivo motivo da saida.
+	 * @param ordemServicoId ordem de servico relacionada.
+	 * @param orcamentoId orcamento relacionado.
+	 * @return movimentacao registrada.
+	 */
+	public MovimentacaoEstoque consumirReserva(BigDecimal quantidadeConsumida, String motivo, UUID ordemServicoId,
+			UUID orcamentoId) {
+		validarQuantidadePositiva(quantidadeConsumida, "A quantidade de saida deve ser positiva.");
+		return new MovimentacaoEstoque(null, this.id, TipoMovimentacao.SAIDA, quantidadeConsumida, this.quantidade,
+				this.quantidade, motivo, ordemServicoId, orcamentoId);
 	}
 
 	/**
@@ -144,7 +221,7 @@ public class Estoque {
 		if (motivo == null || motivo.trim().isEmpty()) {
 			throw new IllegalArgumentException("O motivo e obrigatorio para ajustes de estoque.");
 		}
-		return criarMovimentacao(TipoMovimentacao.AJUSTE, novaQuantidade, motivo);
+		return criarMovimentacao(TipoMovimentacao.AJUSTE, novaQuantidade, motivo, null, null);
 	}
 
 	/**
@@ -159,7 +236,7 @@ public class Estoque {
 	}
 
 	private MovimentacaoEstoque criarMovimentacao(TipoMovimentacao tipo, BigDecimal quantidadeMovimentada,
-			String motivo) {
+			String motivo, UUID ordemServicoId, UUID orcamentoId) {
 		BigDecimal quantidadeAnterior = this.quantidade;
 
 		switch (tipo) {
@@ -179,7 +256,7 @@ public class Estoque {
 		this.dataUltimaAtualizacao = LocalDateTime.now();
 
 		return new MovimentacaoEstoque(null, this.id, tipo, quantidadeMovimentada, quantidadeAnterior, this.quantidade,
-				motivo);
+				motivo, ordemServicoId, orcamentoId);
 	}
 
 	private BigDecimal validarQuantidade(BigDecimal quantidade) {

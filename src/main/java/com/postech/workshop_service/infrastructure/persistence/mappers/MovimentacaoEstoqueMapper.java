@@ -23,8 +23,8 @@ public interface MovimentacaoEstoqueMapper {
 		}
 		return new MovimentacaoEstoque(entity.getId(), entity.getEstoqueId(),
 				TipoMovimentacao.valueOf(entity.getTipo()), entity.getQuantidade(), entity.getQuantidadeAnterior(),
-				entity.getQuantidadePosterior(), entity.getMotivo(), entity.getDataMovimentacao(),
-				entity.getDataCriacao());
+				entity.getQuantidadePosterior(), entity.getMotivo(), entity.getOrdemServicoId(),
+				entity.getOrcamentoId(), entity.getDataMovimentacao(), entity.getDataCriacao());
 	}
 
 	default String mapTipoMovimentacao(TipoMovimentacao tipo) {

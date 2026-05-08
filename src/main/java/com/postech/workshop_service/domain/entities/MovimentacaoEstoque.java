@@ -23,6 +23,10 @@ public class MovimentacaoEstoque {
 
 	private final UUID estoqueId;
 
+	private final UUID ordemServicoId;
+
+	private final UUID orcamentoId;
+
 	private final TipoMovimentacao tipo;
 
 	private final BigDecimal quantidade;
@@ -49,9 +53,30 @@ public class MovimentacaoEstoque {
 	 */
 	public MovimentacaoEstoque(UUID id, UUID estoqueId, TipoMovimentacao tipo, BigDecimal quantidade,
 			BigDecimal quantidadeAnterior, BigDecimal quantidadePosterior, String motivo) {
+		this(id, estoqueId, tipo, quantidade, quantidadeAnterior, quantidadePosterior, motivo, (UUID) null,
+				(UUID) null);
+	}
+
+	/**
+	 * Cria uma nova movimentacao de estoque com contexto tecnico de ordem/orcamento.
+	 * @param id identificador tecnico da movimentacao.
+	 * @param estoqueId identificador do estoque.
+	 * @param tipo tipo de movimentacao.
+	 * @param quantidade quantidade movimentada.
+	 * @param quantidadeAnterior quantidade antes da movimentacao.
+	 * @param quantidadePosterior quantidade apos a movimentacao.
+	 * @param motivo motivo/justificativa.
+	 * @param ordemServicoId identificador da ordem de servico relacionada.
+	 * @param orcamentoId identificador do orcamento relacionado.
+	 */
+	public MovimentacaoEstoque(UUID id, UUID estoqueId, TipoMovimentacao tipo, BigDecimal quantidade,
+			BigDecimal quantidadeAnterior, BigDecimal quantidadePosterior, String motivo, UUID ordemServicoId,
+			UUID orcamentoId) {
 		this.id = id != null ? id : UUID.randomUUID();
 		this.estoqueId = Objects.requireNonNull(estoqueId, "O identificador do estoque e obrigatorio.");
 		this.tipo = Objects.requireNonNull(tipo, "O tipo de movimentacao e obrigatorio.");
+		this.ordemServicoId = ordemServicoId;
+		this.orcamentoId = orcamentoId;
 		this.quantidade = Objects.requireNonNull(quantidade, "A quantidade movimentada e obrigatoria.");
 		this.quantidadeAnterior = Objects.requireNonNull(quantidadeAnterior, "A quantidade anterior e obrigatoria.");
 		this.quantidadePosterior = Objects.requireNonNull(quantidadePosterior, "A quantidade posterior e obrigatoria.");
@@ -76,9 +101,32 @@ public class MovimentacaoEstoque {
 	public MovimentacaoEstoque(UUID id, UUID estoqueId, TipoMovimentacao tipo, BigDecimal quantidade,
 			BigDecimal quantidadeAnterior, BigDecimal quantidadePosterior, String motivo,
 			LocalDateTime dataMovimentacao, LocalDateTime dataCriacao) {
+		this(id, estoqueId, tipo, quantidade, quantidadeAnterior, quantidadePosterior, motivo, (UUID) null, (UUID) null,
+				dataMovimentacao, dataCriacao);
+	}
+
+	/**
+	 * Reconstroi uma movimentacao previamente persistida com contexto tecnico.
+	 * @param id identificador tecnico da movimentacao.
+	 * @param estoqueId identificador do estoque.
+	 * @param tipo tipo de movimentacao.
+	 * @param quantidade quantidade movimentada.
+	 * @param quantidadeAnterior quantidade antes da movimentacao.
+	 * @param quantidadePosterior quantidade apos a movimentacao.
+	 * @param motivo motivo/justificativa.
+	 * @param ordemServicoId identificador da ordem de servico relacionada.
+	 * @param orcamentoId identificador do orcamento relacionado.
+	 * @param dataMovimentacao data/hora da movimentacao.
+	 * @param dataCriacao data de criacao do registro.
+	 */
+	public MovimentacaoEstoque(UUID id, UUID estoqueId, TipoMovimentacao tipo, BigDecimal quantidade,
+			BigDecimal quantidadeAnterior, BigDecimal quantidadePosterior, String motivo, UUID ordemServicoId,
+			UUID orcamentoId, LocalDateTime dataMovimentacao, LocalDateTime dataCriacao) {
 		this.id = Objects.requireNonNull(id, "O identificador da movimentacao e obrigatorio.");
 		this.estoqueId = Objects.requireNonNull(estoqueId, "O identificador do estoque e obrigatorio.");
 		this.tipo = Objects.requireNonNull(tipo, "O tipo de movimentacao e obrigatorio.");
+		this.ordemServicoId = ordemServicoId;
+		this.orcamentoId = orcamentoId;
 		this.quantidade = Objects.requireNonNull(quantidade, "A quantidade movimentada e obrigatoria.");
 		this.quantidadeAnterior = Objects.requireNonNull(quantidadeAnterior, "A quantidade anterior e obrigatoria.");
 		this.quantidadePosterior = Objects.requireNonNull(quantidadePosterior, "A quantidade posterior e obrigatoria.");
