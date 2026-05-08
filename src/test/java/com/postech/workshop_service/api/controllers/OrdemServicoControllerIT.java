@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -45,10 +46,13 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
+	private int sequencialDocumento;
+
 	@BeforeEach
 	void limparDadosOS() {
 		jdbcTemplate.execute("TRUNCATE TABLE historico_status_os, orcamentos_itens, orcamentos, ordens_servico_itens, "
 				+ "ordens_servico, servicos, pecas_insumos, estoques, movimentacoes_estoque RESTART IDENTITY CASCADE");
+		sequencialDocumento = 0;
 	}
 
 	@Test
@@ -353,7 +357,112 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 		mockMvc.perform(patch("/api/v1/orcamentos/{id}/rejeitar", UUID.randomUUID())).andExpect(status().isNotFound());
 	}
 
+	@Test
+	void shouldReturnDetailOfExistingOs() throws Exception {
+		UUID osId = criarOsEObterId();
+
+		mockMvc.perform(get("/api/v1/ordens-servico/{id}", osId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(osId.toString()))
+			.andExpect(jsonPath("$.numero").value(org.hamcrest.Matchers.startsWith("OS-")))
+			.andExpect(jsonPath("$.status").value("AGUARDANDO_RESPOSTA_CLIENTE"))
+			.andExpect(jsonPath("$.itens").isArray())
+			.andExpect(jsonPath("$.itens[0].tipo").exists());
+	}
+
+	@Test
+	void shouldReturn404WhenSearchingNonExistentOs() throws Exception {
+		mockMvc.perform(get("/api/v1/ordens-servico/{id}", UUID.randomUUID())).andExpect(status().isNotFound());
+	}
+
+	@Test
+	void shouldListAllOrdens() throws Exception {
+		criarOsEObterId();
+		criarOsEObterId();
+
+		mockMvc.perform(get("/api/v1/ordens-servico"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.totalElementos").value(2))
+			.andExpect(jsonPath("$.conteudo.length()").value(2))
+			.andExpect(jsonPath("$.pagina").value(0))
+			.andExpect(jsonPath("$.tamanho").value(20));
+	}
+
+	@Test
+	void shouldFilterListByStatus() throws Exception {
+		UUID orcamentoIdParaCancelar = criarOsEObterOrcamentoId();
+		criarOsEObterId();
+
+		// cancela uma das OS para gerar dois status distintos
+		mockMvc.perform(patch("/api/v1/orcamentos/{id}/cancelar", orcamentoIdParaCancelar)).andExpect(status().isOk());
+
+		mockMvc.perform(get("/api/v1/ordens-servico").param("status", "CANCELADA"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.totalElementos").value(1))
+			.andExpect(jsonPath("$.conteudo[0].status").value("CANCELADA"));
+
+		mockMvc.perform(get("/api/v1/ordens-servico").param("status", "AGUARDANDO_RESPOSTA_CLIENTE"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.totalElementos").value(1))
+			.andExpect(jsonPath("$.conteudo[0].status").value("AGUARDANDO_RESPOSTA_CLIENTE"));
+	}
+
+	@Test
+	void shouldRespectPaginationParameters() throws Exception {
+		criarOsEObterId();
+		criarOsEObterId();
+		criarOsEObterId();
+
+		mockMvc.perform(get("/api/v1/ordens-servico").param("pagina", "0").param("tamanho", "2"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.totalElementos").value(3))
+			.andExpect(jsonPath("$.totalPaginas").value(2))
+			.andExpect(jsonPath("$.conteudo.length()").value(2))
+			.andExpect(jsonPath("$.tamanho").value(2));
+
+		mockMvc.perform(get("/api/v1/ordens-servico").param("pagina", "1").param("tamanho", "2"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.conteudo.length()").value(1));
+	}
+
 	// --- helpers ---
+
+	private UUID criarOsEObterId() throws Exception {
+		String docUnico = gerarDocumentoUnico();
+		String placaUnica = gerarPlacaUnica();
+		criarCliente("Cliente " + docUnico, docUnico);
+		UUID servicoId = criarServico("Servico " + placaUnica, new BigDecimal("75.00"));
+
+		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()
+			.clienteDocumento(docUnico)
+			.veiculoPlaca(placaUnica)
+			.veiculo(CriarOrdemServicoRequest.DadosVeiculoRequest.builder().marca("VW").modelo("Gol").ano(2020).build())
+			.servicos(List
+				.of(CriarOrdemServicoRequest.ItemServicoRequest.builder().servicoId(servicoId).quantidade(1).build()))
+			.build();
+
+		MvcResult result = mockMvc
+			.perform(post("/api/v1/ordens-servico").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText());
+	}
+
+	private String gerarDocumentoUnico() {
+		// CPFs de teste validos sao limitados; usamos um pool fixo conhecido
+		String[] documentos = { "12345678909", "98765432100", "11144477735", "71428793860", "33200738006",
+				"87748248800", "52998224725", "39053344705", "77707075027", "06214574006" };
+		return documentos[sequencialDocumento++ % documentos.length];
+	}
+
+	private String gerarPlacaUnica() {
+		// Placa Mercosul: 3 letras + 1 dig + 1 letra + 2 digs
+		int seq = sequencialDocumento;
+		char letra = (char) ('A' + (seq % 26));
+		return "TST" + (seq % 10) + letra + String.format("%02d", seq % 100);
+	}
 
 	private UUID criarOsEObterOrcamentoId() throws Exception {
 		JsonNode body = criarOsEObterResposta();
