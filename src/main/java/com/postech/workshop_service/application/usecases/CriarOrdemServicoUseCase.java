@@ -171,10 +171,9 @@ public class CriarOrdemServicoUseCase {
 				continue;
 			}
 
-			List<Estoque> estoques = estoqueRepository.listarPorPeca(p.pecaId(), false)
+			List<Estoque> estoques = estoqueRepository.listarPorPecaOrdenadoPorQuantidadeDisponivel(p.pecaId(), false)
 				.stream()
-				.filter(e -> e.isAtivo() && e.getQuantidade().compareTo(BigDecimal.ZERO) > 0)
-				.sorted((e1, e2) -> e2.getQuantidade().compareTo(e1.getQuantidade()))
+				.filter(e -> e.getQuantidade().compareTo(BigDecimal.ZERO) > 0)
 				.toList();
 
 			for (Estoque estoque : estoques) {
