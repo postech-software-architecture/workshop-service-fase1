@@ -26,6 +26,7 @@ import com.postech.workshop_service.domain.repositories.ServicoRepository;
 import com.postech.workshop_service.domain.repositories.VeiculoRepository;
 import com.postech.workshop_service.domain.valueobjects.Placa;
 import com.postech.workshop_service.domain.valueobjects.TipoItem;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -144,7 +145,7 @@ public class CriarOrdemServicoUseCase {
 			registrarHistoricoUseCase.executar(osSalva.getId(), statusAnterior, osSalva.getStatus());
 			Orcamento orcamentoSalvo = orcamentoRepository.salvar(orcamento);
 
-			reservarEstoque(pecas != null ? pecas : List.of(), osSalva.getNumero());
+			reservarEstoque(pecas != null ? pecas : List.of(), osSalva, orcamentoSalvo);
 
 			clienteNotificationService.notificarOrcamentoPendente(osSalva, orcamentoSalvo);
 
@@ -156,24 +157,41 @@ public class CriarOrdemServicoUseCase {
 		catch (IllegalArgumentException ex) {
 			throw new RegraDeNegocioException(ex.getMessage());
 		}
+		catch (ObjectOptimisticLockingFailureException ex) {
+			throw new RegraDeNegocioException(
+					"Nao foi possivel criar a ordem de servico porque o estoque foi alterado por outro usuario simultaneamente. Tente novamente.");
+		}
 	}
 
-	private void reservarEstoque(List<ItemPecaSolicitada> pecas, String numeroOs) {
-		String motivo = "Reserva para OS " + numeroOs;
+	private void reservarEstoque(List<ItemPecaSolicitada> pecas, OrdemServico os, Orcamento orcamento) {
+		String motivo = "Reserva para OS " + os.getNumero();
 		for (ItemPecaSolicitada p : pecas) {
-			BigDecimal aReservar = p.quantidade();
-			if (aReservar == null || aReservar.compareTo(BigDecimal.ZERO) <= 0) {
+			BigDecimal quantidadeRestante = p.quantidade();
+			if (quantidadeRestante == null || quantidadeRestante.compareTo(BigDecimal.ZERO) <= 0) {
 				continue;
 			}
-			Estoque estoqueSelecionado = estoqueRepository.listarPorPeca(p.pecaId(), false)
+
+			List<Estoque> estoques = estoqueRepository.listarPorPeca(p.pecaId(), false)
 				.stream()
-				.filter(e -> e.getQuantidade().compareTo(aReservar) >= 0)
-				.findFirst()
-				.orElseThrow(() -> new RegraDeNegocioException(
-						"Nenhum estoque possui saldo suficiente para reservar a quantidade solicitada da peca."));
-			MovimentacaoEstoque mov = estoqueSelecionado.reservar(aReservar, motivo);
-			estoqueRepository.salvar(estoqueSelecionado);
-			movimentacaoEstoqueRepository.salvar(mov);
+				.filter(e -> e.isAtivo() && e.getQuantidade().compareTo(BigDecimal.ZERO) > 0)
+				.sorted((e1, e2) -> e2.getQuantidade().compareTo(e1.getQuantidade()))
+				.toList();
+
+			for (Estoque estoque : estoques) {
+				if (quantidadeRestante.compareTo(BigDecimal.ZERO) <= 0) {
+					break;
+				}
+				BigDecimal quantidadeReserva = quantidadeRestante.min(estoque.getQuantidade());
+				MovimentacaoEstoque mov = estoque.reservar(quantidadeReserva, motivo, os.getId(), orcamento.getId());
+				estoqueRepository.salvar(estoque);
+				movimentacaoEstoqueRepository.salvar(mov);
+				quantidadeRestante = quantidadeRestante.subtract(quantidadeReserva);
+			}
+
+			if (quantidadeRestante.compareTo(BigDecimal.ZERO) > 0) {
+				throw new RegraDeNegocioException(
+						"Estoque insuficiente para reservar a quantidade solicitada da peca.");
+			}
 		}
 	}
 
