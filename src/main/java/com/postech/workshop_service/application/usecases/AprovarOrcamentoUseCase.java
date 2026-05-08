@@ -28,6 +28,8 @@ public class AprovarOrcamentoUseCase {
 
 	private final MecanicoNotificationService mecanicoNotificationService;
 
+	private final RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
+
 	/**
 	 * Construtor para injecao das dependencias do caso de uso.
 	 * @param orcamentoRepository repositorio de orcamentos.
@@ -35,10 +37,12 @@ public class AprovarOrcamentoUseCase {
 	 * @param mecanicoNotificationService service de notificacao do mecanico.
 	 */
 	public AprovarOrcamentoUseCase(OrcamentoRepository orcamentoRepository,
-			OrdemServicoRepository ordemServicoRepository, MecanicoNotificationService mecanicoNotificationService) {
+			OrdemServicoRepository ordemServicoRepository, MecanicoNotificationService mecanicoNotificationService,
+			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase) {
 		this.orcamentoRepository = orcamentoRepository;
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.mecanicoNotificationService = mecanicoNotificationService;
+		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
 	}
 
 	/**
@@ -53,9 +57,11 @@ public class AprovarOrcamentoUseCase {
 		OrdemServico ordemServico = buscarOrdemVinculada(orcamento);
 
 		validarOrdemAguardandoResposta(ordemServico);
+		StatusOrdemServico statusAnterior = ordemServico.getStatus();
 		orcamento.aprovar(ordemServico);
 
 		ordemServicoRepository.salvar(ordemServico);
+		registrarHistoricoUseCase.executar(ordemServico.getId(), statusAnterior, ordemServico.getStatus());
 		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);
 		try {
 			mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);

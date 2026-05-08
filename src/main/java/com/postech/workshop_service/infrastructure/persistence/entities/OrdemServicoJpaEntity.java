@@ -20,6 +20,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,6 +52,15 @@ public class OrdemServicoJpaEntity extends BaseJpaEntity {
 
 	@Column(name = "observacoes", columnDefinition = "TEXT")
 	private String observacoes;
+
+	@Column(name = "data_inicio_execucao")
+	private LocalDateTime dataInicioExecucao;
+
+	@Column(name = "data_finalizacao")
+	private LocalDateTime dataFinalizacao;
+
+	@Column(name = "data_entrega")
+	private LocalDateTime dataEntrega;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "ordens_servico_itens", joinColumns = @JoinColumn(name = "ordem_servico_id"),

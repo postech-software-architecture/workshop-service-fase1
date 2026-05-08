@@ -1,16 +1,22 @@
 package com.postech.workshop_service.api.controllers;
 
 import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
+import com.postech.workshop_service.api.dtos.HistoricoStatusOrdemServicoResponse;
 import com.postech.workshop_service.api.dtos.OrdemServicoDetalheResponse;
 import com.postech.workshop_service.api.dtos.OrdemServicoResponse;
 import com.postech.workshop_service.api.dtos.PaginaOrdensServicoResponse;
 import com.postech.workshop_service.api.dtos.StatusOrdemServicoResponse;
 import com.postech.workshop_service.application.usecases.BuscarOrdemServicoPorIdUseCase;
+import com.postech.workshop_service.application.usecases.ConsultarHistoricoOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.ConsultarStatusOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.CriarOrdemServicoUseCase;
+import com.postech.workshop_service.application.usecases.EntregarVeiculoUseCase;
+import com.postech.workshop_service.application.usecases.FinalizarExecucaoUseCase;
+import com.postech.workshop_service.application.usecases.IniciarExecucaoUseCase;
 import com.postech.workshop_service.application.usecases.ListarMinhasOrdensServicoUseCase;
 import com.postech.workshop_service.application.usecases.ListarOrdensServicoUseCase;
 import com.postech.workshop_service.application.usecases.ResultadoCriacaoOrdemServico;
+import com.postech.workshop_service.domain.entities.HistoricoStatusOrdemServico;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
 import com.postech.workshop_service.domain.repositories.PaginaResultado;
@@ -27,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -56,6 +64,14 @@ public class OrdemServicoController {
 
 	private final ConsultarStatusOrdemServicoUseCase consultarStatusOrdemServicoUseCase;
 
+	private final IniciarExecucaoUseCase iniciarExecucaoUseCase;
+
+	private final FinalizarExecucaoUseCase finalizarExecucaoUseCase;
+
+	private final EntregarVeiculoUseCase entregarVeiculoUseCase;
+
+	private final ConsultarHistoricoOrdemServicoUseCase consultarHistoricoOrdemServicoUseCase;
+
 	/**
 	 * Construtor para injecao de dependencias.
 	 * @param criarOrdemServicoUseCase caso de uso de criacao da OS.
@@ -64,17 +80,29 @@ public class OrdemServicoController {
 	 * @param listarMinhasOrdensServicoUseCase caso de uso de listagem para clientes.
 	 * @param consultarStatusOrdemServicoUseCase caso de uso de consulta de status pelo
 	 * cliente.
+	 * @param iniciarExecucaoUseCase caso de uso para iniciar execucao tecnica.
+	 * @param finalizarExecucaoUseCase caso de uso para finalizar execucao tecnica.
+	 * @param entregarVeiculoUseCase caso de uso para registrar entrega do veiculo.
+	 * @param consultarHistoricoOrdemServicoUseCase caso de uso para consultar historico
+	 * de transicoes.
 	 */
 	public OrdemServicoController(CriarOrdemServicoUseCase criarOrdemServicoUseCase,
 			BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase,
 			ListarOrdensServicoUseCase listarOrdensServicoUseCase,
 			ListarMinhasOrdensServicoUseCase listarMinhasOrdensServicoUseCase,
-			ConsultarStatusOrdemServicoUseCase consultarStatusOrdemServicoUseCase) {
+			ConsultarStatusOrdemServicoUseCase consultarStatusOrdemServicoUseCase,
+			IniciarExecucaoUseCase iniciarExecucaoUseCase, FinalizarExecucaoUseCase finalizarExecucaoUseCase,
+			EntregarVeiculoUseCase entregarVeiculoUseCase,
+			ConsultarHistoricoOrdemServicoUseCase consultarHistoricoOrdemServicoUseCase) {
 		this.criarOrdemServicoUseCase = criarOrdemServicoUseCase;
 		this.buscarOrdemServicoPorIdUseCase = buscarOrdemServicoPorIdUseCase;
 		this.listarOrdensServicoUseCase = listarOrdensServicoUseCase;
 		this.listarMinhasOrdensServicoUseCase = listarMinhasOrdensServicoUseCase;
 		this.consultarStatusOrdemServicoUseCase = consultarStatusOrdemServicoUseCase;
+		this.iniciarExecucaoUseCase = iniciarExecucaoUseCase;
+		this.finalizarExecucaoUseCase = finalizarExecucaoUseCase;
+		this.entregarVeiculoUseCase = entregarVeiculoUseCase;
+		this.consultarHistoricoOrdemServicoUseCase = consultarHistoricoOrdemServicoUseCase;
 	}
 
 	/**
@@ -136,8 +164,7 @@ public class OrdemServicoController {
 	public ResponseEntity<PaginaOrdensServicoResponse> listar(@RequestParam(defaultValue = "0") int pagina,
 			@RequestParam(defaultValue = "20") int tamanho, @RequestParam(required = false) StatusOrdemServico status,
 			@RequestParam(required = false) UUID idCliente,
-			@RequestParam(required = false) @DateTimeFormat(
-					iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicio,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicio,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFim) {
 		PaginaResultado<OrdemServico> resultado = listarOrdensServicoUseCase.executar(pagina, tamanho, status,
 				idCliente, dataInicio, dataFim);
@@ -183,6 +210,61 @@ public class OrdemServicoController {
 	public ResponseEntity<StatusOrdemServicoResponse> consultarStatus(@PathVariable UUID id) {
 		OrdemServico ordem = consultarStatusOrdemServicoUseCase.executar(id);
 		return ResponseEntity.ok(StatusOrdemServicoResponse.from(ordem));
+	}
+
+	@PatchMapping("/{id}/iniciar-execucao")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MECANICO')")
+	@Operation(summary = "Iniciar execucao da OS",
+			description = "Avanca uma ordem aprovada para execucao tecnica e registra historico.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Execucao iniciada com sucesso",
+					content = @Content(schema = @Schema(implementation = OrdemServicoResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada"),
+			@ApiResponse(responseCode = "422", description = "OS nao esta aguardando execucao") })
+	public ResponseEntity<OrdemServicoResponse> iniciarExecucao(@PathVariable UUID id) {
+		OrdemServico ordemServico = iniciarExecucaoUseCase.executar(id);
+		return ResponseEntity.ok(OrdemServicoResponse.from(ordemServico));
+	}
+
+	@PatchMapping("/{id}/finalizar-execucao")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MECANICO')")
+	@Operation(summary = "Finalizar execucao da OS",
+			description = "Finaliza a execucao tecnica de uma ordem em andamento e registra historico.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Execucao finalizada com sucesso",
+					content = @Content(schema = @Schema(implementation = OrdemServicoResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada"),
+			@ApiResponse(responseCode = "422", description = "OS nao esta em execucao") })
+	public ResponseEntity<OrdemServicoResponse> finalizarExecucao(@PathVariable UUID id) {
+		OrdemServico ordemServico = finalizarExecucaoUseCase.executar(id);
+		return ResponseEntity.ok(OrdemServicoResponse.from(ordemServico));
+	}
+
+	@PatchMapping("/{id}/entregar")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE')")
+	@Operation(summary = "Registrar entrega do veiculo",
+			description = "Registra a entrega do veiculo ao cliente apos finalizacao tecnica.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Entrega registrada com sucesso",
+					content = @Content(schema = @Schema(implementation = OrdemServicoResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada"),
+			@ApiResponse(responseCode = "422", description = "OS nao esta finalizada") })
+	public ResponseEntity<OrdemServicoResponse> entregar(@PathVariable UUID id) {
+		OrdemServico ordemServico = entregarVeiculoUseCase.executar(id);
+		return ResponseEntity.ok(OrdemServicoResponse.from(ordemServico));
+	}
+
+	@GetMapping("/{id}/historico-status")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'MECANICO', 'ATENDENTE')")
+	@Operation(summary = "Consultar historico de status da OS",
+			description = "Retorna a linha do tempo de transicoes de status da ordem de servico.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Historico consultado com sucesso", content = @Content(
+					schema = @Schema(implementation = HistoricoStatusOrdemServicoResponse.class, type = "array"))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada") })
+	public ResponseEntity<List<HistoricoStatusOrdemServicoResponse>> consultarHistorico(@PathVariable UUID id) {
+		List<HistoricoStatusOrdemServico> historico = consultarHistoricoOrdemServicoUseCase.executar(id);
+		return ResponseEntity.ok(historico.stream().map(HistoricoStatusOrdemServicoResponse::from).toList());
 	}
 
 }

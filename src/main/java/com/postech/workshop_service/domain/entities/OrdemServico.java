@@ -27,6 +27,12 @@ public class OrdemServico extends EntidadeBase {
 
 	private final String observacoes;
 
+	private LocalDateTime dataInicioExecucao;
+
+	private LocalDateTime dataFinalizacao;
+
+	private LocalDateTime dataEntrega;
+
 	/**
 	 * Cria uma nova ordem de servico vazia, em composicao, sem numero definido. Usado
 	 * internamente e em testes de dominio.
@@ -42,6 +48,9 @@ public class OrdemServico extends EntidadeBase {
 		this.itensComposicao = List.of();
 		this.numero = null;
 		this.observacoes = null;
+		this.dataInicioExecucao = null;
+		this.dataFinalizacao = null;
+		this.dataEntrega = null;
 	}
 
 	/**
@@ -63,6 +72,9 @@ public class OrdemServico extends EntidadeBase {
 		this.observacoes = sanitizarOpcional(observacoes);
 		this.status = StatusOrdemServico.EM_COMPOSICAO;
 		this.itensComposicao = validarItensComposicao(itensComposicao);
+		this.dataInicioExecucao = null;
+		this.dataFinalizacao = null;
+		this.dataEntrega = null;
 	}
 
 	/**
@@ -78,9 +90,34 @@ public class OrdemServico extends EntidadeBase {
 	 * @param dataUltimaAtualizacao data da ultima atualizacao.
 	 * @param dataRemocao data da remocao logica.
 	 */
+	public OrdemServico(UUID id, UUID idCliente, UUID idVeiculo, StatusOrdemServico status,
+			Collection<ItemComposicaoTecnica> itensComposicao, String numero, String observacoes,
+			LocalDateTime dataCriacao, LocalDateTime dataUltimaAtualizacao, LocalDateTime dataRemocao) {
+		this(id, idCliente, idVeiculo, status, itensComposicao, numero, observacoes, null, null, null, dataCriacao,
+				dataUltimaAtualizacao, dataRemocao);
+	}
+
+	/**
+	 * Reconstroi uma ordem de servico previamente persistida com dados do ciclo de
+	 * execucao.
+	 * @param id identificador tecnico da ordem de servico.
+	 * @param idCliente identificador do cliente vinculado.
+	 * @param idVeiculo identificador do veiculo vinculado.
+	 * @param status estado atual da ordem de servico.
+	 * @param itensComposicao itens da composicao tecnica.
+	 * @param numero numero sequencial da OS.
+	 * @param observacoes observacoes registradas na recepcao.
+	 * @param dataInicioExecucao data de inicio da execucao tecnica.
+	 * @param dataFinalizacao data de finalizacao tecnica.
+	 * @param dataEntrega data de entrega ao cliente.
+	 * @param dataCriacao data de criacao.
+	 * @param dataUltimaAtualizacao data da ultima atualizacao.
+	 * @param dataRemocao data da remocao logica.
+	 */
 	@Default
 	public OrdemServico(UUID id, UUID idCliente, UUID idVeiculo, StatusOrdemServico status,
 			Collection<ItemComposicaoTecnica> itensComposicao, String numero, String observacoes,
+			LocalDateTime dataInicioExecucao, LocalDateTime dataFinalizacao, LocalDateTime dataEntrega,
 			LocalDateTime dataCriacao, LocalDateTime dataUltimaAtualizacao, LocalDateTime dataRemocao) {
 		super(id, dataCriacao, dataUltimaAtualizacao, dataRemocao);
 		this.idCliente = validarIdentificador(idCliente, "O identificador do cliente e obrigatorio.");
@@ -89,6 +126,9 @@ public class OrdemServico extends EntidadeBase {
 		this.itensComposicao = validarItensComposicao(itensComposicao);
 		this.numero = numero;
 		this.observacoes = sanitizarOpcional(observacoes);
+		this.dataInicioExecucao = dataInicioExecucao;
+		this.dataFinalizacao = dataFinalizacao;
+		this.dataEntrega = dataEntrega;
 	}
 
 	/**
@@ -143,6 +183,45 @@ public class OrdemServico extends EntidadeBase {
 					"Nao e permitido cancelar uma ordem de servico com status " + this.status + ".");
 		}
 		this.status = StatusOrdemServico.CANCELADA;
+		atualizarDataUltimaAtualizacao();
+	}
+
+	/**
+	 * Inicia a execucao tecnica de uma ordem previamente aprovada.
+	 */
+	public void iniciarExecucao() {
+		if (this.status != StatusOrdemServico.AGUARDANDO_EXECUCAO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido iniciar execucao de uma ordem de servico com status " + this.status + ".");
+		}
+		this.status = StatusOrdemServico.EM_EXECUCAO;
+		this.dataInicioExecucao = LocalDateTime.now();
+		atualizarDataUltimaAtualizacao();
+	}
+
+	/**
+	 * Finaliza a execucao tecnica de uma ordem em andamento.
+	 */
+	public void finalizarExecucao() {
+		if (this.status != StatusOrdemServico.EM_EXECUCAO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido finalizar execucao de uma ordem de servico com status " + this.status + ".");
+		}
+		this.status = StatusOrdemServico.FINALIZADA;
+		this.dataFinalizacao = LocalDateTime.now();
+		atualizarDataUltimaAtualizacao();
+	}
+
+	/**
+	 * Registra a entrega do veiculo ao cliente apos finalizacao tecnica.
+	 */
+	public void entregar() {
+		if (this.status != StatusOrdemServico.FINALIZADA) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido entregar uma ordem de servico com status " + this.status + ".");
+		}
+		this.status = StatusOrdemServico.ENTREGUE;
+		this.dataEntrega = LocalDateTime.now();
 		atualizarDataUltimaAtualizacao();
 	}
 

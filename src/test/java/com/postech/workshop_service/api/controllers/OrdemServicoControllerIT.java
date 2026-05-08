@@ -27,6 +27,7 @@ import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,9 +50,8 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 
 	@BeforeEach
 	void limparDadosOS() {
-		jdbcTemplate
-			.execute("TRUNCATE TABLE orcamentos_itens, orcamentos, ordens_servico_itens, ordens_servico, servicos, "
-					+ "pecas_insumos, estoques, movimentacoes_estoque RESTART IDENTITY CASCADE");
+		jdbcTemplate.execute("TRUNCATE TABLE historico_status_os, orcamentos_itens, orcamentos, ordens_servico_itens, "
+				+ "ordens_servico, servicos, pecas_insumos, estoques, movimentacoes_estoque RESTART IDENTITY CASCADE");
 		sequencialDocumento = 0;
 	}
 
@@ -295,6 +295,39 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
+	void shouldExecuteFullOsCycleAndReturnChronologicalHistory() throws Exception {
+		JsonNode criada = criarOsEObterResposta();
+		UUID osId = UUID.fromString(criada.get("id").asText());
+		UUID orcamentoId = UUID.fromString(criada.get("orcamento").get("id").asText());
+
+		mockMvc.perform(patch("/api/v1/orcamentos/{id}/aprovar", orcamentoId)).andExpect(status().isOk());
+
+		mockMvc.perform(patch("/api/v1/ordens-servico/{id}/iniciar-execucao", osId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("EM_EXECUCAO"))
+			.andExpect(jsonPath("$.dataInicioExecucao").exists());
+
+		mockMvc.perform(patch("/api/v1/ordens-servico/{id}/finalizar-execucao", osId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("FINALIZADA"))
+			.andExpect(jsonPath("$.dataFinalizacao").exists());
+
+		mockMvc.perform(patch("/api/v1/ordens-servico/{id}/entregar", osId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("ENTREGUE"))
+			.andExpect(jsonPath("$.dataEntrega").exists());
+
+		mockMvc.perform(get("/api/v1/ordens-servico/{id}/historico-status", osId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[0].statusAnterior").value("EM_COMPOSICAO"))
+			.andExpect(jsonPath("$[0].statusNovo").value("AGUARDANDO_RESPOSTA_CLIENTE"))
+			.andExpect(jsonPath("$[1].statusNovo").value("AGUARDANDO_EXECUCAO"))
+			.andExpect(jsonPath("$[2].statusNovo").value("EM_EXECUCAO"))
+			.andExpect(jsonPath("$[3].statusNovo").value("FINALIZADA"))
+			.andExpect(jsonPath("$[4].statusNovo").value("ENTREGUE"));
+	}
+
+	@Test
 	void shouldRejectOrcamento() throws Exception {
 		UUID orcamentoId = criarOsEObterOrcamentoId();
 
@@ -432,6 +465,11 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 	}
 
 	private UUID criarOsEObterOrcamentoId() throws Exception {
+		JsonNode body = criarOsEObterResposta();
+		return UUID.fromString(body.get("orcamento").get("id").asText());
+	}
+
+	private JsonNode criarOsEObterResposta() throws Exception {
 		criarCliente("Cliente Orcamento", "33200738006");
 		UUID servicoId = criarServico("Servico Orcamento", new BigDecimal("150.00"));
 
@@ -451,7 +489,7 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 			.andReturn();
 
 		JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
-		return UUID.fromString(body.get("orcamento").get("id").asText());
+		return body;
 	}
 
 	private UUID criarCliente(String nome, String documento) throws Exception {
