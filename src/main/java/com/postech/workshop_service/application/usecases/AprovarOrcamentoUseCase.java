@@ -35,6 +35,7 @@ public class AprovarOrcamentoUseCase {
 	 * @param orcamentoRepository repositorio de orcamentos.
 	 * @param ordemServicoRepository repositorio de ordens.
 	 * @param mecanicoNotificationService service de notificacao do mecanico.
+	 * @param registrarHistoricoUseCase caso de uso para registro de historico.
 	 */
 	public AprovarOrcamentoUseCase(OrcamentoRepository orcamentoRepository,
 			OrdemServicoRepository ordemServicoRepository, MecanicoNotificationService mecanicoNotificationService,
@@ -57,6 +58,8 @@ public class AprovarOrcamentoUseCase {
 		OrdemServico ordemServico = buscarOrdemVinculada(orcamento);
 
 		validarOrdemAguardandoResposta(ordemServico);
+		validarOrcamentoPendente(orcamento);
+
 		StatusOrdemServico statusAnterior = ordemServico.getStatus();
 		orcamento.aprovar(ordemServico);
 
@@ -82,6 +85,13 @@ public class AprovarOrcamentoUseCase {
 		if (ordemServico.getStatus() != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
 			throw new RegraDeNegocioException(
 					"A ordem de servico deve estar aguardando resposta do cliente para aprovar o orcamento.");
+		}
+	}
+
+	private void validarOrcamentoPendente(Orcamento orcamento) {
+		if (orcamento.getStatus() != com.postech.workshop_service.domain.entities.StatusOrcamento.PENDENTE_APROVACAO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido aprovar um orcamento com status " + orcamento.getStatus() + ".");
 		}
 	}
 

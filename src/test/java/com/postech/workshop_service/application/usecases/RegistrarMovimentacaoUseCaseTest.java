@@ -80,21 +80,16 @@ class RegistrarMovimentacaoUseCaseTest {
 	}
 
 	@Test
-	void deveRegistrarAjusteComSucesso() {
+	void deveLancarExcecaoQuandoAjusteForRegistradoManualmente() {
 		UUID estoqueId = UUID.randomUUID();
 		LocalDateTime agora = LocalDateTime.now();
 		Estoque estoque = new Estoque(estoqueId, UUID.randomUUID(), "Prateleira A1", new BigDecimal("10"), true, 0,
 				agora, agora);
 
 		when(estoqueRepository.buscarPorId(estoqueId, false)).thenReturn(Optional.of(estoque));
-		when(movimentacaoRepository.salvar(any(MovimentacaoEstoque.class)))
-			.thenAnswer(invocation -> invocation.getArgument(0));
-		when(estoqueRepository.salvar(any(Estoque.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		MovimentacaoEstoque resultado = useCase.executar(estoqueId, "AJUSTE", new BigDecimal("20"), "Contagem fisica");
-
-		assertEquals(TipoMovimentacao.AJUSTE, resultado.getTipo());
-		assertEquals(new BigDecimal("20"), resultado.getQuantidadePosterior());
+		assertThrows(RegraDeNegocioException.class,
+				() -> useCase.executar(estoqueId, "AJUSTE", new BigDecimal("20"), "Contagem fisica"));
 	}
 
 	@Test

@@ -131,7 +131,8 @@ class CriarOrdemServicoUseCaseTest {
 		when(servicoRepository.buscarPorId(servico.getId(), false)).thenReturn(Optional.of(servico));
 		when(pecaInsumoRepository.buscarPorId(peca.getId(), false)).thenReturn(Optional.of(peca));
 		when(estoqueRepository.calcularQuantidadeTotal(peca.getId())).thenReturn(new BigDecimal("10"));
-		when(estoqueRepository.listarPorPeca(peca.getId(), false)).thenReturn(List.of(estoque));
+		when(estoqueRepository.listarPorPecaOrdenadoPorQuantidadeDisponivel(any(UUID.class), anyBoolean()))
+			.thenReturn(List.of(estoque));
 		when(ordemServicoRepository.gerarProximoNumero(anyInt())).thenReturn("OS-2026-00001");
 		when(ordemServicoRepository.salvar(any())).thenAnswer(inv -> inv.getArgument(0));
 		when(orcamentoRepository.salvar(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -161,14 +162,15 @@ class CriarOrdemServicoUseCaseTest {
 		when(servicoRepository.buscarPorId(servico.getId(), false)).thenReturn(Optional.of(servico));
 		when(pecaInsumoRepository.buscarPorId(peca.getId(), false)).thenReturn(Optional.of(peca));
 		when(estoqueRepository.calcularQuantidadeTotal(peca.getId())).thenReturn(new BigDecimal("10"));
-		when(estoqueRepository.listarPorPeca(peca.getId(), false)).thenReturn(List.of(estoque));
+		when(estoqueRepository.listarPorPecaOrdenadoPorQuantidadeDisponivel(any(UUID.class), anyBoolean()))
+			.thenReturn(List.of(estoque));
 		when(ordemServicoRepository.gerarProximoNumero(anyInt())).thenReturn("OS-2026-00001");
 		when(ordemServicoRepository.salvar(any())).thenAnswer(inv -> inv.getArgument(0));
 		when(orcamentoRepository.salvar(any())).thenAnswer(inv -> inv.getArgument(0));
 
 		useCase.executar(request);
 
-		verify(estoqueRepository).listarPorPeca(peca.getId(), false);
+		verify(estoqueRepository).listarPorPecaOrdenadoPorQuantidadeDisponivel(any(UUID.class), anyBoolean());
 		verify(movimentacaoEstoqueRepository).salvar(any());
 	}
 

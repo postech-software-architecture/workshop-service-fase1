@@ -3,17 +3,14 @@ package com.postech.workshop_service.application.usecases;
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.Estoque;
-import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
-import com.postech.workshop_service.domain.entities.TipoItemComposicaoTecnica;
 import com.postech.workshop_service.domain.repositories.EstoqueRepository;
 import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
-import com.postech.workshop_service.domain.valueobjects.TipoMovimentacao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -99,30 +96,18 @@ public class RejeitarOrcamentoUseCase {
 	}
 
 	private void liberarReservasDeEstoque(OrdemServico ordemServico) {
-		String motivoReservaOriginal = "Reserva para OS " + ordemServico.getNumero();
-		String motivoLiberacao = "Liberacao de reserva — orcamento rejeitado OS " + ordemServico.getNumero();
-		for (ItemComposicaoTecnica item : ordemServico.getItensComposicao()) {
-			if (item.getIdPecaInsumo() == null) {
-				continue;
-			}
-			if (item.getTipo() != TipoItemComposicaoTecnica.PECA
-					&& item.getTipo() != TipoItemComposicaoTecnica.INSUMO) {
-				continue;
-			}
-			MovimentacaoEstoque reservaOriginal = movimentacaoEstoqueRepository
-				.listarPorPeca(item.getIdPecaInsumo(), TipoMovimentacao.RESERVA, null, null)
-				.stream()
-				.filter(mov -> motivoReservaOriginal.equals(mov.getMotivo()))
-				.findFirst()
-				.orElse(null);
-			if (reservaOriginal == null) {
-				continue;
-			}
+		String motivoLiberacao = "Liberacao de reserva - orcamento rejeitado OS " + ordemServico.getNumero();
+		for (MovimentacaoEstoque reservaOriginal : movimentacaoEstoqueRepository
+			.listarPorOrdemServico(ordemServico.getId())
+			.stream()
+			.filter(mov -> mov.getTipo() == com.postech.workshop_service.domain.valueobjects.TipoMovimentacao.RESERVA)
+			.toList()) {
 			Estoque estoque = estoqueRepository.buscarPorId(reservaOriginal.getEstoqueId(), true).orElse(null);
 			if (estoque == null) {
 				continue;
 			}
-			MovimentacaoEstoque liberacao = estoque.liberarReserva(reservaOriginal.getQuantidade(), motivoLiberacao);
+			MovimentacaoEstoque liberacao = estoque.liberarReserva(reservaOriginal.getQuantidade(), motivoLiberacao,
+					ordemServico.getId(), reservaOriginal.getOrcamentoId());
 			estoqueRepository.salvar(estoque);
 			movimentacaoEstoqueRepository.salvar(liberacao);
 		}

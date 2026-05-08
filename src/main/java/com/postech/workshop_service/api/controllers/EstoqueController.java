@@ -5,6 +5,7 @@ import com.postech.workshop_service.api.dtos.MovimentacaoRequest;
 import com.postech.workshop_service.api.dtos.MovimentacaoResponse;
 import com.postech.workshop_service.application.usecases.BuscarEstoquePorIdUseCase;
 import com.postech.workshop_service.application.usecases.ListarEstoquesPorPecaUseCase;
+import com.postech.workshop_service.application.usecases.ListarMovimentacoesEstoquePorOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.RegistrarMovimentacaoUseCase;
 import com.postech.workshop_service.domain.entities.Estoque;
 import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
@@ -40,6 +41,8 @@ public class EstoqueController {
 
 	private final ListarEstoquesPorPecaUseCase listarEstoquesPorPecaUseCase;
 
+	private final ListarMovimentacoesEstoquePorOrdemServicoUseCase listarMovimentacoesEstoquePorOrdemServicoUseCase;
+
 	private final RegistrarMovimentacaoUseCase registrarMovimentacaoUseCase;
 
 	/**
@@ -50,9 +53,11 @@ public class EstoqueController {
 	 */
 	public EstoqueController(BuscarEstoquePorIdUseCase buscarEstoquePorIdUseCase,
 			ListarEstoquesPorPecaUseCase listarEstoquesPorPecaUseCase,
+			ListarMovimentacoesEstoquePorOrdemServicoUseCase listarMovimentacoesEstoquePorOrdemServicoUseCase,
 			RegistrarMovimentacaoUseCase registrarMovimentacaoUseCase) {
 		this.buscarEstoquePorIdUseCase = buscarEstoquePorIdUseCase;
 		this.listarEstoquesPorPecaUseCase = listarEstoquesPorPecaUseCase;
+		this.listarMovimentacoesEstoquePorOrdemServicoUseCase = listarMovimentacoesEstoquePorOrdemServicoUseCase;
 		this.registrarMovimentacaoUseCase = registrarMovimentacaoUseCase;
 	}
 
@@ -102,6 +107,23 @@ public class EstoqueController {
 		return ResponseEntity.ok(lista);
 	}
 
+	/**
+	 * Consulta movimentacoes de estoque relacionadas a uma ordem de servico.
+	 * @param ordemServicoId identificador da ordem de servico.
+	 * @return lista de movimentacoes vinculadas a ordem.
+	 */
+	@GetMapping("/movimentacoes/ordem-servico/{ordemServicoId}")
+	@Operation(summary = "Consultar movimentacoes por ordem de servico")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
+	public ResponseEntity<List<MovimentacaoResponse>> listarMovimentacoesPorOrdemServico(
+			@PathVariable UUID ordemServicoId) {
+		List<MovimentacaoResponse> lista = listarMovimentacoesEstoquePorOrdemServicoUseCase.executar(ordemServicoId)
+			.stream()
+			.map(this::toMovimentacaoResponse)
+			.collect(Collectors.toList());
+		return ResponseEntity.ok(lista);
+	}
+
 	private EstoqueResponse toEstoqueResponse(Estoque estoque) {
 		return EstoqueResponse.builder()
 			.id(estoque.getId())
@@ -119,6 +141,8 @@ public class EstoqueController {
 		return MovimentacaoResponse.builder()
 			.id(movimentacao.getId())
 			.estoqueId(movimentacao.getEstoqueId())
+			.ordemServicoId(movimentacao.getOrdemServicoId())
+			.orcamentoId(movimentacao.getOrcamentoId())
 			.tipo(movimentacao.getTipo().name())
 			.quantidade(movimentacao.getQuantidade())
 			.quantidadeAnterior(movimentacao.getQuantidadeAnterior())

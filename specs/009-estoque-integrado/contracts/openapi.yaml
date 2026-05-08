@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: Estoque Integrado ao Ciclo da Ordem - Contract Delta
+  version: 1.0.0
+  description: Contract changes required by feature 009.
+paths:
+  /api/v1/orcamentos/{id}/aprovar:
+    patch:
+      summary: Aprovar orcamento com reserva de estoque
+      description: Aprova o orcamento e reserva automaticamente as pecas e insumos da OS.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Orcamento aprovado e reservas criadas.
+        "404":
+          description: Orcamento ou ordem de servico nao encontrados.
+        "422":
+          description: Orcamento/OS em estado invalido, estoque insuficiente ou conflito concorrente de disponibilidade.
+  /api/v1/orcamentos/{id}/rejeitar:
+    patch:
+      summary: Rejeitar orcamento com liberacao de reserva
+      description: Rejeita o orcamento e libera reservas ativas vinculadas a OS.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Orcamento rejeitado e reservas ativas liberadas.
+        "404":
+          description: Orcamento ou ordem de servico nao encontrados.
+        "422":
+          description: Orcamento/OS em estado invalido ou reserva inconsistente.
+  /api/v1/orcamentos/{id}/cancelar:
+    patch:
+      summary: Cancelar orcamento com liberacao de reserva
+      description: Cancela o orcamento e libera reservas ativas vinculadas a OS antes da execucao.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Orcamento cancelado e reservas ativas liberadas.
+        "404":
+          description: Orcamento ou ordem de servico nao encontrados.
+        "422":
+          description: Orcamento/OS em estado invalido ou reserva inconsistente.
+  /api/v1/ordens-servico/{id}/iniciar-execucao:
+    patch:
+      summary: Iniciar execucao consumindo reservas
+      description: Avanca a OS para execucao e converte reservas ativas em saidas de estoque.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Execucao iniciada e reservas consumidas exatamente uma vez.
+        "404":
+          description: Ordem de servico nao encontrada.
+        "422":
+          description: OS em estado invalido, reservas ausentes ou reservas ja consumidas.
+  /api/v1/estoques/movimentacoes/ordem-servico/{ordemServicoId}:
+    get:
+      summary: Consultar movimentacoes de estoque por OS
+      description: Retorna somente movimentacoes de estoque vinculadas a ordem de servico informada.
+      parameters:
+        - name: ordemServicoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Movimentacoes de estoque da OS retornadas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MovimentacaoResponse"
+        "404":
+          description: Ordem de servico nao encontrada.
+  /api/v1/estoques/movimentacoes:
+    post:
+      summary: Registrar movimentacao manual de estoque
+      description: Permite apenas movimentacoes manuais. RESERVA e LIBERACAO sao movimentos internos do ciclo de OS.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovimentacaoManualRequest"
+      responses:
+        "201":
+          description: Movimentacao manual registrada.
+        "422":
+          description: Tipo de movimentacao invalido para registro manual.
+components:
+  schemas:
+    MovimentacaoManualRequest:
+      type: object
+      required:
+        - estoqueId
+        - tipo
+        - quantidade
+      properties:
+        estoqueId:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          enum:
+            - ENTRADA
+            - SAIDA
+          description: RESERVA, LIBERACAO e AJUSTE nao devem ser enviados neste endpoint.
+        quantidade:
+          type: number
+          minimum: 0.001
+        motivo:
+          type: string
+          maxLength: 500
+    MovimentacaoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        estoqueId:
+          type: string
+          format: uuid
+        ordemServicoId:
+          type: string
+          format: uuid
+          nullable: true
+        orcamentoId:
+          type: string
+          format: uuid
+          nullable: true
+        tipo:
+          type: string
+          enum:
+            - ENTRADA
+            - SAIDA
+            - AJUSTE
+            - RESERVA
+            - LIBERACAO
+        quantidade:
+          type: number
+        quantidadeAnterior:
+          type: number
+        quantidadePosterior:
+          type: number
+        motivo:
+          type: string
+          nullable: true
+        dataMovimentacao:
+          type: string
+          format: date-time

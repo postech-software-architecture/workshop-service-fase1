@@ -73,6 +73,17 @@ public class EstoqueRepositoryImpl implements EstoqueRepository {
 	 */
 	@Override
 	@Transactional(readOnly = true)
+	public List<Estoque> listarPorPecaOrdenadoPorQuantidadeDisponivel(UUID pecaInsumoId, boolean incluirInativos) {
+		return listarPorPeca(pecaInsumoId, incluirInativos).stream()
+			.sorted((a, b) -> b.getQuantidade().compareTo(a.getQuantidade()))
+			.toList();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
 	public BigDecimal calcularQuantidadeTotal(UUID pecaInsumoId) {
 		return jpaEstoqueRepository.calcularQuantidadeTotal(pecaInsumoId);
 	}

@@ -90,18 +90,18 @@ class RejeitarOrcamentoUseCaseTest {
 				null, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
 		MovimentacaoEstoque reservaOriginal = new MovimentacaoEstoque(UUID.randomUUID(), estoqueId,
 				TipoMovimentacao.RESERVA, quantidadeReservada, new BigDecimal("10"), new BigDecimal("8"),
-				"Reserva para OS " + ordemServico.getNumero());
+				"Reserva para OS " + ordemServico.getNumero(), ordemServico.getId(), orcamento.getId());
 
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
-		when(movimentacaoEstoqueRepository.listarPorPeca(pecaId, TipoMovimentacao.RESERVA, null, null))
+		when(movimentacaoEstoqueRepository.listarPorOrdemServico(ordemServico.getId()))
 			.thenReturn(List.of(reservaOriginal));
 		when(estoqueRepository.buscarPorId(estoqueId, true)).thenReturn(Optional.of(estoque));
 		when(orcamentoRepository.salvar(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
 		rejeitarOrcamentoUseCase.executar(orcamento.getId());
 
-		verify(movimentacaoEstoqueRepository).listarPorPeca(pecaId, TipoMovimentacao.RESERVA, null, null);
+		verify(movimentacaoEstoqueRepository).listarPorOrdemServico(ordemServico.getId());
 		verify(estoqueRepository).buscarPorId(estoqueId, true);
 		verify(estoqueRepository).salvar(estoque);
 		verify(movimentacaoEstoqueRepository).salvar(any());

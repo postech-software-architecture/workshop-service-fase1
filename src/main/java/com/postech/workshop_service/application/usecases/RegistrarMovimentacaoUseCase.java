@@ -54,9 +54,10 @@ public class RegistrarMovimentacaoUseCase {
 			MovimentacaoEstoque movimentacao = switch (tipoMovimentacao) {
 				case ENTRADA -> estoque.registrarEntrada(quantidade, motivo);
 				case SAIDA -> estoque.registrarSaida(quantidade, motivo);
-				case AJUSTE -> estoque.ajustar(quantidade, motivo);
+				case AJUSTE -> throw new RegraDeNegocioException(
+						"Os tipos AJUSTE, RESERVA e LIBERACAO sao gerenciados internamente pelo sistema e nao podem ser registrados manualmente.");
 				case RESERVA, LIBERACAO -> throw new RegraDeNegocioException(
-						"Os tipos RESERVA e LIBERACAO sao gerenciados internamente pelo sistema e nao podem ser registrados manualmente.");
+						"Os tipos AJUSTE, RESERVA e LIBERACAO sao gerenciados internamente pelo sistema e nao podem ser registrados manualmente.");
 			};
 
 			estoqueRepository.salvar(estoque);
@@ -82,8 +83,7 @@ public class RegistrarMovimentacaoUseCase {
 			return TipoMovimentacao.valueOf(tipo.trim().toUpperCase());
 		}
 		catch (IllegalArgumentException ex) {
-			throw new IllegalArgumentException(
-					"Tipo de movimentacao invalido. Valores validos: ENTRADA, SAIDA, AJUSTE");
+			throw new IllegalArgumentException("Tipo de movimentacao invalido. Valores validos: ENTRADA, SAIDA");
 		}
 	}
 

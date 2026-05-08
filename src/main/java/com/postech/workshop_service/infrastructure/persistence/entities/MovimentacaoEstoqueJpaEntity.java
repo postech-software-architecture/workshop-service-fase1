@@ -29,6 +29,12 @@ public class MovimentacaoEstoqueJpaEntity {
 	@Column(name = "estoque_id", nullable = false)
 	private UUID estoqueId;
 
+	@Column(name = "ordem_servico_id")
+	private UUID ordemServicoId;
+
+	@Column(name = "orcamento_id")
+	private UUID orcamentoId;
+
 	@Column(nullable = false, length = 20)
 	private String tipo;
 
