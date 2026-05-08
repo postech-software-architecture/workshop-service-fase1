@@ -76,12 +76,12 @@ paths:
           description: Ordem de servico nao encontrada.
         "422":
           description: OS em estado invalido, reservas ausentes ou reservas ja consumidas.
-  /api/v1/estoques/movimentacoes/ordem-servico/{id}:
+  /api/v1/estoques/movimentacoes/ordem-servico/{ordemServicoId}:
     get:
       summary: Consultar movimentacoes de estoque por OS
       description: Retorna somente movimentacoes de estoque vinculadas a ordem de servico informada.
       parameters:
-        - name: id
+        - name: ordemServicoId
           in: path
           required: true
           schema:
