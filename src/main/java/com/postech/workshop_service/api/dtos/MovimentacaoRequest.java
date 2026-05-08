@@ -22,16 +22,16 @@ public class MovimentacaoRequest {
 	private UUID estoqueId;
 
 	@NotBlank(message = "O tipo de movimentacao e obrigatorio")
-	@Schema(example = "ENTRADA", description = "Tipo: ENTRADA, SAIDA ou AJUSTE")
+	@Schema(example = "ENTRADA", description = "Tipo: ENTRADA ou SAIDA")
 	private String tipo;
 
 	@NotNull(message = "A quantidade e obrigatoria")
 	@PositiveOrZero(message = "A quantidade nao pode ser negativa")
-	@Schema(example = "5", description = "Quantidade movimentada (valor absoluto para AJUSTE)")
+	@Schema(example = "5", description = "Quantidade movimentada")
 	private BigDecimal quantidade;
 
 	@Size(max = 500, message = "O motivo deve ter no maximo 500 caracteres")
-	@Schema(example = "Compra de reposicao", description = "Motivo da movimentacao (obrigatorio para AJUSTE)")
+	@Schema(example = "Compra de reposicao", description = "Motivo da movimentacao")
 	private String motivo;
 
 }

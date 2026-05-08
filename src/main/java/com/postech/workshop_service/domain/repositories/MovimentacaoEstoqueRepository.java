@@ -49,4 +49,11 @@ public interface MovimentacaoEstoqueRepository {
 	List<MovimentacaoEstoque> listarPorPeca(UUID pecaInsumoId, TipoMovimentacao tipo, LocalDateTime dataInicio,
 			LocalDateTime dataFim);
 
+	/**
+	 * Lista todas as movimentacoes vinculadas a uma ordem de servico.
+	 * @param ordemServicoId identificador da ordem de servico.
+	 * @return lista de movimentacoes ordenadas por data decrescente.
+	 */
+	List<MovimentacaoEstoque> listarPorOrdemServico(UUID ordemServicoId);
+
 }

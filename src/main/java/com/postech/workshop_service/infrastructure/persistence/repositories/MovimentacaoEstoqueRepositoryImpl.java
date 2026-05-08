@@ -77,6 +77,18 @@ public class MovimentacaoEstoqueRepositoryImpl implements MovimentacaoEstoqueRep
 		return filtrar(entities, tipo, dataInicio, dataFim).stream().map(movimentacaoEstoqueMapper::toDomain).toList();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public List<MovimentacaoEstoque> listarPorOrdemServico(UUID ordemServicoId) {
+		return jpaMovimentacaoEstoqueRepository.findByOrdemServicoIdOrderByDataMovimentacaoDesc(ordemServicoId)
+			.stream()
+			.map(movimentacaoEstoqueMapper::toDomain)
+			.toList();
+	}
+
 	private List<MovimentacaoEstoqueJpaEntity> filtrar(List<MovimentacaoEstoqueJpaEntity> entities,
 			TipoMovimentacao tipo, LocalDateTime dataInicio, LocalDateTime dataFim) {
 		return entities.stream()

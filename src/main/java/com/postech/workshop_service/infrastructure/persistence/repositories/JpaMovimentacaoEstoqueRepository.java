@@ -28,4 +28,6 @@ public interface JpaMovimentacaoEstoqueRepository extends JpaRepository<Moviment
 			+ "WHERE e.pecaInsumoId = :pecaInsumoId ORDER BY m.dataMovimentacao DESC")
 	List<MovimentacaoEstoqueJpaEntity> findByPecaInsumoIdOrderByDataMovimentacaoDesc(UUID pecaInsumoId);
 
+	List<MovimentacaoEstoqueJpaEntity> findByOrdemServicoIdOrderByDataMovimentacaoDesc(UUID ordemServicoId);
+
 }
