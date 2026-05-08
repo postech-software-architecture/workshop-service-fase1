@@ -1,6 +1,6 @@
 # workshop-service Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-05-01
+Auto-generated from all feature plans. Last updated: 2026-05-07
 
 ## Active Technologies
 - PostgreSQL com Flyway para schema versionado (002-vehicle-management)

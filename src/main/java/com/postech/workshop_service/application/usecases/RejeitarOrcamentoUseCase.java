@@ -39,6 +39,8 @@ public class RejeitarOrcamentoUseCase {
 
 	private final MecanicoNotificationService mecanicoNotificationService;
 
+	private final RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
+
 	/**
 	 * Construtor para injecao das dependencias do caso de uso.
 	 * @param orcamentoRepository repositorio de orcamentos.
@@ -50,12 +52,14 @@ public class RejeitarOrcamentoUseCase {
 	public RejeitarOrcamentoUseCase(OrcamentoRepository orcamentoRepository,
 			OrdemServicoRepository ordemServicoRepository, EstoqueRepository estoqueRepository,
 			MovimentacaoEstoqueRepository movimentacaoEstoqueRepository,
-			MecanicoNotificationService mecanicoNotificationService) {
+			MecanicoNotificationService mecanicoNotificationService,
+			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase) {
 		this.orcamentoRepository = orcamentoRepository;
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.estoqueRepository = estoqueRepository;
 		this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
 		this.mecanicoNotificationService = mecanicoNotificationService;
+		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
 	}
 
 	/**
@@ -76,11 +80,13 @@ public class RejeitarOrcamentoUseCase {
 		}
 
 		orcamento.rejeitar();
+		StatusOrdemServico statusAnterior = ordemServico.getStatus();
 		ordemServico.voltarParaComposicao();
 
 		liberarReservasDeEstoque(ordemServico);
 
 		ordemServicoRepository.salvar(ordemServico);
+		registrarHistoricoUseCase.executar(ordemServico.getId(), statusAnterior, ordemServico.getStatus());
 		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);
 		try {
 			mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);

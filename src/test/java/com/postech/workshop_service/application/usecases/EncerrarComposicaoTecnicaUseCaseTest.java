@@ -41,6 +41,9 @@ class EncerrarComposicaoTecnicaUseCaseTest {
 	@Mock
 	private ClienteNotificationService clienteNotificationService;
 
+	@Mock
+	private RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
+
 	@InjectMocks
 	private EncerrarComposicaoTecnicaUseCase encerrarComposicaoTecnicaUseCase;
 

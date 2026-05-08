@@ -6,6 +6,7 @@ import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.ItemOrcamento;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
+import com.postech.workshop_service.domain.entities.StatusOrdemServico;
 import com.postech.workshop_service.domain.entities.TipoOrcamento;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
@@ -33,6 +34,8 @@ public class EncerrarComposicaoTecnicaUseCase {
 
 	private final ClienteNotificationService clienteNotificationService;
 
+	private final RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
+
 	/**
 	 * Construtor para injecao das dependencias do caso de uso.
 	 * @param ordemServicoRepository repositorio de ordens de servico.
@@ -40,10 +43,12 @@ public class EncerrarComposicaoTecnicaUseCase {
 	 * @param clienteNotificationService service de notificacao do cliente.
 	 */
 	public EncerrarComposicaoTecnicaUseCase(OrdemServicoRepository ordemServicoRepository,
-			OrcamentoRepository orcamentoRepository, ClienteNotificationService clienteNotificationService) {
+			OrcamentoRepository orcamentoRepository, ClienteNotificationService clienteNotificationService,
+			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase) {
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.orcamentoRepository = orcamentoRepository;
 		this.clienteNotificationService = clienteNotificationService;
+		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
 	}
 
 	/**
@@ -76,9 +81,11 @@ public class EncerrarComposicaoTecnicaUseCase {
 		Orcamento orcamento = new Orcamento(null, ordemServico.getId(), valorTotal, itensFotografados,
 				TipoOrcamento.SERVICO_ORIGINAL);
 		orcamento.enviarParaAprovacao();
+		StatusOrdemServico statusAnterior = ordemServico.getStatus();
 		ordemServico.encerrarComposicao();
 
 		ordemServicoRepository.salvar(ordemServico);
+		registrarHistoricoUseCase.executar(ordemServico.getId(), statusAnterior, ordemServico.getStatus());
 		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);
 		try {
 			clienteNotificationService.notificarOrcamentoPendente(ordemServico, orcamentoPersistido);
