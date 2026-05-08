@@ -136,8 +136,8 @@ public class OrdemServicoController {
 	@Operation(summary = "Consultar historico de status da OS",
 			description = "Retorna a linha do tempo de transicoes de status da ordem de servico.")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "Historico consultado com sucesso",
-					content = @Content(schema = @Schema(implementation = HistoricoStatusOrdemServicoResponse.class, type = "array"))),
+			@ApiResponse(responseCode = "200", description = "Historico consultado com sucesso", content = @Content(
+					schema = @Schema(implementation = HistoricoStatusOrdemServicoResponse.class, type = "array"))),
 			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada") })
 	public ResponseEntity<List<HistoricoStatusOrdemServicoResponse>> consultarHistorico(@PathVariable UUID id) {
 		List<HistoricoStatusOrdemServico> historico = consultarHistoricoOrdemServicoUseCase.executar(id);
