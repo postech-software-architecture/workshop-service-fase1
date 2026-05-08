@@ -26,7 +26,7 @@ public class MovimentacaoRequest {
 	private String tipo;
 
 	@NotNull(message = "A quantidade e obrigatoria")
-	@PositiveOrZero(message = "A quantidade nao pode ser negativa")
+	@Positive(message = "A quantidade deve ser maior que zero")
 	@Schema(example = "5", description = "Quantidade movimentada")
 	private BigDecimal quantidade;
 
