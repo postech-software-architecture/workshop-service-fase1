@@ -732,7 +732,7 @@ paths:
 
   /api/v1/ordens-servico/{id}/iniciar-execucao:
     patch:
-      tags: [Ordens de ServiÃ§o]
+      tags: [Ordens de Serviço]
       summary: Iniciar execucao da OS
       parameters:
         - name: id
@@ -755,7 +755,7 @@ paths:
 
   /api/v1/ordens-servico/{id}/finalizar-execucao:
     patch:
-      tags: [Ordens de ServiÃ§o]
+      tags: [Ordens de Serviço]
       summary: Finalizar execucao da OS
       parameters:
         - name: id
@@ -778,7 +778,7 @@ paths:
 
   /api/v1/ordens-servico/{id}/entregar:
     patch:
-      tags: [Ordens de ServiÃ§o]
+      tags: [Ordens de Serviço]
       summary: Registrar entrega do veiculo
       parameters:
         - name: id
@@ -801,7 +801,7 @@ paths:
 
   /api/v1/ordens-servico/{id}/historico-status:
     get:
-      tags: [Ordens de ServiÃ§o]
+      tags: [Ordens de Serviço]
       summary: Consultar historico de status da OS
       parameters:
         - name: id
