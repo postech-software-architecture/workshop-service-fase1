@@ -1213,7 +1213,14 @@ components:
           type: string
         quantidade:
           type: number
-        dataCriacao:
+        quantidadeAnterior:
+          type: number
+        quantidadePosterior:
+          type: number
+        motivo:
+          type: string
+          nullable: true
+        dataMovimentacao:
           type: string
           format: date-time
 
