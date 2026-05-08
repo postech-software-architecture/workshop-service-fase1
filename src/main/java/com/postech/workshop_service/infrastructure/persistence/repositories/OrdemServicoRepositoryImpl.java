@@ -78,8 +78,11 @@ public class OrdemServicoRepositoryImpl implements OrdemServicoRepository {
 		}
 
 		List<OrdemServicoJpaEntity> entidades = jpaOrdemServicoRepository.findAllWithItensByIdIn(ids);
+		// Merge function (a, b) -> a evita IllegalStateException quando o EntityGraph
+		// gera linhas duplicadas para a mesma OS por causa do fetch da colecao EAGER.
 		Map<UUID, OrdemServicoJpaEntity> porId = entidades.stream()
-			.collect(Collectors.toMap(OrdemServicoJpaEntity::getId, Function.identity()));
+			.collect(Collectors.toMap(OrdemServicoJpaEntity::getId, Function.identity(),
+					(primeira, ignorada) -> primeira));
 
 		List<OrdemServico> itens = ids.stream().map(porId::get).map(ordemServicoMapper::toDomain).toList();
 

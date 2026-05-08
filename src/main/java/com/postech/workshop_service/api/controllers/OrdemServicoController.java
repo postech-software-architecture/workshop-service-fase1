@@ -164,7 +164,8 @@ public class OrdemServicoController {
 	public ResponseEntity<PaginaOrdensServicoResponse> listar(@RequestParam(defaultValue = "0") int pagina,
 			@RequestParam(defaultValue = "20") int tamanho, @RequestParam(required = false) StatusOrdemServico status,
 			@RequestParam(required = false) UUID idCliente,
-			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicio,
+			@RequestParam(required = false) @DateTimeFormat(
+					iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicio,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFim) {
 		PaginaResultado<OrdemServico> resultado = listarOrdensServicoUseCase.executar(pagina, tamanho, status,
 				idCliente, dataInicio, dataFim);
