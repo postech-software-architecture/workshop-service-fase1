@@ -1,11 +1,14 @@
 package com.postech.workshop_service.application.usecases;
 
 import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.entities.Estoque;
+import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.ItemOrcamento;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrcamento;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
+import com.postech.workshop_service.domain.entities.TipoItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.TipoOrcamento;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
@@ -47,9 +50,12 @@ class AprovarOrcamentoUseCaseTest {
 
 	@Test
 	void shouldApprovePendingBudget() {
+		UUID pecaId = UUID.randomUUID();
+		ItemComposicaoTecnica itemPeca = new ItemComposicaoTecnica("Filtro de oleo", new BigDecimal("35.00"),
+				TipoItemComposicaoTecnica.PECA, pecaId);
 		Orcamento orcamento = criarOrcamento(StatusOrcamento.PENDENTE_APROVACAO);
 		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE,
-				orcamento.getIdOrdemServico());
+				orcamento.getIdOrdemServico(), List.of(itemPeca));
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
 		when(orcamentoRepository.salvar(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -65,7 +71,7 @@ class AprovarOrcamentoUseCaseTest {
 	void shouldPreventApprovalIfBudgetIsNotPending() {
 		Orcamento orcamento = criarOrcamento(StatusOrcamento.CRIADO);
 		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE,
-				orcamento.getIdOrdemServico());
+				orcamento.getIdOrdemServico(), List.of());
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
 
@@ -75,7 +81,8 @@ class AprovarOrcamentoUseCaseTest {
 	@Test
 	void shouldPreventApprovalIfOrderIsNotWaitingClientResponse() {
 		Orcamento orcamento = criarOrcamento(StatusOrcamento.PENDENTE_APROVACAO);
-		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.EM_COMPOSICAO, orcamento.getIdOrdemServico());
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.EM_COMPOSICAO, orcamento.getIdOrdemServico(),
+				List.of());
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
 
@@ -88,9 +95,10 @@ class AprovarOrcamentoUseCaseTest {
 				status, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
 	}
 
-	private OrdemServico criarOrdemServico(StatusOrdemServico status, UUID idOrdemServico) {
-		return new OrdemServico(idOrdemServico, UUID.randomUUID(), UUID.randomUUID(), status, List.of(), null, null,
-				LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
+	private OrdemServico criarOrdemServico(StatusOrdemServico status, UUID idOrdemServico,
+			List<ItemComposicaoTecnica> itensComposicao) {
+		return new OrdemServico(idOrdemServico, UUID.randomUUID(), UUID.randomUUID(), status, itensComposicao, null,
+				null, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
 	}
 
 }

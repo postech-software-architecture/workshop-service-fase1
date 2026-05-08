@@ -17,6 +17,7 @@ import com.postech.workshop_service.application.usecases.CriarVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.DesvincularClienteVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.ListarClientesUseCase;
 import com.postech.workshop_service.application.usecases.ListarEstoquesPorPecaUseCase;
+import com.postech.workshop_service.application.usecases.ListarMovimentacoesEstoquePorOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.ListarVeiculosPorClienteUseCase;
 import com.postech.workshop_service.application.usecases.ListarVeiculosUseCase;
 import com.postech.workshop_service.application.usecases.RegistrarMovimentacaoUseCase;
@@ -89,9 +90,13 @@ class ControllerCoverageTest {
 	void deveCobrirEstoqueController() {
 		RegistrarMovimentacaoUseCase registrar = mock(RegistrarMovimentacaoUseCase.class);
 		ListarEstoquesPorPecaUseCase listar = mock(ListarEstoquesPorPecaUseCase.class);
-		EstoqueController controller = new EstoqueController(mock(BuscarEstoquePorIdUseCase.class), listar, registrar);
+		ListarMovimentacoesEstoquePorOrdemServicoUseCase listarMovimentacoes = mock(
+				ListarMovimentacoesEstoquePorOrdemServicoUseCase.class);
+		EstoqueController controller = new EstoqueController(mock(BuscarEstoquePorIdUseCase.class), listar,
+				listarMovimentacoes, registrar);
 		UUID estoqueId = UUID.randomUUID();
 		UUID pecaId = UUID.randomUUID();
+		UUID ordemServicoId = UUID.randomUUID();
 		MovimentacaoRequest request = MovimentacaoRequest.builder()
 			.estoqueId(estoqueId)
 			.tipo("ENTRADA")
@@ -103,12 +108,17 @@ class ControllerCoverageTest {
 				LocalDateTime.now(), LocalDateTime.now());
 		Estoque estoque = new Estoque(UUID.randomUUID(), pecaId, "A1", BigDecimal.ONE, true, 0, LocalDateTime.now(),
 				LocalDateTime.now());
+		MovimentacaoEstoque movimentacaoOrdem = new MovimentacaoEstoque(UUID.randomUUID(), estoqueId,
+				TipoMovimentacao.RESERVA, BigDecimal.ONE, BigDecimal.TEN, new BigDecimal("9"), "Reserva para OS",
+				ordemServicoId, UUID.randomUUID());
 
 		when(registrar.executar(estoqueId, "ENTRADA", BigDecimal.ONE, "Entrada")).thenReturn(movimentacao);
 		when(listar.executar(pecaId, false)).thenReturn(List.of(estoque));
+		when(listarMovimentacoes.executar(ordemServicoId)).thenReturn(List.of(movimentacaoOrdem));
 
 		assertThat(controller.registrarMovimentacao(request).getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(controller.listarPorPeca(pecaId, false).getBody()).hasSize(1);
+		assertThat(controller.listarMovimentacoesPorOrdemServico(ordemServicoId).getBody()).hasSize(1);
 	}
 
 	@Test
