@@ -60,7 +60,7 @@ class ListarMovimentacoesEstoquePorOrdemServicoUseCaseTest {
 
 	private com.postech.workshop_service.domain.entities.OrdemServico mockOrdemServico(UUID id) {
 		return new com.postech.workshop_service.domain.entities.OrdemServico(id, UUID.randomUUID(), UUID.randomUUID(),
-				com.postech.workshop_service.domain.entities.StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of(),
+				com.postech.workshop_service.domain.entities.StatusOrdemServico.AGUARDANDO_APROVACAO, List.of(),
 				"OS-TESTE", null, java.time.LocalDateTime.now().minusDays(2), java.time.LocalDateTime.now(), null);
 	}
 

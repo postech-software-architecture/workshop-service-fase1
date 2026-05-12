@@ -56,7 +56,7 @@ class EncerrarComposicaoTecnicaUseCaseTest {
 
 		Orcamento orcamento = encerrarComposicaoTecnicaUseCase.executar(ordemServico.getId());
 
-		assertEquals(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, ordemServico.getStatus());
+		assertEquals(StatusOrdemServico.AGUARDANDO_APROVACAO, ordemServico.getStatus());
 		assertEquals(StatusOrcamento.PENDENTE_APROVACAO, orcamento.getStatus());
 		verify(clienteNotificationService).notificarOrcamentoPendente(ordemServico, orcamento);
 	}

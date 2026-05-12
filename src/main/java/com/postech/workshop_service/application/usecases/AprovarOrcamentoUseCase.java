@@ -82,7 +82,7 @@ public class AprovarOrcamentoUseCase {
 	}
 
 	private void validarOrdemAguardandoResposta(OrdemServico ordemServico) {
-		if (ordemServico.getStatus() != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
+		if (ordemServico.getStatus() != StatusOrdemServico.AGUARDANDO_APROVACAO) {
 			throw new RegraDeNegocioException(
 					"A ordem de servico deve estar aguardando resposta do cliente para aprovar o orcamento.");
 		}

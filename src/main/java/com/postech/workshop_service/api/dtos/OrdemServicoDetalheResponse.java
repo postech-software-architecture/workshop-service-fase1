@@ -29,7 +29,7 @@ public class OrdemServicoDetalheResponse {
 	@Schema(description = "Numero sequencial da OS", example = "OS-2026-00001")
 	private String numero;
 
-	@Schema(description = "Status atual da OS", example = "AGUARDANDO_RESPOSTA_CLIENTE")
+	@Schema(description = "Status atual da OS", example = "AGUARDANDO_APROVACAO")
 	private String status;
 
 	@Schema(description = "Identificador do cliente vinculado")

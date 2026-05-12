@@ -71,7 +71,7 @@ public class RejeitarOrcamentoUseCase {
 		OrdemServico ordemServico = ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())
 			.orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de servico nao encontrada."));
 
-		if (ordemServico.getStatus() != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
+		if (ordemServico.getStatus() != StatusOrdemServico.AGUARDANDO_APROVACAO) {
 			throw new RegraDeNegocioException(
 					"A ordem de servico deve estar aguardando resposta do cliente para rejeitar o orcamento.");
 		}

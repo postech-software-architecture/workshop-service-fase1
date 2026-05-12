@@ -57,10 +57,10 @@ class ListarOrdensServicoUseCaseTest {
 				captor.capture()))
 			.thenReturn(pagina);
 
-		useCase.executar(1, 10, StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, idCliente, dataInicio, dataFim);
+		useCase.executar(1, 10, StatusOrdemServico.AGUARDANDO_APROVACAO, idCliente, dataInicio, dataFim);
 
 		FiltrosOrdemServico filtros = captor.getValue();
-		assertThat(filtros.status()).isEqualTo(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		assertThat(filtros.status()).isEqualTo(StatusOrdemServico.AGUARDANDO_APROVACAO);
 		assertThat(filtros.idCliente()).isEqualTo(idCliente);
 		assertThat(filtros.dataInicio()).isEqualTo(dataInicio);
 		assertThat(filtros.dataFim()).isEqualTo(dataFim);

@@ -54,7 +54,7 @@ class AprovarOrcamentoUseCaseTest {
 		ItemComposicaoTecnica itemPeca = new ItemComposicaoTecnica("Filtro de oleo", new BigDecimal("35.00"),
 				TipoItemComposicaoTecnica.PECA, pecaId);
 		Orcamento orcamento = criarOrcamento(StatusOrcamento.PENDENTE_APROVACAO);
-		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE,
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_APROVACAO,
 				orcamento.getIdOrdemServico(), List.of(itemPeca));
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
@@ -70,7 +70,7 @@ class AprovarOrcamentoUseCaseTest {
 	@Test
 	void shouldPreventApprovalIfBudgetIsNotPending() {
 		Orcamento orcamento = criarOrcamento(StatusOrcamento.CRIADO);
-		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE,
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_APROVACAO,
 				orcamento.getIdOrdemServico(), List.of());
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
