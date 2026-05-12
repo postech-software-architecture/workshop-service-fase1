@@ -9,8 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Caso de uso responsavel por recuperar uma ordem de servico pelo identificador
- * tecnico.
+ * Caso de uso responsavel por recuperar uma ordem de servico pelo identificador tecnico.
  */
 @Service
 public class BuscarOrdemServicoPorIdUseCase {
@@ -21,9 +20,8 @@ public class BuscarOrdemServicoPorIdUseCase {
 
 	/**
 	 * Construtor para injecao de dependencias.
-	 * 
 	 * @param ordemServicoRepository repositorio de ordens de servico.
-	 * @param orcamentoRepository    repositorio de orcamentos.
+	 * @param orcamentoRepository repositorio de orcamentos.
 	 */
 	public BuscarOrdemServicoPorIdUseCase(OrdemServicoRepository ordemServicoRepository,
 			OrcamentoRepository orcamentoRepository) {
@@ -33,14 +31,13 @@ public class BuscarOrdemServicoPorIdUseCase {
 
 	/**
 	 * Recupera a ordem de servico identificorricada.
-	 * 
 	 * @param id identificador tecnico da ordem.
 	 * @return ordem de servico encontrada.
 	 * @throws RecursoNaoEncontradoException quando a ordem nao existir.
 	 */
 	public OrdemServico executar(UUID id) {
 		OrdemServico ordem = ordemServicoRepository.buscarPorId(id)
-				.orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de servico nao encontrada."));
+			.orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de servico nao encontrada."));
 
 		orcamentoRepository.listarPorOrdemServico(id).stream().findFirst().ifPresent(ordem::vincularOrcamento);
 
