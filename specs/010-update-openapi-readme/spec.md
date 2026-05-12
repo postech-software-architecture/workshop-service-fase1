@@ -5,6 +5,12 @@
 **Status**: Draft  
 **Input**: User description: "Complementar o arquivo openapi yaml, presente na pasta controllers src\main\java\com\postech\workshop_service\api\controllers\openapi.yaml. Revisitar todas as controllers para validar se esta de acordo e atualizar o arquivo mantendo o padrao. Tambem revisar o readme e complementar caso necessario"
 
+## Clarifications
+
+### Session 2026-05-12
+
+- Q: Qual deve ser o criterio obrigatorio para exemplos de request e response na documentacao OpenAPI? → A: Exemplos obrigatorios para operacoes com request body, responses complexas e fluxos de negocio criticos; consultas simples podem ter apenas schema.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Consultar contrato completo das APIs (Priority: P1)
@@ -72,6 +78,7 @@ Como nova pessoa desenvolvedora do projeto, quero encontrar no README orientacoe
 - **FR-008**: O README MUST ser revisado para garantir que descreve onde localizar ou acessar a documentacao da API e como iniciar seu uso.
 - **FR-009**: O README MUST ser complementado quando houver lacunas que dificultem descoberta, execucao ou validacao basica da API por uma nova pessoa desenvolvedora.
 - **FR-010**: As atualizacoes MUST preservar o estilo e a organizacao ja adotados pela documentacao existente, exceto quando houver inconsistencia que precise ser corrigida.
+- **FR-011**: A documentacao MUST incluir exemplos de request e response para operacoes com corpo de requisicao, respostas complexas ou fluxos de negocio criticos; consultas simples podem ser documentadas apenas com schemas quando isso for suficiente para consumo externo.
 
 ### Key Entities
 
