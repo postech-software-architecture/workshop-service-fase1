@@ -186,7 +186,7 @@ public class OrdemServico extends EntidadeBase {
 			throw new RegraDeNegocioException(
 					"Nao e permitido encerrar a composicao tecnica de uma ordem de servico sem itens.");
 		}
-		this.status = StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE;
+		this.status = StatusOrdemServico.AGUARDANDO_APROVACAO;
 		atualizarDataUltimaAtualizacao();
 	}
 
@@ -194,7 +194,7 @@ public class OrdemServico extends EntidadeBase {
 	 * Retorna a ordem de servico para a fase de composicao tecnica.
 	 */
 	public void voltarParaComposicao() {
-		if (this.status != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
+		if (this.status != StatusOrdemServico.AGUARDANDO_APROVACAO) {
 			throw new RegraDeNegocioException(
 					"Nao e permitido voltar para composicao uma ordem de servico com status " + this.status + ".");
 		}
@@ -206,7 +206,7 @@ public class OrdemServico extends EntidadeBase {
 	 * Marca a ordem como aguardando execucao apos aprovacao do orcamento.
 	 */
 	public void marcarComoAguardandoExecucao() {
-		if (this.status != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
+		if (this.status != StatusOrdemServico.AGUARDANDO_APROVACAO) {
 			throw new RegraDeNegocioException(
 					"Nao e permitido marcar como aguardando execucao uma ordem de servico com status " + this.status
 							+ ".");
@@ -220,7 +220,7 @@ public class OrdemServico extends EntidadeBase {
 	 * @throws RegraDeNegocioException quando a ordem de servico nao pode ser cancelada.
 	 */
 	public void cancelar() {
-		if (this.status != StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE) {
+		if (this.status != StatusOrdemServico.AGUARDANDO_APROVACAO) {
 			throw new RegraDeNegocioException(
 					"Nao e permitido cancelar uma ordem de servico com status " + this.status + ".");
 		}
@@ -344,10 +344,10 @@ public class OrdemServico extends EntidadeBase {
 	/**
 	 * Indica se a ordem de servico pode ser cancelada no estado atual.
 	 * @return {@code true} apenas quando o status for
-	 * {@link StatusOrdemServico#AGUARDANDO_RESPOSTA_CLIENTE}.
+	 * {@link StatusOrdemServico#AGUARDANDO_APROVACAO}.
 	 */
 	public boolean podeSerCancelada() {
-		return this.status == StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE;
+		return this.status == StatusOrdemServico.AGUARDANDO_APROVACAO;
 	}
 
 	private UUID validarIdentificador(UUID identificador, String mensagem) {

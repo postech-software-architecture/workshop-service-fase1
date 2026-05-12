@@ -111,7 +111,7 @@ class OrcamentoTest {
 	@Test
 	void shouldApprovePendingBudget() {
 		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
-		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
 
 		orcamento.aprovar(ordemServico);
 
@@ -121,7 +121,7 @@ class OrcamentoTest {
 	@Test
 	void shouldApproveServiceOriginalAndAdvanceOrderToExecution() {
 		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
-		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
 
 		orcamento.aprovar(ordemServico);
 
@@ -143,7 +143,7 @@ class OrcamentoTest {
 	@Test
 	void shouldRejectApprovalWhenStatusIsInvalid() {
 		Orcamento orcamento = criarOrcamentoServicoOriginal();
-		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
 
 		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
 				() -> orcamento.aprovar(ordemServico));
@@ -175,7 +175,7 @@ class OrcamentoTest {
 	@Test
 	void shouldCancelCreatedBudget() {
 		Orcamento orcamento = criarOrcamentoServicoOriginal();
-		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
 
 		orcamento.cancelar(ordemServico);
 
@@ -185,7 +185,7 @@ class OrcamentoTest {
 	@Test
 	void shouldCancelPendingBudget() {
 		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
-		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
 
 		orcamento.cancelar(ordemServico);
 
@@ -206,7 +206,7 @@ class OrcamentoTest {
 	@Test
 	void shouldCancelServiceOriginalBudgetAndCancelOrderWhenOrderIsCancellable() {
 		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.PENDENTE_APROVACAO);
-		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
 
 		orcamento.cancelar(ordemServico);
 
@@ -228,18 +228,18 @@ class OrcamentoTest {
 	@Test
 	void shouldCancelAddedServiceBudgetWithoutCancellingOrder() {
 		Orcamento orcamento = criarOrcamentoAdicaoServico(StatusOrcamento.PENDENTE_APROVACAO);
-		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
 
 		orcamento.cancelar(ordemServico);
 
 		assertEquals(StatusOrcamento.CANCELADO, orcamento.getStatus());
-		assertEquals(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, ordemServico.getStatus());
+		assertEquals(StatusOrdemServico.AGUARDANDO_APROVACAO, ordemServico.getStatus());
 	}
 
 	@Test
 	void shouldRejectCancelWhenStatusIsInvalid() {
 		Orcamento orcamento = criarOrcamentoReconstituido(StatusOrcamento.REJEITADO);
-		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		OrdemServico ordemServico = criarOrdemServicoComStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
 
 		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
 				() -> orcamento.cancelar(ordemServico));

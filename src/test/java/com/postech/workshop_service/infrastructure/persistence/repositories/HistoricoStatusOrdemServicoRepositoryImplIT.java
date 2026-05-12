@@ -30,8 +30,8 @@ class HistoricoStatusOrdemServicoRepositoryImplIT extends PostgresTestContainer 
 				StatusOrdemServico.AGUARDANDO_EXECUCAO, StatusOrdemServico.EM_EXECUCAO,
 				LocalDateTime.now().plusMinutes(1), usuarioId, "mecanico");
 		HistoricoStatusOrdemServico primeiro = new HistoricoStatusOrdemServico(null, ordemId,
-				StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, StatusOrdemServico.AGUARDANDO_EXECUCAO,
-				LocalDateTime.now(), usuarioId, "mecanico");
+				StatusOrdemServico.AGUARDANDO_APROVACAO, StatusOrdemServico.AGUARDANDO_EXECUCAO, LocalDateTime.now(),
+				usuarioId, "mecanico");
 
 		historicoRepository.salvar(segundo);
 		historicoRepository.salvar(primeiro);

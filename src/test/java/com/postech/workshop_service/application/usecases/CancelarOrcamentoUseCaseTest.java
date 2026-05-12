@@ -61,7 +61,7 @@ class CancelarOrcamentoUseCaseTest {
 	@Test
 	void shouldCancelPendingBudget() {
 		Orcamento orcamento = criarOrcamento(StatusOrcamento.PENDENTE_APROVACAO);
-		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE,
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_APROVACAO,
 				orcamento.getIdOrdemServico());
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
@@ -85,8 +85,8 @@ class CancelarOrcamentoUseCaseTest {
 
 		Orcamento orcamento = criarOrcamento(StatusOrcamento.PENDENTE_APROVACAO);
 		OrdemServico ordemServico = new OrdemServico(orcamento.getIdOrdemServico(), UUID.randomUUID(),
-				UUID.randomUUID(), StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of(itemPeca), "OS-2026-00002",
-				null, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
+				UUID.randomUUID(), StatusOrdemServico.AGUARDANDO_APROVACAO, List.of(itemPeca), "OS-2026-00002", null,
+				LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
 		MovimentacaoEstoque reservaOriginal = new MovimentacaoEstoque(UUID.randomUUID(), estoqueId,
 				TipoMovimentacao.RESERVA, quantidadeReservada, new BigDecimal("5"), new BigDecimal("3"),
 				"Reserva para OS " + ordemServico.getNumero(), ordemServico.getId(), orcamento.getId());

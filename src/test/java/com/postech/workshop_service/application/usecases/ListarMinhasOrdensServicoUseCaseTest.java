@@ -42,11 +42,11 @@ class ListarMinhasOrdensServicoUseCaseTest {
 				captor.capture()))
 			.thenReturn(pagina);
 
-		useCase.executar(0, 20, StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		useCase.executar(0, 20, StatusOrdemServico.AGUARDANDO_APROVACAO);
 
 		FiltrosOrdemServico filtros = captor.getValue();
 		assertThat(filtros.idCliente()).isEqualTo(clienteId);
-		assertThat(filtros.status()).isEqualTo(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE);
+		assertThat(filtros.status()).isEqualTo(StatusOrdemServico.AGUARDANDO_APROVACAO);
 		assertThat(filtros.dataInicio()).isNull();
 		assertThat(filtros.dataFim()).isNull();
 	}

@@ -45,13 +45,12 @@ class OrdemServicoTest {
 				TipoItemComposicaoTecnica.SERVICO));
 
 		OrdemServico ordemServico = new OrdemServico(ordemId, clienteId, veiculoId,
-				StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, itens, "OS-2026-00001", null, criacao, atualizacao,
-				remocao);
+				StatusOrdemServico.AGUARDANDO_APROVACAO, itens, "OS-2026-00001", null, criacao, atualizacao, remocao);
 
 		assertEquals(ordemId, ordemServico.getId());
 		assertEquals(clienteId, ordemServico.getIdCliente());
 		assertEquals(veiculoId, ordemServico.getIdVeiculo());
-		assertEquals(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, ordemServico.getStatus());
+		assertEquals(StatusOrdemServico.AGUARDANDO_APROVACAO, ordemServico.getStatus());
 		assertEquals(itens, ordemServico.getItensComposicao());
 		assertEquals("OS-2026-00001", ordemServico.getNumero());
 		assertEquals(criacao, ordemServico.getDataCriacao());
@@ -123,7 +122,7 @@ class OrdemServicoTest {
 
 		ordemServico.encerrarComposicao();
 
-		assertEquals(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, ordemServico.getStatus());
+		assertEquals(StatusOrdemServico.AGUARDANDO_APROVACAO, ordemServico.getStatus());
 		assertTrue(ordemServico.getDataUltimaAtualizacao().isAfter(dataAnterior)
 				|| ordemServico.getDataUltimaAtualizacao().isEqual(dataAnterior));
 	}
@@ -154,7 +153,7 @@ class OrdemServicoTest {
 
 	@Test
 	void shouldReturnOrderToCompositionWhenStatusAllowsIt() {
-		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of());
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_APROVACAO, List.of());
 
 		ordemServico.voltarParaComposicao();
 
@@ -163,7 +162,7 @@ class OrdemServicoTest {
 
 	@Test
 	void shouldMarkOrderAsWaitingExecutionWhenStatusAllowsIt() {
-		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of());
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_APROVACAO, List.of());
 
 		ordemServico.marcarComoAguardandoExecucao();
 
@@ -172,7 +171,7 @@ class OrdemServicoTest {
 
 	@Test
 	void shouldCancelOrderWhenStatusAllowsIt() {
-		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of());
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.AGUARDANDO_APROVACAO, List.of());
 
 		ordemServico.cancelar();
 
@@ -209,7 +208,7 @@ class OrdemServicoTest {
 
 	@Test
 	void shouldReportIfOrderCanBeCancelledBasedOnStatus() {
-		OrdemServico cancelavel = criarOrdemServico(StatusOrdemServico.AGUARDANDO_RESPOSTA_CLIENTE, List.of());
+		OrdemServico cancelavel = criarOrdemServico(StatusOrdemServico.AGUARDANDO_APROVACAO, List.of());
 		OrdemServico emComposicao = criarOrdemServico(StatusOrdemServico.EM_COMPOSICAO, List.of());
 		OrdemServico aguardandoExecucao = criarOrdemServico(StatusOrdemServico.AGUARDANDO_EXECUCAO, List.of());
 		OrdemServico cancelada = criarOrdemServico(StatusOrdemServico.CANCELADA, List.of());

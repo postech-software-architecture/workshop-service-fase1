@@ -2477,7 +2477,7 @@ components:
       type: string
       enum:
         - EM_COMPOSICAO
-        - AGUARDANDO_RESPOSTA_CLIENTE
+        - AGUARDANDO_APROVACAO
         - AGUARDANDO_EXECUCAO
         - EM_EXECUCAO
         - CANCELADA
