@@ -251,6 +251,10 @@ public class OrdemServico extends EntidadeBase {
 	 * @param idItem identificador do item de servico a ser finalizado.
 	 */
 	public void finalizarServico(UUID idItem) {
+		if (this.status != StatusOrdemServico.EM_EXECUCAO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido finalizar um servico em uma ordem de servico com status " + this.status + ".");
+		}
 		ItemComposicaoTecnica item = buscarItemPorId(idItem);
 		if (!item.isServico()) {
 			throw new RegraDeNegocioException("O item informado nao e um servico.");
@@ -345,7 +349,7 @@ public class OrdemServico extends EntidadeBase {
 			}
 			itensValidados.add(item);
 		}
-		return new ArrayList<>(itensValidados);
+		return List.copyOf(itensValidados);
 	}
 
 }

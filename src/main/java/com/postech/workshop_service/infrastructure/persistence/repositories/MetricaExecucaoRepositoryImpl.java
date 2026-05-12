@@ -32,10 +32,12 @@ public class MetricaExecucaoRepositoryImpl implements MetricaExecucaoRepository 
 			    COUNT(*)                                                                     AS total_execucoes,
 			    AVG(EXTRACT(EPOCH FROM (i.data_finalizacao - i.data_inicio_execucao)) / 60)  AS tempo_medio
 			FROM ordens_servico_itens i
+			JOIN ordens_servico os ON os.id = i.ordem_servico_id
 			WHERE i.tipo = 'SERVICO'
 			  AND i.status_execucao = 'FINALIZADO'
 			  AND i.data_inicio_execucao IS NOT NULL
 			  AND i.data_finalizacao IS NOT NULL
+			  AND os.status IN ('FINALIZADA', 'ENTREGUE')
 			GROUP BY i.descricao
 			ORDER BY tempo_medio DESC
 			""";
