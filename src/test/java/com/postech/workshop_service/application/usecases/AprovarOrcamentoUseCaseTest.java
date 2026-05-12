@@ -1,7 +1,6 @@
 package com.postech.workshop_service.application.usecases;
 
 import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
-import com.postech.workshop_service.domain.entities.Estoque;
 import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.ItemOrcamento;
 import com.postech.workshop_service.domain.entities.Orcamento;
@@ -10,6 +9,8 @@ import com.postech.workshop_service.domain.entities.StatusOrcamento;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
 import com.postech.workshop_service.domain.entities.TipoItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.TipoOrcamento;
+import com.postech.workshop_service.domain.repositories.EstoqueRepository;
+import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,12 @@ class AprovarOrcamentoUseCaseTest {
 	@Mock
 	private RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
 
+	@Mock
+	private EstoqueRepository estoqueRepository;
+
+	@Mock
+	private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+
 	@InjectMocks
 	private AprovarOrcamentoUseCase aprovarOrcamentoUseCase;
 
@@ -59,6 +66,7 @@ class AprovarOrcamentoUseCaseTest {
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
 		when(orcamentoRepository.salvar(any())).thenAnswer(invocation -> invocation.getArgument(0));
+		when(movimentacaoEstoqueRepository.listarPorOrdemServico(ordemServico.getId())).thenReturn(java.util.List.of());
 
 		Orcamento resultado = aprovarOrcamentoUseCase.executar(orcamento.getId());
 

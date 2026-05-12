@@ -97,9 +97,14 @@ public class RejeitarOrcamentoUseCase {
 
 	private void liberarReservasDeEstoque(OrdemServico ordemServico) {
 		String motivoLiberacao = "Liberacao de reserva - orcamento rejeitado OS " + ordemServico.getNumero();
-		for (MovimentacaoEstoque reservaOriginal : movimentacaoEstoqueRepository
-			.listarPorOrdemServico(ordemServico.getId())
-			.stream()
+		java.util.List<MovimentacaoEstoque> movimentacoes = movimentacaoEstoqueRepository
+			.listarPorOrdemServico(ordemServico.getId());
+		boolean houveBaixa = movimentacoes.stream()
+			.anyMatch(m -> m.getTipo() == com.postech.workshop_service.domain.valueobjects.TipoMovimentacao.SAIDA);
+		if (houveBaixa) {
+			return;
+		}
+		for (MovimentacaoEstoque reservaOriginal : movimentacoes.stream()
 			.filter(mov -> mov.getTipo() == com.postech.workshop_service.domain.valueobjects.TipoMovimentacao.RESERVA)
 			.toList()) {
 			Estoque estoque = estoqueRepository.buscarPorId(reservaOriginal.getEstoqueId(), true).orElse(null);
