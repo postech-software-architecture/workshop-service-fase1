@@ -33,6 +33,16 @@ public class OrdemServico extends EntidadeBase {
 
 	private LocalDateTime dataEntrega;
 
+	private Orcamento orcamentoAtual;
+
+	/**
+	 * Vincula o orcamento atual a esta ordem de servico para fins de consulta.
+	 * @param orcamento orcamento a ser vinculado.
+	 */
+	public void vincularOrcamento(Orcamento orcamento) {
+		this.orcamentoAtual = orcamento;
+	}
+
 	/**
 	 * Cria uma nova ordem de servico vazia, em composicao, sem numero definido. Usado
 	 * internamente e em testes de dominio.

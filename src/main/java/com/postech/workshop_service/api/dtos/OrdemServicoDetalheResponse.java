@@ -50,6 +50,9 @@ public class OrdemServicoDetalheResponse {
 	@Schema(description = "Data e hora da ultima atualizacao")
 	private LocalDateTime dataUltimaAtualizacao;
 
+	@Schema(description = "Orcamento vinculado a ordem")
+	private OrdemServicoResponse.OrcamentoResumoResponse orcamento;
+
 	/**
 	 * Constroi a resposta a partir do agregado de dominio.
 	 * @param ordem ordem de servico de origem.
@@ -66,6 +69,13 @@ public class OrdemServicoDetalheResponse {
 			.observacoes(ordem.getObservacoes())
 			.dataCriacao(ordem.getDataCriacao())
 			.dataUltimaAtualizacao(ordem.getDataUltimaAtualizacao())
+			.orcamento(ordem.getOrcamentoAtual() == null ? null
+					: OrdemServicoResponse.OrcamentoResumoResponse.builder()
+						.id(ordem.getOrcamentoAtual().getId())
+						.valorTotal(ordem.getOrcamentoAtual().getValor())
+						.status(ordem.getOrcamentoAtual().getStatus().name())
+						.dataCriacao(ordem.getOrcamentoAtual().getDataCriacao())
+						.build())
 			.build();
 	}
 

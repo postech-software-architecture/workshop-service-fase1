@@ -4,9 +4,11 @@ import com.postech.workshop_service.api.dtos.OrcamentoResponse;
 import com.postech.workshop_service.api.dtos.OrcamentoResponse.ItemOrcamentoResponse;
 import com.postech.workshop_service.application.usecases.AprovarOrcamentoUseCase;
 import com.postech.workshop_service.application.usecases.CancelarOrcamentoUseCase;
+import com.postech.workshop_service.application.usecases.ListarOrcamentosPorOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.RejeitarOrcamentoUseCase;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,11 +17,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -37,17 +41,44 @@ public class OrcamentoController {
 
 	private final CancelarOrcamentoUseCase cancelarOrcamentoUseCase;
 
+	private final ListarOrcamentosPorOrdemServicoUseCase listarOrcamentosPorOrdemServicoUseCase;
+
 	/**
 	 * Construtor para injecao de dependencias.
 	 * @param aprovarOrcamentoUseCase caso de uso de aprovacao.
 	 * @param rejeitarOrcamentoUseCase caso de uso de rejeicao.
 	 * @param cancelarOrcamentoUseCase caso de uso de cancelamento.
+	 * @param listarOrcamentosPorOrdemServicoUseCase caso de uso de consulta por ordem.
 	 */
 	public OrcamentoController(AprovarOrcamentoUseCase aprovarOrcamentoUseCase,
-			RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase, CancelarOrcamentoUseCase cancelarOrcamentoUseCase) {
+			RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase, CancelarOrcamentoUseCase cancelarOrcamentoUseCase,
+			ListarOrcamentosPorOrdemServicoUseCase listarOrcamentosPorOrdemServicoUseCase) {
 		this.aprovarOrcamentoUseCase = aprovarOrcamentoUseCase;
 		this.rejeitarOrcamentoUseCase = rejeitarOrcamentoUseCase;
 		this.cancelarOrcamentoUseCase = cancelarOrcamentoUseCase;
+		this.listarOrcamentosPorOrdemServicoUseCase = listarOrcamentosPorOrdemServicoUseCase;
+	}
+
+	/**
+	 * Lista os orcamentos vinculados a uma ordem de servico.
+	 * @param idOrdemServico identificador da ordem de servico.
+	 * @return orcamentos vinculados a ordem.
+	 */
+	@GetMapping("/ordem-servico/{idOrdemServico}")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'CLIENTE')")
+	@Operation(summary = "Listar orcamentos por ordem de servico",
+			description = "Retorna os orcamentos vinculados a uma ordem de servico existente.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Orcamentos vinculados a ordem",
+					content = @Content(
+							array = @ArraySchema(schema = @Schema(implementation = OrcamentoResponse.class)))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada") })
+	public ResponseEntity<List<OrcamentoResponse>> listarPorOrdemServico(@PathVariable UUID idOrdemServico) {
+		List<OrcamentoResponse> orcamentos = listarOrcamentosPorOrdemServicoUseCase.executar(idOrdemServico)
+			.stream()
+			.map(this::toResponse)
+			.toList();
+		return ResponseEntity.ok(orcamentos);
 	}
 
 	/**

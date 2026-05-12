@@ -4,6 +4,7 @@ import com.postech.workshop_service.api.dtos.CadastroClienteRequest;
 import com.postech.workshop_service.api.dtos.MovimentacaoRequest;
 import com.postech.workshop_service.application.exceptions.AcessoNegadoException;
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.application.usecases.AprovarOrcamentoUseCase;
 import com.postech.workshop_service.application.usecases.AtualizarClienteUseCase;
 import com.postech.workshop_service.application.usecases.AtualizarVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.BuscarClientePorDocumentoUseCase;
@@ -12,21 +13,28 @@ import com.postech.workshop_service.application.usecases.BuscarEstoquePorIdUseCa
 import com.postech.workshop_service.application.usecases.BuscarUsuarioAutenticadoUseCase;
 import com.postech.workshop_service.application.usecases.BuscarVeiculoPorIdUseCase;
 import com.postech.workshop_service.application.usecases.BuscarVeiculoPorPlacaUseCase;
+import com.postech.workshop_service.application.usecases.CancelarOrcamentoUseCase;
 import com.postech.workshop_service.application.usecases.CriarClienteUseCase;
 import com.postech.workshop_service.application.usecases.CriarVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.DesvincularClienteVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.ListarClientesUseCase;
 import com.postech.workshop_service.application.usecases.ListarEstoquesPorPecaUseCase;
 import com.postech.workshop_service.application.usecases.ListarMovimentacoesEstoquePorOrdemServicoUseCase;
+import com.postech.workshop_service.application.usecases.ListarOrcamentosPorOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.ListarVeiculosPorClienteUseCase;
 import com.postech.workshop_service.application.usecases.ListarVeiculosUseCase;
+import com.postech.workshop_service.application.usecases.RejeitarOrcamentoUseCase;
 import com.postech.workshop_service.application.usecases.RegistrarMovimentacaoUseCase;
 import com.postech.workshop_service.application.usecases.RemoverClienteUseCase;
 import com.postech.workshop_service.application.usecases.RemoverVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.VincularClienteVeiculoUseCase;
 import com.postech.workshop_service.domain.entities.Cliente;
 import com.postech.workshop_service.domain.entities.Estoque;
+import com.postech.workshop_service.domain.entities.ItemOrcamento;
 import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
+import com.postech.workshop_service.domain.entities.Orcamento;
+import com.postech.workshop_service.domain.entities.StatusOrcamento;
+import com.postech.workshop_service.domain.entities.TipoOrcamento;
 import com.postech.workshop_service.domain.entities.Veiculo;
 import com.postech.workshop_service.domain.valueobjects.Documento;
 import com.postech.workshop_service.domain.valueobjects.TipoMovimentacao;
@@ -119,6 +127,25 @@ class ControllerCoverageTest {
 		assertThat(controller.registrarMovimentacao(request).getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(controller.listarPorPeca(pecaId, false).getBody()).hasSize(1);
 		assertThat(controller.listarMovimentacoesPorOrdemServico(ordemServicoId).getBody()).hasSize(1);
+	}
+
+	@Test
+	void deveCobrirListagemDeOrcamentosPorOrdemServico() {
+		ListarOrcamentosPorOrdemServicoUseCase listarOrcamentos = mock(ListarOrcamentosPorOrdemServicoUseCase.class);
+		OrcamentoController controller = new OrcamentoController(mock(AprovarOrcamentoUseCase.class),
+				mock(RejeitarOrcamentoUseCase.class), mock(CancelarOrcamentoUseCase.class), listarOrcamentos);
+		UUID idOrdemServico = UUID.randomUUID();
+		Orcamento orcamento = new Orcamento(UUID.randomUUID(), idOrdemServico, new BigDecimal("120.00"),
+				List.of(new ItemOrcamento("Troca de oleo", new BigDecimal("120.00"))), TipoOrcamento.SERVICO_ORIGINAL,
+				StatusOrcamento.PENDENTE_APROVACAO, LocalDateTime.now(), LocalDateTime.now(), null);
+
+		when(listarOrcamentos.executar(idOrdemServico)).thenReturn(List.of(orcamento));
+
+		var response = controller.listarPorOrdemServico(idOrdemServico);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).hasSize(1);
+		assertThat(response.getBody().get(0).getIdOrdemServico()).isEqualTo(idOrdemServico);
 	}
 
 	@Test

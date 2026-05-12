@@ -5,6 +5,7 @@ import com.postech.workshop_service.infrastructure.persistence.entities.Orcament
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +17,9 @@ public interface JpaOrcamentoRepository extends JpaRepository<OrcamentoJpaEntity
 	@Override
 	@EntityGraph(attributePaths = "itens")
 	Optional<OrcamentoJpaEntity> findById(UUID id);
+
+	@EntityGraph(attributePaths = "itens")
+	List<OrcamentoJpaEntity> findByIdOrdemServicoOrderByDataCriacaoDesc(UUID idOrdemServico);
 
 	boolean existsByIdOrdemServicoAndStatus(UUID idOrdemServico, StatusOrcamento status);
 
