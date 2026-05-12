@@ -1,18 +1,22 @@
 package com.postech.workshop_service.api.controllers;
 
+import com.postech.workshop_service.api.dtos.AdicionarItemOrdemServicoRequest;
 import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
 import com.postech.workshop_service.api.dtos.HistoricoStatusOrdemServicoResponse;
 import com.postech.workshop_service.api.dtos.OrdemServicoDetalheResponse;
 import com.postech.workshop_service.api.dtos.OrdemServicoResponse;
 import com.postech.workshop_service.api.dtos.PaginaOrdensServicoResponse;
 import com.postech.workshop_service.api.dtos.StatusOrdemServicoResponse;
+import com.postech.workshop_service.application.usecases.AdicionarItemOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.BuscarOrdemServicoPorIdUseCase;
 import com.postech.workshop_service.application.usecases.ConsultarHistoricoOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.ConsultarStatusOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.CriarOrdemServicoUseCase;
+import com.postech.workshop_service.application.usecases.EncerrarDiagnosticoUseCase;
 import com.postech.workshop_service.application.usecases.EntregarVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.FinalizarExecucaoUseCase;
 import com.postech.workshop_service.application.usecases.FinalizarServicoOrdemUseCase;
+import com.postech.workshop_service.application.usecases.IniciarDiagnosticoUseCase;
 import com.postech.workshop_service.application.usecases.IniciarExecucaoUseCase;
 import com.postech.workshop_service.application.usecases.IniciarServicoOrdemUseCase;
 import com.postech.workshop_service.application.usecases.ListarMinhasOrdensServicoUseCase;
@@ -78,6 +82,12 @@ public class OrdemServicoController {
 
 	private final FinalizarServicoOrdemUseCase finalizarServicoOrdemUseCase;
 
+	private final IniciarDiagnosticoUseCase iniciarDiagnosticoUseCase;
+
+	private final EncerrarDiagnosticoUseCase encerrarDiagnosticoUseCase;
+
+	private final AdicionarItemOrdemServicoUseCase adicionarItemOrdemServicoUseCase;
+
 	/**
 	 * Construtor para injecao de dependencias.
 	 * @param criarOrdemServicoUseCase caso de uso de criacao da OS.
@@ -101,7 +111,9 @@ public class OrdemServicoController {
 			EntregarVeiculoUseCase entregarVeiculoUseCase,
 			ConsultarHistoricoOrdemServicoUseCase consultarHistoricoOrdemServicoUseCase,
 			IniciarServicoOrdemUseCase iniciarServicoOrdemUseCase,
-			FinalizarServicoOrdemUseCase finalizarServicoOrdemUseCase) {
+			FinalizarServicoOrdemUseCase finalizarServicoOrdemUseCase,
+			IniciarDiagnosticoUseCase iniciarDiagnosticoUseCase, EncerrarDiagnosticoUseCase encerrarDiagnosticoUseCase,
+			AdicionarItemOrdemServicoUseCase adicionarItemOrdemServicoUseCase) {
 		this.criarOrdemServicoUseCase = criarOrdemServicoUseCase;
 		this.buscarOrdemServicoPorIdUseCase = buscarOrdemServicoPorIdUseCase;
 		this.listarOrdensServicoUseCase = listarOrdensServicoUseCase;
@@ -113,6 +125,9 @@ public class OrdemServicoController {
 		this.consultarHistoricoOrdemServicoUseCase = consultarHistoricoOrdemServicoUseCase;
 		this.iniciarServicoOrdemUseCase = iniciarServicoOrdemUseCase;
 		this.finalizarServicoOrdemUseCase = finalizarServicoOrdemUseCase;
+		this.iniciarDiagnosticoUseCase = iniciarDiagnosticoUseCase;
+		this.encerrarDiagnosticoUseCase = encerrarDiagnosticoUseCase;
+		this.adicionarItemOrdemServicoUseCase = adicionarItemOrdemServicoUseCase;
 	}
 
 	/**
@@ -221,6 +236,65 @@ public class OrdemServicoController {
 	public ResponseEntity<StatusOrdemServicoResponse> consultarStatus(@PathVariable UUID id) {
 		OrdemServico ordem = consultarStatusOrdemServicoUseCase.executar(id);
 		return ResponseEntity.ok(StatusOrdemServicoResponse.from(ordem));
+	}
+
+	@PatchMapping("/{id}/iniciar-diagnostico")
+	@PreAuthorize("hasRole('MECANICO')")
+	@Operation(summary = "Iniciar diagnostico da OS",
+			description = "Mecanico inicia a inspecao tecnica do veiculo apos a recepcao. Restrito ao perfil MECANICO.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Diagnostico iniciado",
+					content = @Content(schema = @Schema(implementation = OrdemServicoResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada"),
+			@ApiResponse(responseCode = "422", description = "OS nao esta em RECEBIDO") })
+	public ResponseEntity<OrdemServicoResponse> iniciarDiagnostico(@PathVariable UUID id) {
+		OrdemServico ordemServico = iniciarDiagnosticoUseCase.executar(id);
+		return ResponseEntity.ok(OrdemServicoResponse.from(ordemServico));
+	}
+
+	@PatchMapping("/{id}/encerrar-diagnostico")
+	@PreAuthorize("hasRole('MECANICO')")
+	@Operation(summary = "Encerrar diagnostico da OS",
+			description = "Mecanico encerra a inspecao tecnica e avanca a OS para composicao tecnica. Restrito ao perfil MECANICO.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Diagnostico encerrado",
+					content = @Content(schema = @Schema(implementation = OrdemServicoResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada"),
+			@ApiResponse(responseCode = "422", description = "OS nao esta em EM_DIAGNOSTICO") })
+	public ResponseEntity<OrdemServicoResponse> encerrarDiagnostico(@PathVariable UUID id) {
+		OrdemServico ordemServico = encerrarDiagnosticoUseCase.executar(id);
+		return ResponseEntity.ok(OrdemServicoResponse.from(ordemServico));
+	}
+
+	@PostMapping("/{id}/itens")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
+	@Operation(summary = "Adicionar item a composicao tecnica",
+			description = "Adiciona um servico ou peca a composicao tecnica de uma OS em EM_COMPOSICAO.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Item adicionado",
+					content = @Content(schema = @Schema(implementation = OrdemServicoDetalheResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico, servico ou peca nao encontrados"),
+			@ApiResponse(responseCode = "422", description = "OS nao esta em EM_COMPOSICAO ou payload invalido") })
+	public ResponseEntity<OrdemServicoDetalheResponse> adicionarItem(@PathVariable UUID id,
+			@RequestBody @Valid AdicionarItemOrdemServicoRequest request) {
+		OrdemServico ordemServico;
+		if (request.getTipo() == AdicionarItemOrdemServicoRequest.TipoItem.SERVICO) {
+			if (request.getServicoId() == null) {
+				throw new com.postech.workshop_service.application.exceptions.RegraDeNegocioException(
+						"O identificador do servico e obrigatorio para itens do tipo SERVICO.");
+			}
+			ordemServico = adicionarItemOrdemServicoUseCase.executarServico(id, request.getServicoId(),
+					request.getQuantidade());
+		}
+		else {
+			if (request.getPecaId() == null) {
+				throw new com.postech.workshop_service.application.exceptions.RegraDeNegocioException(
+						"O identificador da peca e obrigatorio para itens do tipo PECA.");
+			}
+			ordemServico = adicionarItemOrdemServicoUseCase.executarPeca(id, request.getPecaId(),
+					request.getQuantidade());
+		}
+		return ResponseEntity.ok(OrdemServicoDetalheResponse.from(ordemServico));
 	}
 
 	@PatchMapping("/{id}/iniciar-execucao")

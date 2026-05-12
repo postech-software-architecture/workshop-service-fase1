@@ -27,7 +27,7 @@ class OrdemServicoTest {
 		assertNotNull(ordemServico.getId());
 		assertEquals(clienteId, ordemServico.getIdCliente());
 		assertEquals(veiculoId, ordemServico.getIdVeiculo());
-		assertEquals(StatusOrdemServico.EM_COMPOSICAO, ordemServico.getStatus());
+		assertEquals(StatusOrdemServico.RECEBIDO, ordemServico.getStatus());
 		assertTrue(ordemServico.getItensComposicao().isEmpty());
 		assertNotNull(ordemServico.getDataCriacao());
 		assertEquals(ordemServico.getDataCriacao(), ordemServico.getDataUltimaAtualizacao());
@@ -85,7 +85,7 @@ class OrdemServicoTest {
 
 		assertEquals("OS-2026-00001", os.getNumero());
 		assertEquals("Barulho no motor", os.getObservacoes());
-		assertEquals(StatusOrdemServico.EM_COMPOSICAO, os.getStatus());
+		assertEquals(StatusOrdemServico.RECEBIDO, os.getStatus());
 		assertEquals(1, os.getItensComposicao().size());
 	}
 
@@ -130,7 +130,7 @@ class OrdemServicoTest {
 
 	@Test
 	void shouldRejectCloseCompositionWithoutItems() {
-		OrdemServico ordemServico = new OrdemServico(null, UUID.randomUUID(), UUID.randomUUID());
+		OrdemServico ordemServico = criarOrdemServico(StatusOrdemServico.EM_COMPOSICAO, List.of());
 
 		RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
 				ordemServico::encerrarComposicao);
