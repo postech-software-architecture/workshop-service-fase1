@@ -2,16 +2,22 @@ package com.postech.workshop_service.application.usecases;
 
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.entities.Estoque;
+import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
+import com.postech.workshop_service.domain.repositories.EstoqueRepository;
+import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
+import com.postech.workshop_service.domain.valueobjects.TipoMovimentacao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -30,20 +36,20 @@ public class AprovarOrcamentoUseCase {
 
 	private final RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
 
-	/**
-	 * Construtor para injecao das dependencias do caso de uso.
-	 * @param orcamentoRepository repositorio de orcamentos.
-	 * @param ordemServicoRepository repositorio de ordens.
-	 * @param mecanicoNotificationService service de notificacao do mecanico.
-	 * @param registrarHistoricoUseCase caso de uso para registro de historico.
-	 */
+	private final EstoqueRepository estoqueRepository;
+
+	private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+
 	public AprovarOrcamentoUseCase(OrcamentoRepository orcamentoRepository,
 			OrdemServicoRepository ordemServicoRepository, MecanicoNotificationService mecanicoNotificationService,
-			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase) {
+			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase, EstoqueRepository estoqueRepository,
+			MovimentacaoEstoqueRepository movimentacaoEstoqueRepository) {
 		this.orcamentoRepository = orcamentoRepository;
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.mecanicoNotificationService = mecanicoNotificationService;
 		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
+		this.estoqueRepository = estoqueRepository;
+		this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
 	}
 
 	/**
@@ -66,6 +72,7 @@ public class AprovarOrcamentoUseCase {
 		ordemServicoRepository.salvar(ordemServico);
 		registrarHistoricoUseCase.executar(ordemServico.getId(), statusAnterior, ordemServico.getStatus());
 		Orcamento orcamentoPersistido = orcamentoRepository.salvar(orcamento);
+		consumirReservas(ordemServico);
 		try {
 			mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);
 		}
@@ -92,6 +99,22 @@ public class AprovarOrcamentoUseCase {
 		if (orcamento.getStatus() != com.postech.workshop_service.domain.entities.StatusOrcamento.PENDENTE_APROVACAO) {
 			throw new RegraDeNegocioException(
 					"Nao e permitido aprovar um orcamento com status " + orcamento.getStatus() + ".");
+		}
+	}
+
+	private void consumirReservas(OrdemServico ordemServico) {
+		List<MovimentacaoEstoque> reservas = movimentacaoEstoqueRepository.listarPorOrdemServico(ordemServico.getId())
+			.stream()
+			.filter(mov -> mov.getTipo() == TipoMovimentacao.RESERVA)
+			.toList();
+		String motivo = "Baixa por aprovacao de orcamento da OS " + ordemServico.getNumero();
+		for (MovimentacaoEstoque reserva : reservas) {
+			Estoque estoque = estoqueRepository.buscarPorId(reserva.getEstoqueId(), true)
+				.orElseThrow(
+						() -> new RecursoNaoEncontradoException("Estoque nao encontrado para consumo da reserva."));
+			MovimentacaoEstoque saida = estoque.consumirReserva(reserva.getQuantidade(), motivo, ordemServico.getId(),
+					reserva.getOrcamentoId());
+			movimentacaoEstoqueRepository.salvar(saida);
 		}
 	}
 
