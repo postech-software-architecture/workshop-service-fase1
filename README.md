@@ -190,11 +190,14 @@ mvn spring-boot:run
 
 ### Documentação OpenAPI
 
-- `http://localhost:8080/swagger-ui/index.html`
+- Swagger UI local: `http://localhost:8080/swagger-ui/index.html`
+- Contrato OpenAPI versionado no repositório: `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+
+A documentação cobre os fluxos de autenticação, clientes, veículos, serviços, peças e insumos, estoque, ordens de serviço, orçamentos e métricas administrativas. Para acessar o Swagger UI localmente, suba a aplicação com `JWT_SECRET` configurado conforme a seção de execução da aplicação.
 
 ## Observações do MVP
 
-- Os endpoints de veículos estão liberados no MVP e preparados para futura restrição de acesso.
+- Os endpoints da API usam autenticação JWT e controle de acesso por perfil conforme descrito no contrato OpenAPI.
 - A remoção de veículos é lógica, preservando rastreabilidade e referências históricas.
 - O projeto representa a primeira fase da construção do domínio da oficina mecânica.
 

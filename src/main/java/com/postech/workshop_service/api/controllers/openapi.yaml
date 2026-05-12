@@ -1433,6 +1433,171 @@ paths:
         '404':
           description: OS não encontrada
 
+  /api/v1/ordens-servico/{id}/iniciar-diagnostico:
+    patch:
+      tags: [Ordens de Serviço]
+      summary: Iniciar diagnóstico da OS
+      description: >
+        Restrito ao perfil MECANICO. Inicia a inspeção técnica do veículo após
+        a recepção da ordem de serviço.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Identificador único da ordem de serviço
+      responses:
+        '200':
+          description: Diagnóstico iniciado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão (requer perfil MECANICO)
+        '404':
+          description: Ordem de serviço não encontrada
+        '422':
+          description: OS não está em estado que permita início de diagnóstico
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/ordens-servico/{id}/encerrar-diagnostico:
+    patch:
+      tags: [Ordens de Serviço]
+      summary: Encerrar diagnóstico da OS
+      description: >
+        Restrito ao perfil MECANICO. Encerra a inspeção técnica e avança a ordem
+        para composição técnica.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Identificador único da ordem de serviço
+      responses:
+        '200':
+          description: Diagnóstico encerrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão (requer perfil MECANICO)
+        '404':
+          description: Ordem de serviço não encontrada
+        '422':
+          description: OS não está em diagnóstico
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/ordens-servico/{id}/itens:
+    post:
+      tags: [Ordens de Serviço]
+      summary: Adicionar item à composição técnica
+      description: >
+        Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO. Adiciona um
+        serviço ou peça à composição técnica de uma OS em composição.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Identificador único da ordem de serviço
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdicionarItemOrdemServicoRequest'
+            examples:
+              servico:
+                summary: Adicionar serviço
+                value:
+                  tipo: SERVICO
+                  servicoId: "00000000-0000-0000-0000-000000000001"
+                  quantidade: 1
+              peca:
+                summary: Adicionar peça
+                value:
+                  tipo: PECA
+                  pecaId: "00000000-0000-0000-0000-000000000002"
+                  quantidade: 2
+      responses:
+        '200':
+          description: Item adicionado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoDetalheResponse'
+        '400':
+          description: Payload inválido ou mal formado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+        '404':
+          description: Ordem de serviço, serviço ou peça não encontrados
+        '422':
+          description: OS não está em composição ou item informado viola regra de negócio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/ordens-servico/{id}/encerrar-composicao:
+    patch:
+      tags: [Ordens de Serviço]
+      summary: Encerrar composição técnica da OS
+      description: >
+        Restrito ao perfil MECANICO. Encerra a composição técnica e gera um
+        orçamento aguardando aprovação.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Identificador único da ordem de serviço
+      responses:
+        '200':
+          description: Composição encerrada e orçamento gerado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão (requer perfil MECANICO)
+        '404':
+          description: Ordem de serviço não encontrada
+        '422':
+          description: OS não está em composição ou não possui itens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/v1/ordens-servico/{id}/iniciar-execucao:
     patch:
       tags: [Ordens de Serviço]
@@ -2560,6 +2725,33 @@ components:
           type: number
           minimum: 0.01
           example: 2.0
+
+    AdicionarItemOrdemServicoRequest:
+      type: object
+      description: Dados para adicionar serviço ou peça à composição técnica da OS
+      required: [tipo]
+      properties:
+        tipo:
+          type: string
+          enum: [SERVICO, PECA]
+          description: Tipo do item a adicionar
+          example: SERVICO
+        servicoId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Identificador do serviço do catálogo, obrigatório para tipo SERVICO
+        pecaId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Identificador da peça do catálogo, obrigatório para tipo PECA
+        quantidade:
+          type: number
+          minimum: 0.01
+          nullable: true
+          description: Quantidade do item; para serviços, quando omitida, o domínio assume 1
+          example: 1
 
     CriarOrdemServicoRequest:
       type: object

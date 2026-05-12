@@ -17,10 +17,10 @@
 
 **Purpose**: Establish the documentation baseline and avoid editing from stale assumptions.
 
-- [ ] T001 Confirm the active branch and pending changes before editing using repository status for `specs/010-update-openapi-readme/tasks.md`
-- [ ] T002 [P] Review the endpoint inventory contract in `specs/010-update-openapi-readme/contracts/openapi-documentation-contract.md`
-- [ ] T003 [P] Review the current OpenAPI structure, tags, shared schemas, and response conventions in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T004 [P] Review current README OpenAPI and execution guidance in `README.md`
+- [X] T001 Confirm the active branch and pending changes before editing using repository status for `specs/010-update-openapi-readme/tasks.md`
+- [X] T002 [P] Review the endpoint inventory contract in `specs/010-update-openapi-readme/contracts/openapi-documentation-contract.md`
+- [X] T003 [P] Review the current OpenAPI structure, tags, shared schemas, and response conventions in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T004 [P] Review current README OpenAPI and execution guidance in `README.md`
 
 ---
 
@@ -30,17 +30,17 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T005 Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/AuthController.java`
-- [ ] T006 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/ClienteController.java`
-- [ ] T007 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/VeiculoController.java`
-- [ ] T008 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/ServicoController.java`
-- [ ] T009 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
-- [ ] T010 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/EstoqueController.java`
-- [ ] T011 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java`
-- [ ] T012 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/OrcamentoController.java`
-- [ ] T013 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/MetricaController.java`
-- [ ] T014 Extract error response status codes and response body conventions from `src/main/java/com/postech/workshop_service/api/controllers/GlobalExceptionHandler.java`
-- [ ] T015 Cross-check controller inventory against existing integration coverage in `src/test/java/com/postech/workshop_service/api/controllers/ControllerCoverageTest.java`
+- [X] T005 Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/AuthController.java`
+- [X] T006 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/ClienteController.java`
+- [X] T007 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/VeiculoController.java`
+- [X] T008 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/ServicoController.java`
+- [X] T009 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/PecaInsumoController.java`
+- [X] T010 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/EstoqueController.java`
+- [X] T011 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/OrdemServicoController.java`
+- [X] T012 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/OrcamentoController.java`
+- [X] T013 [P] Extract current controller routes, methods, parameters, request bodies, and authorization annotations from `src/main/java/com/postech/workshop_service/api/controllers/MetricaController.java`
+- [X] T014 Extract error response status codes and response body conventions from `src/main/java/com/postech/workshop_service/api/controllers/GlobalExceptionHandler.java`
+- [X] T015 Cross-check controller inventory against existing integration coverage in `src/test/java/com/postech/workshop_service/api/controllers/ControllerCoverageTest.java`
 
 **Checkpoint**: Endpoint inventory and shared error conventions are known and ready for story work.
 
@@ -54,16 +54,16 @@
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Add or correct authentication operations, request schemas, response schemas, security exceptions, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T017 [US1] Add or correct customer operations, parameters, request schemas, response schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T018 [US1] Add or correct vehicle operations, parameters, request schemas, response schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T019 [US1] Add or correct service catalog operations, parameters, request schemas, response schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T020 [US1] Add or correct parts, inventory, and stock movement operations, parameters, schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T021 [US1] Add or correct service order lifecycle operations, parameters, request schemas, response schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T022 [US1] Add or correct budget approval, rejection, cancellation, and listing operations with schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T023 [US1] Add or correct metrics operations, query parameters, response schemas, authorization responses, and examples when required in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T024 [US1] Ensure shared schemas for requests, responses, paginated payloads, validation errors, business errors, and authentication errors are present and consistently referenced in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T025 [US1] Verify the endpoint inventory from `specs/010-update-openapi-readme/contracts/openapi-documentation-contract.md` is fully represented in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T016 [US1] Add or correct authentication operations, request schemas, response schemas, security exceptions, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T017 [US1] Add or correct customer operations, parameters, request schemas, response schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T018 [US1] Add or correct vehicle operations, parameters, request schemas, response schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T019 [US1] Add or correct service catalog operations, parameters, request schemas, response schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T020 [US1] Add or correct parts, inventory, and stock movement operations, parameters, schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T021 [US1] Add or correct service order lifecycle operations, parameters, request schemas, response schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T022 [US1] Add or correct budget approval, rejection, cancellation, and listing operations with schemas, errors, and required examples in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T023 [US1] Add or correct metrics operations, query parameters, response schemas, authorization responses, and examples when required in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T024 [US1] Ensure shared schemas for requests, responses, paginated payloads, validation errors, business errors, and authentication errors are present and consistently referenced in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T025 [US1] Verify the endpoint inventory from `specs/010-update-openapi-readme/contracts/openapi-documentation-contract.md` is fully represented in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
 
 **Checkpoint**: User Story 1 is complete when every public endpoint is represented in OpenAPI and can be reviewed without reading controller source.
 
@@ -77,12 +77,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Normalize tag names, summaries, descriptions, and operation ordering across all path groups in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T027 [US2] Normalize path, query, and request body parameter descriptions across all operations in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T028 [US2] Normalize response descriptions for 200, 201, 204, 400, 401, 403, 404, 409, and 422 where applicable in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T029 [US2] Apply the clarified example rule from `specs/010-update-openapi-readme/spec.md` to all request-body operations, complex responses, and critical business flows in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T030 [US2] Remove obsolete, duplicated, or contradictory schema definitions from `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T031 [US2] Validate that authorization notes for ADMINISTRADOR, CLIENTE, and public authentication flows match controller behavior in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T026 [US2] Normalize tag names, summaries, descriptions, and operation ordering across all path groups in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T027 [US2] Normalize path, query, and request body parameter descriptions across all operations in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T028 [US2] Normalize response descriptions for 200, 201, 204, 400, 401, 403, 404, 409, and 422 where applicable in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T029 [US2] Apply the clarified example rule from `specs/010-update-openapi-readme/spec.md` to all request-body operations, complex responses, and critical business flows in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T030 [US2] Remove obsolete, duplicated, or contradictory schema definitions from `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T031 [US2] Validate that authorization notes for ADMINISTRADOR, CLIENTE, and public authentication flows match controller behavior in `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
 
 **Checkpoint**: User Story 2 is complete when equivalent operations read as one coherent contract and no obvious naming or error-format drift remains.
 
@@ -96,10 +96,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Update the OpenAPI documentation section with Swagger UI URL and the versioned YAML source path in `README.md`
-- [ ] T033 [US3] Add concise API domain coverage guidance without duplicating the full endpoint contract in `README.md`
-- [ ] T034 [US3] Ensure JWT setup, application startup, and documentation access instructions are consistent and non-conflicting in `README.md`
-- [ ] T035 [US3] Remove or update stale MVP observations that contradict the current documented API scope in `README.md`
+- [X] T032 [US3] Update the OpenAPI documentation section with Swagger UI URL and the versioned YAML source path in `README.md`
+- [X] T033 [US3] Add concise API domain coverage guidance without duplicating the full endpoint contract in `README.md`
+- [X] T034 [US3] Ensure JWT setup, application startup, and documentation access instructions are consistent and non-conflicting in `README.md`
+- [X] T035 [US3] Remove or update stale MVP observations that contradict the current documented API scope in `README.md`
 
 **Checkpoint**: User Story 3 is complete when README guidance supports API discovery in under 10 minutes without duplicating the OpenAPI contract.
 
@@ -109,11 +109,11 @@
 
 **Purpose**: Final validation across OpenAPI, README, and existing project behavior.
 
-- [ ] T036 [P] Validate YAML structure and indentation by reviewing `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
-- [ ] T037 [P] Validate README links and relative paths for API documentation in `README.md`
-- [ ] T038 Run the existing Maven test suite using `pom.xml`
-- [ ] T039 Compare the final implementation against quickstart completion criteria in `specs/010-update-openapi-readme/quickstart.md`
-- [ ] T040 Record any validation limitation or intentionally deferred follow-up in `specs/010-update-openapi-readme/tasks.md`
+- [X] T036 [P] Validate YAML structure and indentation by reviewing `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+- [X] T037 [P] Validate README links and relative paths for API documentation in `README.md`
+- [X] T038 Run the existing Maven test suite using `pom.xml`
+- [X] T039 Compare the final implementation against quickstart completion criteria in `specs/010-update-openapi-readme/quickstart.md`
+- [X] T040 Record any validation limitation or intentionally deferred follow-up in `specs/010-update-openapi-readme/tasks.md`
 
 ---
 
@@ -192,3 +192,5 @@ Task: "Validate README links and relative paths for API documentation in README.
 - Keep this feature documentary only; do not change controller behavior, use cases, entities, migrations, or authorization rules.
 - Preserve the existing OpenAPI style unless it conflicts with the feature requirements.
 - Commit after each logical group when repository policy allows it.
+- Validation: `mvn test` passed with 319 tests, 0 failures, 0 errors, 0 skipped.
+- Validation limitation: no external YAML parser was available in the environment (`ruby` not installed and the Windows `python` alias did not execute). YAML structure was reviewed by inspection and endpoint coverage was checked against the contract inventory.
