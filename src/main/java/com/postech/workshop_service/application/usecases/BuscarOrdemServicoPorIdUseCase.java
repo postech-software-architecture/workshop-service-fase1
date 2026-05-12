@@ -2,36 +2,49 @@ package com.postech.workshop_service.application.usecases;
 
 import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.domain.entities.OrdemServico;
+import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 /**
- * Caso de uso responsavel por recuperar uma ordem de servico pelo identificador tecnico.
+ * Caso de uso responsavel por recuperar uma ordem de servico pelo identificador
+ * tecnico.
  */
 @Service
 public class BuscarOrdemServicoPorIdUseCase {
 
 	private final OrdemServicoRepository ordemServicoRepository;
 
+	private final OrcamentoRepository orcamentoRepository;
+
 	/**
 	 * Construtor para injecao de dependencias.
+	 * 
 	 * @param ordemServicoRepository repositorio de ordens de servico.
+	 * @param orcamentoRepository    repositorio de orcamentos.
 	 */
-	public BuscarOrdemServicoPorIdUseCase(OrdemServicoRepository ordemServicoRepository) {
+	public BuscarOrdemServicoPorIdUseCase(OrdemServicoRepository ordemServicoRepository,
+			OrcamentoRepository orcamentoRepository) {
 		this.ordemServicoRepository = ordemServicoRepository;
+		this.orcamentoRepository = orcamentoRepository;
 	}
 
 	/**
-	 * Recupera a ordem de servico identificada.
+	 * Recupera a ordem de servico identificorricada.
+	 * 
 	 * @param id identificador tecnico da ordem.
 	 * @return ordem de servico encontrada.
 	 * @throws RecursoNaoEncontradoException quando a ordem nao existir.
 	 */
 	public OrdemServico executar(UUID id) {
-		return ordemServicoRepository.buscarPorId(id)
-			.orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de servico nao encontrada."));
+		OrdemServico ordem = ordemServicoRepository.buscarPorId(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de servico nao encontrada."));
+
+		orcamentoRepository.listarPorOrdemServico(id).stream().findFirst().ifPresent(ordem::vincularOrcamento);
+
+		return ordem;
 	}
 
 }

@@ -7,6 +7,7 @@ import com.postech.workshop_service.infrastructure.persistence.mappers.Orcamento
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,6 +40,15 @@ public class OrcamentoRepositoryImpl implements OrcamentoRepository {
 	@Override
 	public Optional<Orcamento> buscarPorId(UUID id) {
 		return jpaOrcamentoRepository.findById(id).map(orcamentoMapper::toDomain);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Orcamento> listarPorOrdemServico(UUID idOrdemServico) {
+		return jpaOrcamentoRepository.findByIdOrdemServicoOrderByDataCriacaoDesc(idOrdemServico)
+			.stream()
+			.map(orcamentoMapper::toDomain)
+			.toList();
 	}
 
 	@Override

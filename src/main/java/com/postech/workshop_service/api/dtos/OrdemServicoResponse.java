@@ -160,6 +160,13 @@ public class OrdemServicoResponse {
 			.dataInicioExecucao(ordemServico.getDataInicioExecucao())
 			.dataFinalizacao(ordemServico.getDataFinalizacao())
 			.dataEntrega(ordemServico.getDataEntrega())
+			.orcamento(ordemServico.getOrcamentoAtual() == null ? null
+					: OrcamentoResumoResponse.builder()
+						.id(ordemServico.getOrcamentoAtual().getId())
+						.valorTotal(ordemServico.getOrcamentoAtual().getValor())
+						.status(ordemServico.getOrcamentoAtual().getStatus().name())
+						.dataCriacao(ordemServico.getOrcamentoAtual().getDataCriacao())
+						.build())
 			.build();
 	}
 

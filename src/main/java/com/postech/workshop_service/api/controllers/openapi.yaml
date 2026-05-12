@@ -1649,6 +1649,37 @@ paths:
 
   # ─── Orçamentos ────────────────────────────────────────────────────────────
 
+  /api/v1/orcamentos/ordem-servico/{idOrdemServico}:
+    get:
+      tags: [OrÃ§amentos]
+      summary: Listar orÃ§amentos por ordem de serviÃ§o
+      description: >
+        Restrito aos perfis ADMINISTRADOR, ATENDENTE e CLIENTE.
+        Retorna os orÃ§amentos vinculados a uma ordem de serviÃ§o existente.
+      parameters:
+        - name: idOrdemServico
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Identificador Ãºnico da ordem de serviÃ§o
+      responses:
+        '200':
+          description: OrÃ§amentos vinculados Ã  ordem
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrcamentoResponse'
+        '401':
+          description: NÃ£o autenticado
+        '403':
+          description: Sem permissÃ£o
+        '404':
+          description: Ordem de serviÃ§o nÃ£o encontrada
+
   /api/v1/orcamentos/{id}/aprovar:
     patch:
       tags: [Orçamentos]
@@ -2716,6 +2747,8 @@ components:
         dataUltimaAtualizacao:
           type: string
           format: date-time
+        orcamento:
+          $ref: '#/components/schemas/OrcamentoResumoOSResponse'
 
     OrdemServicoResumoResponse:
       type: object

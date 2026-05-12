@@ -2,6 +2,7 @@ package com.postech.workshop_service.domain.repositories;
 
 import com.postech.workshop_service.domain.entities.Orcamento;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +24,13 @@ public interface OrcamentoRepository {
 	 * @return orcamento encontrado, se existir.
 	 */
 	Optional<Orcamento> buscarPorId(UUID id);
+
+	/**
+	 * Lista os orcamentos vinculados a uma ordem de servico.
+	 * @param idOrdemServico identificador da ordem de servico.
+	 * @return orcamentos vinculados a ordem.
+	 */
+	List<Orcamento> listarPorOrdemServico(UUID idOrdemServico);
 
 	/**
 	 * Verifica se ja existe um orcamento pendente para a ordem informada.
