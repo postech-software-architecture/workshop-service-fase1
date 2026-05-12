@@ -21,7 +21,7 @@ public class OrdemServico extends EntidadeBase {
 
 	private StatusOrdemServico status;
 
-	private final List<ItemComposicaoTecnica> itensComposicao;
+	private List<ItemComposicaoTecnica> itensComposicao;
 
 	private final String numero;
 
@@ -44,7 +44,7 @@ public class OrdemServico extends EntidadeBase {
 		super(id != null ? id : UUID.randomUUID());
 		this.idCliente = validarIdentificador(idCliente, "O identificador do cliente e obrigatorio.");
 		this.idVeiculo = validarIdentificador(idVeiculo, "O identificador do veiculo e obrigatorio.");
-		this.status = StatusOrdemServico.EM_COMPOSICAO;
+		this.status = StatusOrdemServico.RECEBIDO;
 		this.itensComposicao = List.of();
 		this.numero = null;
 		this.observacoes = null;
@@ -70,7 +70,7 @@ public class OrdemServico extends EntidadeBase {
 		this.idVeiculo = validarIdentificador(idVeiculo, "O identificador do veiculo e obrigatorio.");
 		this.numero = validarNumero(numero);
 		this.observacoes = sanitizarOpcional(observacoes);
-		this.status = StatusOrdemServico.EM_COMPOSICAO;
+		this.status = StatusOrdemServico.RECEBIDO;
 		this.itensComposicao = validarItensComposicao(itensComposicao);
 		this.dataInicioExecucao = null;
 		this.dataFinalizacao = null;
@@ -129,6 +129,48 @@ public class OrdemServico extends EntidadeBase {
 		this.dataInicioExecucao = dataInicioExecucao;
 		this.dataFinalizacao = dataFinalizacao;
 		this.dataEntrega = dataEntrega;
+	}
+
+	/**
+	 * Inicia o diagnostico do veiculo apos a recepcao.
+	 */
+	public void iniciarDiagnostico() {
+		if (this.status != StatusOrdemServico.RECEBIDO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido iniciar diagnostico de uma ordem de servico com status " + this.status + ".");
+		}
+		this.status = StatusOrdemServico.EM_DIAGNOSTICO;
+		atualizarDataUltimaAtualizacao();
+	}
+
+	/**
+	 * Encerra o diagnostico e avanca para a fase de composicao tecnica.
+	 */
+	public void encerrarDiagnostico() {
+		if (this.status != StatusOrdemServico.EM_DIAGNOSTICO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido encerrar diagnostico de uma ordem de servico com status " + this.status + ".");
+		}
+		this.status = StatusOrdemServico.EM_COMPOSICAO;
+		atualizarDataUltimaAtualizacao();
+	}
+
+	/**
+	 * Adiciona um item a composicao tecnica da ordem de servico.
+	 * @param item item a ser adicionado.
+	 */
+	public void adicionarItem(ItemComposicaoTecnica item) {
+		if (this.status != StatusOrdemServico.EM_COMPOSICAO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido adicionar itens a uma ordem de servico com status " + this.status + ".");
+		}
+		if (item == null) {
+			throw new IllegalArgumentException("Nao e permitido informar item nulo na ordem de servico.");
+		}
+		List<ItemComposicaoTecnica> novaLista = new ArrayList<>(this.itensComposicao);
+		novaLista.add(item);
+		this.itensComposicao = List.copyOf(novaLista);
+		atualizarDataUltimaAtualizacao();
 	}
 
 	/**

@@ -116,7 +116,7 @@ class OrdemServicoClienteIT extends PostgresTestContainer {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.id").value(osId.toString()))
 			.andExpect(jsonPath("$.numero").value(org.hamcrest.Matchers.startsWith("OS-")))
-			.andExpect(jsonPath("$.status").value("AGUARDANDO_RESPOSTA_CLIENTE"));
+			.andExpect(jsonPath("$.status").value("RECEBIDO"));
 	}
 
 	@Test
@@ -168,14 +168,10 @@ class OrdemServicoClienteIT extends PostgresTestContainer {
 	}
 
 	private UUID criarOsViaApi(String clienteDocumento, String placa) throws Exception {
-		UUID servicoId = criarServico("Servico " + placa, new BigDecimal("100.00"));
-
 		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()
 			.clienteDocumento(clienteDocumento)
 			.veiculoPlaca(placa)
 			.veiculo(CriarOrdemServicoRequest.DadosVeiculoRequest.builder().marca("VW").modelo("Gol").ano(2020).build())
-			.servicos(List
-				.of(CriarOrdemServicoRequest.ItemServicoRequest.builder().servicoId(servicoId).quantidade(1).build()))
 			.build();
 
 		MvcResult result = mockMvc

@@ -38,12 +38,13 @@ public class CriarOrdemServicoRequest {
 	private DadosVeiculoRequest veiculo;
 
 	@Valid
-	@NotEmpty(message = "A OS deve ter pelo menos um servico selecionado")
-	@Schema(description = "Servicos do catalogo a serem executados")
+	@Schema(description = "(Deprecated) Servicos do catalogo. A OS agora abre vazia em RECEBIDO; "
+			+ "itens devem ser adicionados via POST /ordens-servico/{id}/itens apos o diagnostico.")
 	private List<ItemServicoRequest> servicos;
 
 	@Valid
-	@Schema(description = "Pecas e insumos necessarios (opcional — podem ser adicionados apos diagnostico)")
+	@Schema(description = "(Deprecated) Pecas e insumos. A OS agora abre vazia em RECEBIDO; "
+			+ "itens devem ser adicionados via POST /ordens-servico/{id}/itens apos o diagnostico.")
 	private List<ItemPecaRequest> pecas;
 
 	@Schema(description = "Observacoes do atendente sobre o veiculo ou relato do cliente",
