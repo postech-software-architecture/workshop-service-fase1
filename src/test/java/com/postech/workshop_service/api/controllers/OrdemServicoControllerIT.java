@@ -307,6 +307,28 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 			.andExpect(jsonPath("$.status").value("EM_EXECUCAO"))
 			.andExpect(jsonPath("$.dataInicioExecucao").exists());
 
+		MvcResult detalheResult = mockMvc.perform(get("/api/v1/ordens-servico/{id}", osId))
+			.andExpect(status().isOk())
+			.andReturn();
+		JsonNode detalhe = objectMapper.readTree(detalheResult.getResponse().getContentAsString());
+		UUID idItemServico = UUID.fromString(detalhe.get("itens").get(0).get("id").asText());
+
+		mockMvc
+			.perform(patch("/api/v1/ordens-servico/{id}/itens/{idItem}/iniciar-servico", osId, idItemServico)
+				.with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
+					.user("mecanico")
+					.roles("MECANICO")))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.itens[0].statusExecucao").value("EM_EXECUCAO"));
+
+		mockMvc
+			.perform(patch("/api/v1/ordens-servico/{id}/itens/{idItem}/finalizar-servico", osId, idItemServico)
+				.with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
+					.user("mecanico")
+					.roles("MECANICO")))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.itens[0].statusExecucao").value("FINALIZADO"));
+
 		mockMvc.perform(patch("/api/v1/ordens-servico/{id}/finalizar-execucao", osId))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value("FINALIZADA"))

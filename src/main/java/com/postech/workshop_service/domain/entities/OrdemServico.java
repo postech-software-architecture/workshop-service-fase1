@@ -200,16 +200,82 @@ public class OrdemServico extends EntidadeBase {
 	}
 
 	/**
-	 * Finaliza a execucao tecnica de uma ordem em andamento.
+	 * Finaliza a execucao tecnica de uma ordem em andamento. Exige que todos os itens do
+	 * tipo SERVICO estejam com status FINALIZADO.
 	 */
 	public void finalizarExecucao() {
 		if (this.status != StatusOrdemServico.EM_EXECUCAO) {
 			throw new RegraDeNegocioException(
 					"Nao e permitido finalizar execucao de uma ordem de servico com status " + this.status + ".");
 		}
+		for (ItemComposicaoTecnica item : this.itensComposicao) {
+			if (item.isServico() && !item.estaFinalizado()) {
+				throw new RegraDeNegocioException(
+						"Nao e possivel finalizar a OS: existem servicos pendentes ou em execucao.");
+			}
+		}
 		this.status = StatusOrdemServico.FINALIZADA;
 		this.dataFinalizacao = LocalDateTime.now();
 		atualizarDataUltimaAtualizacao();
+	}
+
+	/**
+	 * Inicia a execucao de um item de servico individual da composicao tecnica. Apenas um
+	 * item de servico pode estar em execucao simultaneamente nesta ordem de servico.
+	 * @param idItem identificador do item de servico a ser iniciado.
+	 */
+	public void iniciarServico(UUID idItem) {
+		if (this.status != StatusOrdemServico.EM_EXECUCAO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido iniciar um servico em uma ordem de servico com status " + this.status + ".");
+		}
+		ItemComposicaoTecnica item = buscarItemPorId(idItem);
+		if (!item.isServico()) {
+			throw new RegraDeNegocioException("O item informado nao e um servico.");
+		}
+		if (item.getStatusExecucao() != StatusItemExecucao.PENDENTE) {
+			throw new RegraDeNegocioException("O servico ja foi iniciado ou finalizado.");
+		}
+		for (ItemComposicaoTecnica outro : this.itensComposicao) {
+			if (outro.isServico() && outro.estaEmExecucao() && !outro.getId().equals(item.getId())) {
+				throw new RegraDeNegocioException(
+						"Ja existe um servico em execucao nesta ordem. Finalize-o antes de iniciar outro.");
+			}
+		}
+		item.marcarInicioExecucao();
+		atualizarDataUltimaAtualizacao();
+	}
+
+	/**
+	 * Finaliza a execucao de um item de servico individual da composicao tecnica.
+	 * @param idItem identificador do item de servico a ser finalizado.
+	 */
+	public void finalizarServico(UUID idItem) {
+		if (this.status != StatusOrdemServico.EM_EXECUCAO) {
+			throw new RegraDeNegocioException(
+					"Nao e permitido finalizar um servico em uma ordem de servico com status " + this.status + ".");
+		}
+		ItemComposicaoTecnica item = buscarItemPorId(idItem);
+		if (!item.isServico()) {
+			throw new RegraDeNegocioException("O item informado nao e um servico.");
+		}
+		if (item.getStatusExecucao() != StatusItemExecucao.EM_EXECUCAO) {
+			throw new RegraDeNegocioException("O servico nao esta em execucao.");
+		}
+		item.marcarFinalizacao();
+		atualizarDataUltimaAtualizacao();
+	}
+
+	private ItemComposicaoTecnica buscarItemPorId(UUID idItem) {
+		if (idItem == null) {
+			throw new RegraDeNegocioException("Item de servico nao encontrado na ordem de servico.");
+		}
+		for (ItemComposicaoTecnica item : this.itensComposicao) {
+			if (idItem.equals(item.getId())) {
+				return item;
+			}
+		}
+		throw new RegraDeNegocioException("Item de servico nao encontrado na ordem de servico.");
 	}
 
 	/**

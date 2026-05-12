@@ -59,15 +59,19 @@ class MetricaControllerIT extends PostgresTestContainer {
 						""",
 				os2Id, clienteId, veiculoId);
 
-		jdbcTemplate.update("""
-				INSERT INTO ordens_servico_itens (ordem_servico_id, ordem_item, descricao, valor, tipo)
-				VALUES (?, 0, 'Troca de oleo e filtro', 180.00, 'SERVICO')
-				""", os1Id);
+		jdbcTemplate.update(
+				"""
+						INSERT INTO ordens_servico_itens (id, ordem_servico_id, ordem_item, descricao, valor, tipo, status_execucao, data_inicio_execucao, data_finalizacao)
+						VALUES (?, ?, 0, 'Troca de oleo e filtro', 180.00, 'SERVICO', 'FINALIZADO', now() - interval '90 minutes', now() - interval '30 minutes')
+						""",
+				UUID.randomUUID(), os1Id);
 
-		jdbcTemplate.update("""
-				INSERT INTO ordens_servico_itens (ordem_servico_id, ordem_item, descricao, valor, tipo)
-				VALUES (?, 0, 'Revisao de freios', 320.00, 'SERVICO')
-				""", os2Id);
+		jdbcTemplate.update(
+				"""
+						INSERT INTO ordens_servico_itens (id, ordem_servico_id, ordem_item, descricao, valor, tipo, status_execucao, data_inicio_execucao, data_finalizacao)
+						VALUES (?, ?, 0, 'Revisao de freios', 320.00, 'SERVICO', 'FINALIZADO', now() - interval '50 minutes', now() - interval '10 minutes')
+						""",
+				UUID.randomUUID(), os2Id);
 	}
 
 	@Test
