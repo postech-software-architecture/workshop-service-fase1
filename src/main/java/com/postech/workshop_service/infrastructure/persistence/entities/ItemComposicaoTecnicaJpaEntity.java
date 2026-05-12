@@ -1,5 +1,6 @@
 package com.postech.workshop_service.infrastructure.persistence.entities;
 
+import com.postech.workshop_service.domain.entities.StatusItemExecucao;
 import com.postech.workshop_service.domain.entities.TipoItemComposicaoTecnica;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -22,8 +24,12 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ItemComposicaoTecnicaJpaEntity {
+
+	@EqualsAndHashCode.Include
+	@Column(name = "id", nullable = false)
+	private UUID id;
 
 	@Column(nullable = false)
 	private String descricao;
@@ -37,5 +43,18 @@ public class ItemComposicaoTecnicaJpaEntity {
 
 	@Column(name = "peca_insumo_id")
 	private UUID idPecaInsumo;
+
+	@Column(name = "servico_id")
+	private UUID idServico;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status_execucao", length = 20)
+	private StatusItemExecucao statusExecucao;
+
+	@Column(name = "data_inicio_execucao")
+	private LocalDateTime dataInicioExecucao;
+
+	@Column(name = "data_finalizacao")
+	private LocalDateTime dataFinalizacao;
 
 }

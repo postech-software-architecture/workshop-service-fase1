@@ -12,7 +12,9 @@ import com.postech.workshop_service.application.usecases.ConsultarStatusOrdemSer
 import com.postech.workshop_service.application.usecases.CriarOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.EntregarVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.FinalizarExecucaoUseCase;
+import com.postech.workshop_service.application.usecases.FinalizarServicoOrdemUseCase;
 import com.postech.workshop_service.application.usecases.IniciarExecucaoUseCase;
+import com.postech.workshop_service.application.usecases.IniciarServicoOrdemUseCase;
 import com.postech.workshop_service.application.usecases.ListarMinhasOrdensServicoUseCase;
 import com.postech.workshop_service.application.usecases.ListarOrdensServicoUseCase;
 import com.postech.workshop_service.application.usecases.ResultadoCriacaoOrdemServico;
@@ -72,6 +74,10 @@ public class OrdemServicoController {
 
 	private final ConsultarHistoricoOrdemServicoUseCase consultarHistoricoOrdemServicoUseCase;
 
+	private final IniciarServicoOrdemUseCase iniciarServicoOrdemUseCase;
+
+	private final FinalizarServicoOrdemUseCase finalizarServicoOrdemUseCase;
+
 	/**
 	 * Construtor para injecao de dependencias.
 	 * @param criarOrdemServicoUseCase caso de uso de criacao da OS.
@@ -93,7 +99,9 @@ public class OrdemServicoController {
 			ConsultarStatusOrdemServicoUseCase consultarStatusOrdemServicoUseCase,
 			IniciarExecucaoUseCase iniciarExecucaoUseCase, FinalizarExecucaoUseCase finalizarExecucaoUseCase,
 			EntregarVeiculoUseCase entregarVeiculoUseCase,
-			ConsultarHistoricoOrdemServicoUseCase consultarHistoricoOrdemServicoUseCase) {
+			ConsultarHistoricoOrdemServicoUseCase consultarHistoricoOrdemServicoUseCase,
+			IniciarServicoOrdemUseCase iniciarServicoOrdemUseCase,
+			FinalizarServicoOrdemUseCase finalizarServicoOrdemUseCase) {
 		this.criarOrdemServicoUseCase = criarOrdemServicoUseCase;
 		this.buscarOrdemServicoPorIdUseCase = buscarOrdemServicoPorIdUseCase;
 		this.listarOrdensServicoUseCase = listarOrdensServicoUseCase;
@@ -103,6 +111,8 @@ public class OrdemServicoController {
 		this.finalizarExecucaoUseCase = finalizarExecucaoUseCase;
 		this.entregarVeiculoUseCase = entregarVeiculoUseCase;
 		this.consultarHistoricoOrdemServicoUseCase = consultarHistoricoOrdemServicoUseCase;
+		this.iniciarServicoOrdemUseCase = iniciarServicoOrdemUseCase;
+		this.finalizarServicoOrdemUseCase = finalizarServicoOrdemUseCase;
 	}
 
 	/**
@@ -239,6 +249,39 @@ public class OrdemServicoController {
 	public ResponseEntity<OrdemServicoResponse> finalizarExecucao(@PathVariable UUID id) {
 		OrdemServico ordemServico = finalizarExecucaoUseCase.executar(id);
 		return ResponseEntity.ok(OrdemServicoResponse.from(ordemServico));
+	}
+
+	@PatchMapping("/{id}/itens/{idItem}/iniciar-servico")
+	@PreAuthorize("hasRole('MECANICO')")
+	@Operation(summary = "Iniciar execucao de um servico da OS",
+			description = "Marca o inicio da execucao de um item de servico individual dentro da ordem. "
+					+ "Restrito ao perfil MECANICO. Apenas um servico pode estar em execucao por OS por vez.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Servico iniciado com sucesso",
+					content = @Content(schema = @Schema(implementation = OrdemServicoDetalheResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada"),
+			@ApiResponse(responseCode = "422",
+					description = "OS nao esta em execucao, item nao e servico, servico ja iniciado ou outro servico em execucao") })
+	public ResponseEntity<OrdemServicoDetalheResponse> iniciarServico(@PathVariable UUID id,
+			@PathVariable UUID idItem) {
+		OrdemServico ordemServico = iniciarServicoOrdemUseCase.executar(id, idItem);
+		return ResponseEntity.ok(OrdemServicoDetalheResponse.from(ordemServico));
+	}
+
+	@PatchMapping("/{id}/itens/{idItem}/finalizar-servico")
+	@PreAuthorize("hasRole('MECANICO')")
+	@Operation(summary = "Finalizar execucao de um servico da OS",
+			description = "Marca a finalizacao da execucao de um item de servico individual dentro da ordem. "
+					+ "Restrito ao perfil MECANICO.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Servico finalizado com sucesso",
+					content = @Content(schema = @Schema(implementation = OrdemServicoDetalheResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada"),
+			@ApiResponse(responseCode = "422", description = "Servico nao esta em execucao ou item nao e servico") })
+	public ResponseEntity<OrdemServicoDetalheResponse> finalizarServico(@PathVariable UUID id,
+			@PathVariable UUID idItem) {
+		OrdemServico ordemServico = finalizarServicoOrdemUseCase.executar(id, idItem);
+		return ResponseEntity.ok(OrdemServicoDetalheResponse.from(ordemServico));
 	}
 
 	@PatchMapping("/{id}/entregar")

@@ -28,22 +28,15 @@ public class MetricaExecucaoRepositoryImpl implements MetricaExecucaoRepository 
 
 	private static final String SQL_TEMPO_MEDIO_POR_TIPO_SERVICO = """
 			SELECT
-			    descricao_servico,
-			    COUNT(*)         AS total_execucoes,
-			    AVG(duracao_min) AS tempo_medio
-			FROM (
-			    SELECT DISTINCT
-			        os.id                                                                        AS ordem_id,
-			        i.descricao                                                                  AS descricao_servico,
-			        EXTRACT(EPOCH FROM (os.data_finalizacao - os.data_inicio_execucao)) / 60     AS duracao_min
-			    FROM ordens_servico os
-			    JOIN ordens_servico_itens i ON i.ordem_servico_id = os.id
-			    WHERE os.status IN ('FINALIZADA', 'ENTREGUE')
-			      AND os.data_inicio_execucao IS NOT NULL
-			      AND os.data_finalizacao IS NOT NULL
-			      AND i.tipo = 'SERVICO'
-			) t
-			GROUP BY descricao_servico
+			    i.descricao                                                                  AS descricao_servico,
+			    COUNT(*)                                                                     AS total_execucoes,
+			    AVG(EXTRACT(EPOCH FROM (i.data_finalizacao - i.data_inicio_execucao)) / 60)  AS tempo_medio
+			FROM ordens_servico_itens i
+			WHERE i.tipo = 'SERVICO'
+			  AND i.status_execucao = 'FINALIZADO'
+			  AND i.data_inicio_execucao IS NOT NULL
+			  AND i.data_finalizacao IS NOT NULL
+			GROUP BY i.descricao
 			ORDER BY tempo_medio DESC
 			""";
 

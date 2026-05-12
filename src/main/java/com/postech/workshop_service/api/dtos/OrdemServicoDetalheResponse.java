@@ -79,6 +79,9 @@ public class OrdemServicoDetalheResponse {
 	@Schema(description = "Item da composicao tecnica registrado na ordem")
 	public static class ItemComposicaoResponse {
 
+		@Schema(description = "Identificador unico do item")
+		private UUID id;
+
 		@Schema(description = "Tipo do item", example = "SERVICO")
 		private String tipo;
 
@@ -91,6 +94,18 @@ public class OrdemServicoDetalheResponse {
 		@Schema(description = "Identificador da peca/insumo (apenas itens do tipo PECA)")
 		private UUID idPecaInsumo;
 
+		@Schema(description = "Identificador do servico do catalogo (apenas itens do tipo SERVICO)")
+		private UUID idServico;
+
+		@Schema(description = "Status de execucao do servico (PENDENTE, EM_EXECUCAO, FINALIZADO)", example = "PENDENTE")
+		private String statusExecucao;
+
+		@Schema(description = "Data e hora de inicio da execucao do servico")
+		private LocalDateTime dataInicioExecucao;
+
+		@Schema(description = "Data e hora de finalizacao da execucao do servico")
+		private LocalDateTime dataFinalizacao;
+
 		/**
 		 * Mapeia um item de composicao tecnica para sua resposta.
 		 * @param item item a ser convertido.
@@ -98,10 +113,15 @@ public class OrdemServicoDetalheResponse {
 		 */
 		public static ItemComposicaoResponse from(ItemComposicaoTecnica item) {
 			return ItemComposicaoResponse.builder()
+				.id(item.getId())
 				.tipo(item.getTipo().name())
 				.descricao(item.getDescricao())
 				.valor(item.getValor())
 				.idPecaInsumo(item.getIdPecaInsumo())
+				.idServico(item.getIdServico())
+				.statusExecucao(item.getStatusExecucao() != null ? item.getStatusExecucao().name() : null)
+				.dataInicioExecucao(item.getDataInicioExecucao())
+				.dataFinalizacao(item.getDataFinalizacao())
 				.build();
 		}
 

@@ -4,7 +4,12 @@ info:
   description: API REST de gestão de oficina mecânica — Spring Boot 3.4.1
   version: 1.0.0
 
+security:
+  - bearerAuth: []
+
 tags:
+  - name: Autenticacao
+    description: Fluxos de login, refresh, logout e identidade autenticada
   - name: Clientes
     description: Cadastro e gestão de clientes
   - name: Veículos
@@ -18,11 +23,114 @@ tags:
   - name: Ordens de Serviço
     description: Gerenciamento do ciclo de vida das ordens de serviço
   - name: Orçamentos
-    description: Aprovação e rejeição de orçamentos vinculados a ordens de serviço
+    description: Aprovação, rejeição e cancelamento de orçamentos vinculados a ordens de serviço
   - name: Métricas
     description: Monitoramento do tempo médio de execução das ordens de serviço (perfil ADMINISTRADOR)
 
 paths:
+
+  # ─── Autenticação ─────────────────────────────────────────────────────────
+
+  /api/auth/login:
+    post:
+      tags: [Autenticacao]
+      summary: Autenticar usuário e emitir tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Sessão autenticada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokensResponse'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Credenciais inválidas ou conta inativa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/refresh:
+    post:
+      tags: [Autenticacao]
+      summary: Renovar sessão autenticada
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Tokens renovados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokensResponse'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Refresh token inválido ou expirado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      tags: [Autenticacao]
+      summary: Encerrar uma sessão autenticada
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '204':
+          description: Sessão encerrada
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/me:
+    get:
+      tags: [Autenticacao]
+      summary: Consultar identidade autenticada
+      responses:
+        '200':
+          description: Identidade autenticada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioAutenticadoResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   # ─── Clientes ──────────────────────────────────────────────────────────────
 
@@ -30,6 +138,7 @@ paths:
     post:
       tags: [Clientes]
       summary: Cadastrar cliente
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       requestBody:
         required: true
         content:
@@ -45,11 +154,43 @@ paths:
                 $ref: '#/components/schemas/ClienteResponse'
         '400':
           description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '422':
           description: Regra de negócio violada (CPF/CNPJ duplicado)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     get:
       tags: [Clientes]
-      summary: Listar todos os clientes
+      summary: Listar clientes com paginação
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Página solicitada (base zero)
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+          description: Quantidade de registros por página
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Incluir clientes inativos no resultado
       responses:
         '200':
           description: Lista de clientes
@@ -59,11 +200,16 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ClienteResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
 
   /api/v1/clientes/{id}:
     get:
       tags: [Clientes]
       summary: Buscar cliente por ID
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       parameters:
         - name: id
           in: path
@@ -71,6 +217,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Cliente encontrado
@@ -78,11 +229,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClienteResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Cliente não encontrado
     put:
       tags: [Clientes]
       summary: Atualizar dados do cliente
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       parameters:
         - name: id
           in: path
@@ -103,11 +259,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClienteResponse'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Cliente não encontrado
     delete:
       tags: [Clientes]
       summary: Remover cliente (remoção lógica)
+      description: Restrito ao perfil ADMINISTRADOR.
       parameters:
         - name: id
           in: path
@@ -118,6 +285,10 @@ paths:
       responses:
         '204':
           description: Cliente removido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
         '404':
           description: Cliente não encontrado
 
@@ -125,6 +296,7 @@ paths:
     get:
       tags: [Clientes]
       summary: Buscar cliente por CPF ou CNPJ
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       parameters:
         - name: documento
           in: path
@@ -132,6 +304,11 @@ paths:
           schema:
             type: string
           description: CPF ou CNPJ com ou sem máscara
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Cliente encontrado
@@ -139,8 +316,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClienteResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Cliente não encontrado
+
+  /api/v1/clientes/me:
+    get:
+      tags: [Clientes]
+      summary: Consultar o próprio cadastro do cliente autenticado
+      description: Restrito ao perfil CLIENTE.
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil CLIENTE
+        '404':
+          description: Cadastro não encontrado para o usuário autenticado
 
   # ─── Veículos ──────────────────────────────────────────────────────────────
 
@@ -148,6 +348,7 @@ paths:
     post:
       tags: [Veículos]
       summary: Cadastrar veículo
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       requestBody:
         required: true
         content:
@@ -163,11 +364,51 @@ paths:
                 $ref: '#/components/schemas/VeiculoResponse'
         '400':
           description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '422':
-          description: Placa duplicada
+          description: Placa duplicada ou cliente vinculado inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     get:
       tags: [Veículos]
-      summary: Listar veículos (paginado)
+      summary: Listar veículos com paginação e filtros
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: placa
+          in: query
+          schema:
+            type: string
+          description: Filtro parcial por placa
+        - name: clienteId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtra veículos vinculados ao cliente
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Página de veículos
@@ -175,11 +416,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginaVeiculosResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
 
   /api/v1/veiculos/{id}:
     get:
       tags: [Veículos]
       summary: Buscar veículo por ID
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       parameters:
         - name: id
           in: path
@@ -187,6 +433,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Veículo encontrado
@@ -194,11 +445,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VeiculoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Veículo não encontrado
     put:
       tags: [Veículos]
       summary: Atualizar veículo
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       parameters:
         - name: id
           in: path
@@ -219,11 +475,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VeiculoResponse'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Veículo não encontrado
     delete:
       tags: [Veículos]
       summary: Remover veículo (remoção lógica)
+      description: Restrito ao perfil ADMINISTRADOR.
       parameters:
         - name: id
           in: path
@@ -234,6 +501,10 @@ paths:
       responses:
         '204':
           description: Veículo removido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
         '404':
           description: Veículo não encontrado
 
@@ -241,6 +512,7 @@ paths:
     get:
       tags: [Veículos]
       summary: Buscar veículo por placa
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       parameters:
         - name: placa
           in: path
@@ -248,6 +520,11 @@ paths:
           schema:
             type: string
           example: ABC1D23
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Veículo encontrado
@@ -255,6 +532,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VeiculoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Veículo não encontrado
 
@@ -262,6 +543,7 @@ paths:
     get:
       tags: [Veículos]
       summary: Listar veículos de um cliente
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       parameters:
         - name: clienteId
           in: path
@@ -269,6 +551,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Veículos do cliente
@@ -278,11 +565,16 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/VeiculoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
 
   /api/v1/veiculos/{id}/clientes/{clienteId}:
     post:
       tags: [Veículos]
       summary: Vincular cliente ao veículo
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       parameters:
         - name: id
           in: path
@@ -303,11 +595,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VeiculoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Veículo ou cliente não encontrado
+        '422':
+          description: Regra de negócio violada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags: [Veículos]
       summary: Desvincular cliente do veículo
+      description: Restrito aos perfis ADMINISTRADOR e ATENDENTE.
       parameters:
         - name: id
           in: path
@@ -328,8 +631,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VeiculoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Veículo ou cliente não encontrado
+        '422':
+          description: Regra de negócio violada (último cliente vinculado, por exemplo)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   # ─── Serviços ──────────────────────────────────────────────────────────────
 
@@ -337,6 +650,7 @@ paths:
     post:
       tags: [Serviços]
       summary: Cadastrar serviço no catálogo
+      description: Restrito ao perfil ADMINISTRADOR.
       requestBody:
         required: true
         content:
@@ -352,9 +666,46 @@ paths:
                 $ref: '#/components/schemas/ServicoResponse'
         '400':
           description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
     get:
       tags: [Serviços]
-      summary: Listar serviços (paginado)
+      summary: Listar serviços com paginação e filtros
+      description: Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Página solicitada (base zero)
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+          description: Quantidade de registros por página
+        - name: nome
+          in: query
+          schema:
+            type: string
+          description: Filtro parcial pelo nome do serviço
+        - name: categoria
+          in: query
+          schema:
+            $ref: '#/components/schemas/CategoriaServico'
+          description: Filtro por categoria do serviço
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Página de serviços
@@ -362,11 +713,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginaServicosResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
 
   /api/v1/servicos/{id}:
     get:
       tags: [Serviços]
-      summary: Buscar serviço por ID
+      summary: Buscar serviço por identificador
+      description: Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
       parameters:
         - name: id
           in: path
@@ -374,6 +730,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Serviço encontrado
@@ -381,11 +742,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Serviço não encontrado
     put:
       tags: [Serviços]
-      summary: Atualizar serviço
+      summary: Atualizar serviço do catálogo
+      description: Restrito ao perfil ADMINISTRADOR.
       parameters:
         - name: id
           in: path
@@ -406,11 +772,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServicoResponse'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
         '404':
           description: Serviço não encontrado
     delete:
       tags: [Serviços]
-      summary: Remover serviço do catálogo (remoção lógica)
+      summary: Remover serviço logicamente
+      description: Restrito ao perfil ADMINISTRADOR.
       parameters:
         - name: id
           in: path
@@ -421,6 +798,10 @@ paths:
       responses:
         '204':
           description: Serviço removido
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
         '404':
           description: Serviço não encontrado
 
@@ -428,12 +809,18 @@ paths:
     get:
       tags: [Serviços]
       summary: Listar serviços por categoria
+      description: Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
       parameters:
         - name: categoria
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/CategoriaServico'
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Serviços da categoria
@@ -443,11 +830,16 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
 
   /api/v1/servicos/{id}/reativar:
     post:
       tags: [Serviços]
-      summary: Reativar serviço removido
+      summary: Reativar serviço previamente removido
+      description: Restrito ao perfil ADMINISTRADOR.
       parameters:
         - name: id
           in: path
@@ -462,8 +854,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
         '404':
           description: Serviço não encontrado
+        '422':
+          description: Serviço não está em estado removido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   # ─── Peças e Insumos ───────────────────────────────────────────────────────
 
@@ -471,6 +873,7 @@ paths:
     post:
       tags: [Peças e Insumos]
       summary: Cadastrar peça ou insumo
+      description: Restrito ao perfil ADMINISTRADOR.
       requestBody:
         required: true
         content:
@@ -486,11 +889,50 @@ paths:
                 $ref: '#/components/schemas/PecaResponse'
         '400':
           description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
         '422':
           description: SKU duplicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     get:
       tags: [Peças e Insumos]
-      summary: Listar peças (paginado)
+      summary: Listar peças com paginação e filtros
+      description: Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: nome
+          in: query
+          schema:
+            type: string
+          description: Filtro parcial pelo nome da peça
+        - name: categoria
+          in: query
+          schema:
+            type: string
+          description: Filtro por categoria
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Página de peças
@@ -498,11 +940,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginaPecasResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
 
   /api/v1/pecas/{id}:
     get:
       tags: [Peças e Insumos]
       summary: Buscar peça por ID
+      description: Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
       parameters:
         - name: id
           in: path
@@ -510,6 +957,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Peça encontrada
@@ -517,11 +969,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PecaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Peça não encontrada
     put:
       tags: [Peças e Insumos]
       summary: Atualizar peça
+      description: Restrito ao perfil ADMINISTRADOR.
       parameters:
         - name: id
           in: path
@@ -542,11 +999,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PecaResponse'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
         '404':
           description: Peça não encontrada
     delete:
       tags: [Peças e Insumos]
-      summary: Remover peça (remoção lógica)
+      summary: Remover peça (soft delete)
+      description: Restrito ao perfil ADMINISTRADOR.
       parameters:
         - name: id
           in: path
@@ -557,6 +1025,10 @@ paths:
       responses:
         '204':
           description: Peça removida
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
         '404':
           description: Peça não encontrada
 
@@ -564,12 +1036,18 @@ paths:
     get:
       tags: [Peças e Insumos]
       summary: Buscar peça por SKU
+      description: Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
       parameters:
         - name: sku
           in: path
           required: true
           schema:
             type: string
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Peça encontrada
@@ -577,6 +1055,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PecaResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Peça não encontrada
 
@@ -584,6 +1066,7 @@ paths:
     post:
       tags: [Peças e Insumos]
       summary: Criar estoque para uma peça
+      description: Restrito ao perfil ADMINISTRADOR.
       requestBody:
         required: true
         content:
@@ -599,6 +1082,14 @@ paths:
                 $ref: '#/components/schemas/EstoqueResponse'
         '400':
           description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão — requer perfil ADMINISTRADOR
         '404':
           description: Peça não encontrada
 
@@ -608,6 +1099,7 @@ paths:
     post:
       tags: [Estoques]
       summary: Registrar movimentação de estoque (entrada ou saída)
+      description: Restrito aos perfis ADMINISTRADOR e MECANICO.
       requestBody:
         required: true
         content:
@@ -623,15 +1115,28 @@ paths:
                 $ref: '#/components/schemas/MovimentacaoResponse'
         '400':
           description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Estoque não encontrado
         '422':
           description: Estoque insuficiente para saída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/v1/estoques/movimentacoes/ordem-servico/{ordemServicoId}:
     get:
       tags: [Estoques]
-      summary: Consultar movimentacoes de estoque por ordem de servico
+      summary: Consultar movimentações de estoque por ordem de serviço
+      description: Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
       parameters:
         - name: ordemServicoId
           in: path
@@ -641,20 +1146,25 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Movimentacoes vinculadas a ordem
+          description: Movimentações vinculadas à ordem
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/MovimentacaoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
-          description: Ordem de servico nao encontrada
+          description: Ordem de serviço não encontrada
 
   /api/v1/estoques/{id}:
     get:
       tags: [Estoques]
       summary: Buscar estoque por ID
+      description: Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
       parameters:
         - name: id
           in: path
@@ -662,6 +1172,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Estoque encontrado
@@ -669,6 +1184,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EstoqueResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Estoque não encontrado
 
@@ -676,6 +1195,7 @@ paths:
     get:
       tags: [Estoques]
       summary: Listar todos os estoques de uma peça
+      description: Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
       parameters:
         - name: pecaInsumoId
           in: path
@@ -683,6 +1203,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: incluirInativos
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Estoques da peça
@@ -692,6 +1217,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EstoqueResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
 
   # ─── Ordens de Serviço ─────────────────────────────────────────────────────
 
@@ -700,9 +1229,9 @@ paths:
       tags: [Ordens de Serviço]
       summary: Abrir Ordem de Serviço
       description: >
-        Registra a recepção do veículo, identifica o cliente, calcula o orçamento
-        automaticamente e envia para aprovação do cliente. Se o veículo não existir
-        no sistema, é cadastrado automaticamente com os dados informados.
+        Restrito aos perfis ADMINISTRADOR e ATENDENTE. Registra a recepção do veículo,
+        identifica o cliente, calcula o orçamento automaticamente e envia para aprovação.
+        Se o veículo não existir no sistema, é cadastrado automaticamente com os dados informados.
       requestBody:
         required: true
         content:
@@ -742,7 +1271,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrdemServicoResponse'
         '400':
-          description: Dados de entrada inválidos (campos obrigatórios ausentes)
+          description: Dados de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Cliente ou serviço não encontrado no sistema
         '422':
@@ -752,13 +1289,157 @@ paths:
             - veículo não encontrado e dados para cadastro ausentes
             - estoque insuficiente para a peça solicitada
             - serviço inativo no catálogo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags: [Ordens de Serviço]
+      summary: Listar Ordens de Serviço com filtros
+      description: >
+        Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
+        Aplica filtros opcionais (status, cliente, intervalo de datas).
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/StatusOrdemServico'
+        - name: idCliente
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Data mínima inclusiva de criação (ISO-8601)
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Data máxima exclusiva de criação (ISO-8601)
+      responses:
+        '200':
+          description: Página de ordens de serviço
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaOrdensServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
 
-  # ─── Ordens de Serviço ────────────────────────────────────────────────────────
+  /api/v1/ordens-servico/{id}:
+    get:
+      tags: [Ordens de Serviço]
+      summary: Buscar Ordem de Serviço por id
+      description: >
+        Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
+        Retorna o detalhe completo de uma OS com itens da composição técnica.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OS encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoDetalheResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+        '404':
+          description: OS não encontrada
+
+  /api/v1/ordens-servico/minhas:
+    get:
+      tags: [Ordens de Serviço]
+      summary: Listar minhas Ordens de Serviço
+      description: >
+        Restrito ao perfil CLIENTE. Retorna as ordens de serviço do cliente autenticado,
+        com filtro opcional por status.
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/StatusOrdemServico'
+      responses:
+        '200':
+          description: Página de ordens de serviço do cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaOrdensServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Conta autenticada sem cliente vinculado ou perfil incompatível
+
+  /api/v1/ordens-servico/{id}/status:
+    get:
+      tags: [Ordens de Serviço]
+      summary: Consultar status da Ordem de Serviço
+      description: >
+        Restrito ao perfil CLIENTE. Permite que o cliente acompanhe o progresso da sua OS.
+        Retorna 403 quando a OS pertence a outro cliente.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Status atual da OS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusOrdemServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: OS pertence a outro cliente ou perfil incompatível
+        '404':
+          description: OS não encontrada
 
   /api/v1/ordens-servico/{id}/iniciar-execucao:
     patch:
       tags: [Ordens de Serviço]
-      summary: Iniciar execucao da OS
+      summary: Iniciar execução da OS
+      description: >
+        Restrito aos perfis ADMINISTRADOR e MECANICO.
+        Avança uma ordem aprovada para execução técnica e registra histórico.
       parameters:
         - name: id
           in: path
@@ -768,20 +1449,31 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Execucao iniciada
+          description: Execução iniciada com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrdemServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
-          description: Ordem de servico nao encontrada
+          description: Ordem de serviço não encontrada
         '422':
-          description: Ordem de servico nao esta aguardando execucao
+          description: OS não está aguardando execução
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/v1/ordens-servico/{id}/finalizar-execucao:
     patch:
       tags: [Ordens de Serviço]
-      summary: Finalizar execucao da OS
+      summary: Finalizar execução da OS
+      description: >
+        Restrito aos perfis ADMINISTRADOR e MECANICO.
+        Finaliza a execução técnica de uma ordem em andamento e registra histórico.
       parameters:
         - name: id
           in: path
@@ -791,20 +1483,113 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Execucao finalizada
+          description: Execução finalizada com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrdemServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
-          description: Ordem de servico nao encontrada
+          description: Ordem de serviço não encontrada
         '422':
-          description: Ordem de servico nao esta em execucao
+          description: OS não está em execução
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/ordens-servico/{id}/itens/{idItem}/iniciar-servico:
+    patch:
+      tags: [Ordens de Serviço]
+      summary: Iniciar execução de um serviço da OS
+      description: >
+        Restrito ao perfil MECANICO. Marca o início da execução de um item de serviço
+        individual dentro da OS. Apenas um serviço pode estar em execução por OS por vez.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: idItem
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Serviço iniciado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoDetalheResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão (requer perfil MECANICO)
+        '404':
+          description: Ordem de serviço não encontrada
+        '422':
+          description: >
+            OS não está em execução, item não é serviço, serviço já iniciado/finalizado
+            ou outro serviço já em execução na mesma OS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/ordens-servico/{id}/itens/{idItem}/finalizar-servico:
+    patch:
+      tags: [Ordens de Serviço]
+      summary: Finalizar execução de um serviço da OS
+      description: >
+        Restrito ao perfil MECANICO. Marca a finalização da execução de um item de
+        serviço individual dentro da OS.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: idItem
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Serviço finalizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoDetalheResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão (requer perfil MECANICO)
+        '404':
+          description: Ordem de serviço não encontrada
+        '422':
+          description: Serviço não está em execução ou item não é do tipo SERVICO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/v1/ordens-servico/{id}/entregar:
     patch:
       tags: [Ordens de Serviço]
-      summary: Registrar entrega do veiculo
+      summary: Registrar entrega do veículo
+      description: >
+        Restrito aos perfis ADMINISTRADOR e ATENDENTE.
+        Registra a entrega do veículo ao cliente após finalização técnica.
       parameters:
         - name: id
           in: path
@@ -814,20 +1599,31 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Veiculo entregue
+          description: Entrega registrada com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrdemServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
-          description: Ordem de servico nao encontrada
+          description: Ordem de serviço não encontrada
         '422':
-          description: Ordem de servico nao esta finalizada
+          description: OS não está finalizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/v1/ordens-servico/{id}/historico-status:
     get:
       tags: [Ordens de Serviço]
-      summary: Consultar historico de status da OS
+      summary: Consultar histórico de status da OS
+      description: >
+        Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO.
+        Retorna a linha do tempo de transições de status da ordem de serviço.
       parameters:
         - name: id
           in: path
@@ -837,23 +1633,29 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Historico cronologico da OS
+          description: Histórico cronológico da OS
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/HistoricoStatusOrdemServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
-          description: Ordem de servico nao encontrada
+          description: Ordem de serviço não encontrada
+
+  # ─── Orçamentos ────────────────────────────────────────────────────────────
 
   /api/v1/orcamentos/{id}/aprovar:
     patch:
       tags: [Orçamentos]
       summary: Aprovar orçamento
       description: >
-        Registra a aprovação do cliente para o orçamento pendente.
-        A ordem de serviço avança para o status AGUARDANDO_EXECUCAO.
+        Restrito aos perfis ADMINISTRADOR, ATENDENTE e CLIENTE.
+        Registra a aprovação do cliente para o orçamento pendente, avançando a OS para AGUARDANDO_EXECUCAO.
       parameters:
         - name: id
           in: path
@@ -869,18 +1671,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrcamentoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Orçamento não encontrado
         '422':
           description: Orçamento não está pendente de aprovação ou OS em estado inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/v1/orcamentos/{id}/rejeitar:
     patch:
       tags: [Orçamentos]
       summary: Rejeitar orçamento
       description: >
-        Registra a rejeição do cliente para o orçamento pendente.
-        A ordem de serviço retorna ao status EM_COMPOSICAO para revisão.
+        Restrito aos perfis ADMINISTRADOR, ATENDENTE e CLIENTE.
+        Registra a rejeição do cliente para o orçamento pendente, retornando a OS para EM_COMPOSICAO.
       parameters:
         - name: id
           in: path
@@ -896,10 +1706,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrcamentoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
         '404':
           description: Orçamento não encontrado
         '422':
           description: Orçamento não está pendente de aprovação ou OS em estado inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/orcamentos/{id}/cancelar:
+    patch:
+      tags: [Orçamentos]
+      summary: Cancelar orçamento
+      description: >
+        Restrito aos perfis ADMINISTRADOR, ATENDENTE e CLIENTE.
+        Cancela um orçamento pendente, encerra a OS vinculada e libera as reservas de estoque.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Identificador único do orçamento
+      responses:
+        '200':
+          description: Orçamento cancelado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrcamentoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Sem permissão
+        '404':
+          description: Orçamento ou ordem de serviço não encontrados
+        '422':
+          description: Orçamento não pode ser cancelado no estado atual da OS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   # ─── Métricas ───────────────────────────────────────────────────────────────
 
@@ -907,9 +1760,9 @@ paths:
     get:
       tags: [Métricas]
       summary: Tempo médio global de execução
-      description: Retorna média, mínimo, máximo e total de ordens de serviço finalizadas ou entregues. Restrito ao perfil ADMINISTRADOR.
-      security:
-        - bearerAuth: []
+      description: >
+        Restrito ao perfil ADMINISTRADOR. Retorna média, mínimo, máximo e total de ordens
+        de serviço finalizadas ou entregues.
       responses:
         '200':
           description: Métricas globais de execução
@@ -926,9 +1779,9 @@ paths:
     get:
       tags: [Métricas]
       summary: Tempo médio de execução por tipo de serviço
-      description: Retorna o tempo médio de execução agrupado pela descrição dos itens de serviço presentes na composição técnica das ordens finalizadas. Restrito ao perfil ADMINISTRADOR.
-      security:
-        - bearerAuth: []
+      description: >
+        Restrito ao perfil ADMINISTRADOR. Retorna o tempo médio de execução agrupado pela
+        descrição dos itens de serviço presentes na composição técnica das ordens finalizadas.
       responses:
         '200':
           description: Lista de métricas agrupadas por tipo de serviço
@@ -944,9 +1797,97 @@ paths:
           description: Acesso negado — requer perfil ADMINISTRADOR
 
 components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
 
+    # ── Autenticação ─────────────────────────────────────────────────────────
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          description: Username ou email do usuário
+          example: admin
+        password:
+          type: string
+          format: password
+          example: "senha123"
+
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    LogoutRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    AuthTokensResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          format: int64
+          description: Tempo de validade do access token em segundos
+
+    UsuarioAutenticadoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [ADMINISTRADOR, ATENDENTE, MECANICO, CLIENTE]
+
     # ── Clientes ──────────────────────────────────────────────────────────────
+
+    EnderecoDTO:
+      type: object
+      description: Dados de endereço
+      properties:
+        logradouro:
+          type: string
+          example: Avenida Paulista
+        numero:
+          type: string
+          example: "1000"
+        complemento:
+          type: string
+          example: Apto 101
+        bairro:
+          type: string
+          example: Bela Vista
+        cidade:
+          type: string
+          example: São Paulo
+        estado:
+          type: string
+          example: SP
+        cep:
+          type: string
+          example: 01310-100
 
     CadastroClienteRequest:
       type: object
@@ -954,28 +1895,51 @@ components:
       properties:
         nome:
           type: string
-          example: João Silva
+          example: João da Silva
         documento:
           type: string
-          description: CPF ou CNPJ sem máscara
-          example: "12345678909"
+          description: CPF ou CNPJ (com ou sem máscara)
+          example: "123.456.789-01"
+        email:
+          type: string
+          format: email
+          example: joao@email.com
         telefone:
           type: string
           example: "(11) 99999-9999"
-        email:
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+        dataNascimentoFundacao:
           type: string
-          format: email
+          format: date
+          example: "1990-01-01"
+        observacoes:
+          type: string
+          example: Cliente prefere contato via WhatsApp
 
     AtualizarClienteRequest:
       type: object
+      required: [nome]
       properties:
         nome:
           type: string
-        telefone:
-          type: string
+          example: João da Silva Sauro
         email:
           type: string
           format: email
+          example: joao.sauro@email.com
+        telefone:
+          type: string
+          example: "(11) 98888-8888"
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+        dataNascimentoFundacao:
+          type: string
+          format: date
+          example: "1990-01-01"
+        observacoes:
+          type: string
+          example: Cliente VIP
 
     ClienteResponse:
       type: object
@@ -985,46 +1949,119 @@ components:
           format: uuid
         nome:
           type: string
+          example: João da Silva
         documento:
           type: string
-          description: Documento mascarado (ex. 123.456.789-09)
+          description: Documento mascarado
+          example: "***.456.789-**"
+        email:
+          type: string
+          example: joao@email.com
+        telefone:
+          type: string
+          example: "(11) 99999-9999"
+        endereco:
+          $ref: '#/components/schemas/EnderecoDTO'
+        dataNascimentoFundacao:
+          type: string
+          format: date
+        observacoes:
+          type: string
         ativo:
           type: boolean
+          example: true
         dataCriacao:
           type: string
           format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+        dataRemocao:
+          type: string
+          format: date-time
+          nullable: true
 
     # ── Veículos ──────────────────────────────────────────────────────────────
 
     CadastroVeiculoRequest:
       type: object
+      required: [placa, marca, modelo, ano, clientesIds]
+      properties:
+        placa:
+          type: string
+          maxLength: 10
+          example: BRA1D23
+        marca:
+          type: string
+          maxLength: 60
+          example: Toyota
+        modelo:
+          type: string
+          maxLength: 80
+          example: Corolla
+        ano:
+          type: integer
+          minimum: 1900
+          maximum: 3000
+          example: 2020
+        clientesIds:
+          type: array
+          minItems: 1
+          description: Lista de clientes vinculados ao veículo
+          items:
+            type: string
+            format: uuid
+        cor:
+          type: string
+          maxLength: 30
+          example: Prata
+        observacoes:
+          type: string
+          maxLength: 2000
+          example: Veículo compartilhado entre familiares
+
+    AtualizarVeiculoRequest:
+      type: object
       required: [placa, marca, modelo, ano]
       properties:
         placa:
           type: string
-          example: ABC1D23
+          maxLength: 10
+          example: BRA1D23
         marca:
           type: string
+          maxLength: 60
           example: Toyota
         modelo:
           type: string
+          maxLength: 80
           example: Corolla
         ano:
           type: integer
+          minimum: 1900
+          maximum: 3000
           example: 2020
-        clienteId:
+        cor:
+          type: string
+          maxLength: 30
+          example: Prata
+        observacoes:
+          type: string
+          maxLength: 2000
+
+    ClienteVinculadoResponse:
+      type: object
+      description: Cliente vinculado ao veículo
+      properties:
+        id:
           type: string
           format: uuid
-
-    AtualizarVeiculoRequest:
-      type: object
-      properties:
-        marca:
+        nome:
           type: string
-        modelo:
+          example: João da Silva
+        documentoMascarado:
           type: string
-        ano:
-          type: integer
+          example: "***.654.321-**"
 
     VeiculoResponse:
       type: object
@@ -1034,31 +2071,60 @@ components:
           format: uuid
         placa:
           type: string
+          example: ABC1D23
         marca:
           type: string
         modelo:
           type: string
         ano:
           type: integer
-        clientesVinculados:
+        cor:
+          type: string
+        observacoes:
+          type: string
+        clientes:
           type: array
           items:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/ClienteVinculadoResponse'
+        ativo:
+          type: boolean
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+        dataRemocao:
+          type: string
+          format: date-time
+          nullable: true
 
     PaginaVeiculosResponse:
       type: object
       properties:
-        content:
+        conteudo:
           type: array
           items:
             $ref: '#/components/schemas/VeiculoResponse'
-        totalElements:
+        pagina:
           type: integer
-        totalPages:
+        tamanho:
+          type: integer
+        totalElementos:
+          type: integer
+          format: int64
+        totalPaginas:
           type: integer
 
     # ── Serviços ──────────────────────────────────────────────────────────────
+
+    CategoriaServico:
+      type: string
+      enum: [MECANICA, ELETRICA, ESTETICA, PREVENTIVA]
+
+    NivelComplexidade:
+      type: string
+      enum: [BAIXA, MEDIA, ALTA]
 
     CadastroServicoRequest:
       type: object
@@ -1066,30 +2132,46 @@ components:
       properties:
         nome:
           type: string
+          maxLength: 100
           example: Troca de óleo
+        descricao:
+          type: string
+          example: Substituição do óleo do motor e filtro de óleo
+        valor:
+          type: number
+          format: decimal
+          example: 150.00
+        categoria:
+          $ref: '#/components/schemas/CategoriaServico'
+        nivelComplexidade:
+          $ref: '#/components/schemas/NivelComplexidade'
+        garantiaDias:
+          type: integer
+          minimum: 1
+          example: 30
+        observacoesTecnicas:
+          type: string
+          example: Utilizar óleo sintético 5W30 conforme manual do fabricante
+
+    AtualizarServicoRequest:
+      type: object
+      required: [nome, descricao, valor]
+      properties:
+        nome:
+          type: string
+          maxLength: 100
         descricao:
           type: string
         valor:
           type: number
           format: decimal
-          example: 100.00
         categoria:
-          type: string
+          $ref: '#/components/schemas/CategoriaServico'
         nivelComplexidade:
-          type: string
+          $ref: '#/components/schemas/NivelComplexidade'
         garantiaDias:
           type: integer
-
-    AtualizarServicoRequest:
-      type: object
-      properties:
-        nome:
-          type: string
-        descricao:
-          type: string
-        valor:
-          type: number
-        categoria:
+        observacoesTecnicas:
           type: string
 
     ServicoResponse:
@@ -1105,20 +2187,41 @@ components:
         valor:
           type: number
         categoria:
+          $ref: '#/components/schemas/CategoriaServico'
+        nivelComplexidade:
+          $ref: '#/components/schemas/NivelComplexidade'
+        garantiaDias:
+          type: integer
+        observacoesTecnicas:
           type: string
         ativo:
           type: boolean
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+        dataRemocao:
+          type: string
+          format: date-time
+          nullable: true
 
     PaginaServicosResponse:
       type: object
       properties:
-        content:
+        conteudo:
           type: array
           items:
             $ref: '#/components/schemas/ServicoResponse'
-        totalElements:
+        pagina:
           type: integer
-        totalPages:
+        tamanho:
+          type: integer
+        totalElementos:
+          type: integer
+          format: int64
+        totalPaginas:
           type: integer
 
     # ── Peças e Insumos ───────────────────────────────────────────────────────
@@ -1129,33 +2232,78 @@ components:
       properties:
         sku:
           type: string
-          example: OLEO-5W30
+          maxLength: 50
+          example: FIL-001
         nome:
           type: string
-          example: Óleo 5W30
+          maxLength: 200
+          example: Filtro de oleo 5W30
         valorUnitario:
           type: number
-          example: 45.00
+          example: 45.90
         estoqueMinimo:
           type: number
-          example: 5.0
+          example: 5
         unidadeMedida:
           type: string
-          enum: [UN, L, KG, M, M2, M3, CX]
+          enum: [UN, L, KG, M, ML, CX, PC]
+          example: UN
         tipoItem:
           type: string
           enum: [PECA, INSUMO]
+          example: PECA
+        fornecedor:
+          type: string
+          maxLength: 200
+          example: Bosch
+        codigoBarras:
+          type: string
+          maxLength: 50
+          example: "7891234567890"
+        marca:
+          type: string
+          maxLength: 100
+          example: Bosch
+        categoria:
+          type: string
+          maxLength: 100
+          example: Filtros
+        aplicacao:
+          type: string
+          maxLength: 500
+          example: Hatch compacto ate 2.0
+        observacoes:
+          type: string
+          example: Compativel com Gol, Fox e Polo
 
     AtualizarPecaRequest:
       type: object
+      required: [nome, valorUnitario, estoqueMinimo, unidadeMedida, tipoItem]
       properties:
         nome:
           type: string
+          maxLength: 200
         valorUnitario:
           type: number
         estoqueMinimo:
           type: number
         unidadeMedida:
+          type: string
+          enum: [UN, L, KG, M, ML, CX, PC]
+        tipoItem:
+          type: string
+          enum: [PECA, INSUMO]
+        fornecedor:
+          type: string
+        codigoBarras:
+          type: string
+        marca:
+          type: string
+        categoria:
+          type: string
+        aplicacao:
+          type: string
+        observacoes:
           type: string
 
     PecaResponse:
@@ -1166,6 +2314,7 @@ components:
           format: uuid
         sku:
           type: string
+          example: FIL-001
         nome:
           type: string
         valorUnitario:
@@ -1174,22 +2323,59 @@ components:
           type: number
         unidadeMedida:
           type: string
+          enum: [UN, L, KG, M, ML, CX, PC]
         tipoItem:
+          type: string
+          enum: [PECA, INSUMO]
+        fornecedor:
+          type: string
+        codigoBarras:
+          type: string
+        marca:
+          type: string
+        categoria:
+          type: string
+        aplicacao:
+          type: string
+        observacoes:
           type: string
         ativo:
           type: boolean
+        quantidadeTotal:
+          type: number
+          description: Soma das quantidades em todos os estoques da peça
+          example: 12.500
+        versao:
+          type: integer
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+        dataRemocao:
+          type: string
+          format: date-time
+          nullable: true
 
     PaginaPecasResponse:
       type: object
       properties:
-        content:
+        conteudo:
           type: array
           items:
             $ref: '#/components/schemas/PecaResponse'
-        totalElements:
+        pagina:
           type: integer
-        totalPages:
+        tamanho:
           type: integer
+        totalElementos:
+          type: integer
+          format: int64
+        totalPaginas:
+          type: integer
+
+    # ── Estoques ──────────────────────────────────────────────────────────────
 
     CriarEstoqueRequest:
       type: object
@@ -1200,10 +2386,12 @@ components:
           format: uuid
         localizacao:
           type: string
-          example: Prateleira A1
+          maxLength: 100
+          example: Prateleira A2
         quantidade:
           type: number
-          example: 10.0
+          minimum: 0
+          example: 10
 
     EstoqueResponse:
       type: object
@@ -1216,8 +2404,20 @@ components:
           format: uuid
         localizacao:
           type: string
+          example: Prateleira A2
         quantidade:
           type: number
+          example: 10.500
+        ativo:
+          type: boolean
+        versao:
+          type: integer
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
 
     MovimentacaoRequest:
       type: object
@@ -1229,12 +2429,14 @@ components:
         tipo:
           type: string
           enum: [ENTRADA, SAIDA]
-          description: Movimentacoes RESERVA, LIBERACAO e AJUSTE sao internas e nao entram neste endpoint
+          description: Tipos RESERVA, LIBERACAO e AJUSTE são internos e não são aceitos neste endpoint
         quantidade:
           type: number
-          example: 2.0
+          example: 5
         motivo:
           type: string
+          maxLength: 500
+          example: Compra de reposicao
 
     MovimentacaoResponse:
       type: object
@@ -1255,6 +2457,7 @@ components:
           nullable: true
         tipo:
           type: string
+          enum: [ENTRADA, SAIDA, AJUSTE, RESERVA, LIBERACAO]
         quantidade:
           type: number
         quantidadeAnterior:
@@ -1269,6 +2472,63 @@ components:
           format: date-time
 
     # ── Ordens de Serviço ─────────────────────────────────────────────────────
+
+    StatusOrdemServico:
+      type: string
+      enum:
+        - EM_COMPOSICAO
+        - AGUARDANDO_RESPOSTA_CLIENTE
+        - AGUARDANDO_EXECUCAO
+        - EM_EXECUCAO
+        - CANCELADA
+        - FINALIZADA
+        - ENTREGUE
+
+    TipoItemComposicaoTecnica:
+      type: string
+      enum: [SERVICO, PECA, INSUMO]
+
+    DadosVeiculoRequest:
+      type: object
+      description: Dados para cadastro do veículo caso não exista no sistema
+      required: [marca, modelo, ano]
+      properties:
+        marca:
+          type: string
+          example: Toyota
+        modelo:
+          type: string
+          example: Corolla
+        ano:
+          type: integer
+          minimum: 1
+          example: 2020
+
+    ItemServicoRequest:
+      type: object
+      required: [servicoId]
+      properties:
+        servicoId:
+          type: string
+          format: uuid
+          description: UUID do serviço no catálogo
+        quantidade:
+          type: integer
+          minimum: 1
+          example: 1
+
+    ItemPecaRequest:
+      type: object
+      required: [pecaId, quantidade]
+      properties:
+        pecaId:
+          type: string
+          format: uuid
+          description: UUID da peça no catálogo
+        quantidade:
+          type: number
+          minimum: 0.01
+          example: 2.0
 
     CriarOrdemServicoRequest:
       type: object
@@ -1298,123 +2558,23 @@ components:
           description: Observações do atendente sobre o veículo ou relato do cliente
           example: Cliente relatou barulho ao frear
 
-    DadosVeiculoRequest:
+    ClienteResumoOSResponse:
       type: object
-      description: Dados para cadastro do veículo caso não exista no sistema
-      required: [marca, modelo, ano]
-      properties:
-        marca:
-          type: string
-          example: Toyota
-        modelo:
-          type: string
-          example: Corolla
-        ano:
-          type: integer
-          example: 2020
-
-    ItemServicoRequest:
-      type: object
-      required: [servicoId, quantidade]
-      properties:
-        servicoId:
-          type: string
-          format: uuid
-          description: UUID do serviço no catálogo
-        quantidade:
-          type: integer
-          minimum: 1
-          example: 1
-
-    ItemPecaRequest:
-      type: object
-      required: [pecaId, quantidade]
-      properties:
-        pecaId:
-          type: string
-          format: uuid
-          description: UUID da peça no catálogo
-        quantidade:
-          type: number
-          minimum: 0.01
-          example: 2.0
-
-    OrdemServicoResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        numero:
-          type: string
-          description: Número sequencial único no formato OS-{ANO}-{NNNNN}
-          example: OS-2026-00001
-        status:
-          type: string
-          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, EM_EXECUCAO, CANCELADA, FINALIZADA, ENTREGUE]
-          example: AGUARDANDO_RESPOSTA_CLIENTE
-        cliente:
-          $ref: '#/components/schemas/ClienteResumoResponse'
-        veiculo:
-          $ref: '#/components/schemas/VeiculoResumoResponse'
-        orcamento:
-          $ref: '#/components/schemas/OrcamentoResumoResponse'
-        observacoes:
-          type: string
-        dataCriacao:
-          type: string
-          format: date-time
-        dataUltimaAtualizacao:
-          type: string
-          format: date-time
-        dataInicioExecucao:
-          type: string
-          format: date-time
-        dataFinalizacao:
-          type: string
-          format: date-time
-        dataEntrega:
-          type: string
-          format: date-time
-
-    HistoricoStatusOrdemServicoResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        idOrdemServico:
-          type: string
-          format: uuid
-        statusAnterior:
-          type: string
-          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, EM_EXECUCAO, CANCELADA, FINALIZADA, ENTREGUE]
-        statusNovo:
-          type: string
-          enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, EM_EXECUCAO, CANCELADA, FINALIZADA, ENTREGUE]
-        dataTransicao:
-          type: string
-          format: date-time
-        idUsuario:
-          type: string
-          format: uuid
-        usernameUsuario:
-          type: string
-
-    ClienteResumoResponse:
-      type: object
+      description: Dados resumidos do cliente vinculado à OS
       properties:
         id:
           type: string
           format: uuid
         nome:
           type: string
+          example: Joao da Silva
         documentoMascarado:
           type: string
           example: "123.456.789-09"
 
-    VeiculoResumoResponse:
+    VeiculoResumoOSResponse:
       type: object
+      description: Dados resumidos do veículo vinculado à OS
       properties:
         id:
           type: string
@@ -1429,27 +2589,240 @@ components:
         ano:
           type: integer
 
-    OrcamentoResumoResponse:
+    OrcamentoResumoOSResponse:
       type: object
+      description: Resumo do orçamento gerado na criação da OS
       properties:
         id:
           type: string
           format: uuid
         valorTotal:
           type: number
-          example: 180.00
+          example: 310.00
         status:
-          type: string
-          enum: [CRIADO, PENDENTE_APROVACAO, APROVADO, REJEITADO, CANCELADO]
-          example: PENDENTE_APROVACAO
+          $ref: '#/components/schemas/StatusOrcamento'
         dataCriacao:
           type: string
           format: date-time
 
+    OrdemServicoResponse:
+      type: object
+      description: Dados da Ordem de Serviço
+      properties:
+        id:
+          type: string
+          format: uuid
+        numero:
+          type: string
+          description: Número sequencial da OS
+          example: OS-2026-00001
+        status:
+          $ref: '#/components/schemas/StatusOrdemServico'
+        cliente:
+          $ref: '#/components/schemas/ClienteResumoOSResponse'
+        veiculo:
+          $ref: '#/components/schemas/VeiculoResumoOSResponse'
+        orcamento:
+          $ref: '#/components/schemas/OrcamentoResumoOSResponse'
+        observacoes:
+          type: string
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+        dataInicioExecucao:
+          type: string
+          format: date-time
+          nullable: true
+        dataFinalizacao:
+          type: string
+          format: date-time
+          nullable: true
+        dataEntrega:
+          type: string
+          format: date-time
+          nullable: true
+
+    ItemComposicaoResponse:
+      type: object
+      description: Item da composição técnica registrado na ordem
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identificador único do item
+        tipo:
+          $ref: '#/components/schemas/TipoItemComposicaoTecnica'
+        descricao:
+          type: string
+        valor:
+          type: number
+          example: 150.00
+        idPecaInsumo:
+          type: string
+          format: uuid
+          nullable: true
+          description: Identificador da peça/insumo (apenas itens do tipo PECA ou INSUMO)
+        idServico:
+          type: string
+          format: uuid
+          nullable: true
+          description: Identificador do serviço do catálogo (apenas itens do tipo SERVICO)
+        statusExecucao:
+          type: string
+          enum: [PENDENTE, EM_EXECUCAO, FINALIZADO]
+          nullable: true
+          description: Status de execução individual do serviço (apenas itens do tipo SERVICO)
+        dataInicioExecucao:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data e hora de início da execução do serviço pelo mecânico
+        dataFinalizacao:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data e hora de finalização da execução do serviço pelo mecânico
+
+    OrdemServicoDetalheResponse:
+      type: object
+      description: Detalhe completo de uma ordem de serviço
+      properties:
+        id:
+          type: string
+          format: uuid
+        numero:
+          type: string
+          example: OS-2026-00001
+        status:
+          $ref: '#/components/schemas/StatusOrdemServico'
+        idCliente:
+          type: string
+          format: uuid
+        idVeiculo:
+          type: string
+          format: uuid
+        itens:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemComposicaoResponse'
+        observacoes:
+          type: string
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+
+    OrdemServicoResumoResponse:
+      type: object
+      description: Resumo de uma ordem de serviço para listagens
+      properties:
+        id:
+          type: string
+          format: uuid
+        numero:
+          type: string
+          example: OS-2026-00001
+        status:
+          $ref: '#/components/schemas/StatusOrdemServico'
+        idCliente:
+          type: string
+          format: uuid
+        idVeiculo:
+          type: string
+          format: uuid
+        dataCriacao:
+          type: string
+          format: date-time
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+
+    PaginaOrdensServicoResponse:
+      type: object
+      properties:
+        conteudo:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrdemServicoResumoResponse'
+        pagina:
+          type: integer
+        tamanho:
+          type: integer
+        totalElementos:
+          type: integer
+          format: int64
+        totalPaginas:
+          type: integer
+
+    StatusOrdemServicoResponse:
+      type: object
+      description: Status atual de uma ordem de serviço
+      properties:
+        id:
+          type: string
+          format: uuid
+        numero:
+          type: string
+          example: OS-2026-00001
+        status:
+          $ref: '#/components/schemas/StatusOrdemServico'
+        dataUltimaAtualizacao:
+          type: string
+          format: date-time
+
+    HistoricoStatusOrdemServicoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        idOrdemServico:
+          type: string
+          format: uuid
+        statusAnterior:
+          $ref: '#/components/schemas/StatusOrdemServico'
+        statusNovo:
+          $ref: '#/components/schemas/StatusOrdemServico'
+        dataTransicao:
+          type: string
+          format: date-time
+        idUsuario:
+          type: string
+          format: uuid
+          nullable: true
+        usernameUsuario:
+          type: string
+          nullable: true
+
     # ── Orçamentos ────────────────────────────────────────────────────────────
+
+    StatusOrcamento:
+      type: string
+      enum: [CRIADO, PENDENTE_APROVACAO, APROVADO, REJEITADO, CANCELADO]
+
+    TipoOrcamento:
+      type: string
+      enum: [SERVICO_ORIGINAL, ADICAO_SERVICO]
+
+    ItemOrcamentoResponse:
+      type: object
+      description: Item cobrado no orçamento
+      properties:
+        descricao:
+          type: string
+          example: Troca de oleo
+        valor:
+          type: number
+          example: 100.00
 
     OrcamentoResponse:
       type: object
+      description: Dados completos do orçamento
       properties:
         id:
           type: string
@@ -1461,13 +2834,9 @@ components:
           type: number
           example: 310.00
         status:
-          type: string
-          enum: [CRIADO, PENDENTE_APROVACAO, APROVADO, REJEITADO, CANCELADO]
-          example: APROVADO
+          $ref: '#/components/schemas/StatusOrcamento'
         tipo:
-          type: string
-          enum: [SERVICO_ORIGINAL, ADICAO_SERVICO]
-          example: SERVICO_ORIGINAL
+          $ref: '#/components/schemas/TipoOrcamento'
         itens:
           type: array
           items:
@@ -1479,15 +2848,7 @@ components:
           type: string
           format: date-time
 
-    ItemOrcamentoResponse:
-      type: object
-      properties:
-        descricao:
-          type: string
-          example: Troca de óleo
-        valor:
-          type: number
-          example: 100.00
+    # ── Métricas ──────────────────────────────────────────────────────────────
 
     TempoMedioExecucaoResponse:
       type: object
@@ -1523,3 +2884,40 @@ components:
           type: number
           format: double
           example: 45.0
+
+    # ── Erro ──────────────────────────────────────────────────────────────────
+
+    FieldErrorDetail:
+      type: object
+      properties:
+        field:
+          type: string
+          example: nome
+        message:
+          type: string
+          example: O nome é obrigatório
+
+    ErrorResponse:
+      type: object
+      description: Payload padrão de erro
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          example: 422
+        error:
+          type: string
+          example: Unprocessable Entity
+        message:
+          type: string
+          example: Regra de negócio violada
+        path:
+          type: string
+          example: /api/v1/clientes
+        fieldErrors:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/FieldErrorDetail'
