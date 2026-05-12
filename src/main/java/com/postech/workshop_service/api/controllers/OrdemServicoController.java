@@ -12,6 +12,7 @@ import com.postech.workshop_service.application.usecases.BuscarOrdemServicoPorId
 import com.postech.workshop_service.application.usecases.ConsultarHistoricoOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.ConsultarStatusOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.CriarOrdemServicoUseCase;
+import com.postech.workshop_service.application.usecases.EncerrarComposicaoTecnicaUseCase;
 import com.postech.workshop_service.application.usecases.EncerrarDiagnosticoUseCase;
 import com.postech.workshop_service.application.usecases.EntregarVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.FinalizarExecucaoUseCase;
@@ -88,6 +89,8 @@ public class OrdemServicoController {
 
 	private final AdicionarItemOrdemServicoUseCase adicionarItemOrdemServicoUseCase;
 
+	private final EncerrarComposicaoTecnicaUseCase encerrarComposicaoTecnicaUseCase;
+
 	/**
 	 * Construtor para injecao de dependencias.
 	 * @param criarOrdemServicoUseCase caso de uso de criacao da OS.
@@ -113,7 +116,8 @@ public class OrdemServicoController {
 			IniciarServicoOrdemUseCase iniciarServicoOrdemUseCase,
 			FinalizarServicoOrdemUseCase finalizarServicoOrdemUseCase,
 			IniciarDiagnosticoUseCase iniciarDiagnosticoUseCase, EncerrarDiagnosticoUseCase encerrarDiagnosticoUseCase,
-			AdicionarItemOrdemServicoUseCase adicionarItemOrdemServicoUseCase) {
+			AdicionarItemOrdemServicoUseCase adicionarItemOrdemServicoUseCase,
+			EncerrarComposicaoTecnicaUseCase encerrarComposicaoTecnicaUseCase) {
 		this.criarOrdemServicoUseCase = criarOrdemServicoUseCase;
 		this.buscarOrdemServicoPorIdUseCase = buscarOrdemServicoPorIdUseCase;
 		this.listarOrdensServicoUseCase = listarOrdensServicoUseCase;
@@ -128,6 +132,7 @@ public class OrdemServicoController {
 		this.iniciarDiagnosticoUseCase = iniciarDiagnosticoUseCase;
 		this.encerrarDiagnosticoUseCase = encerrarDiagnosticoUseCase;
 		this.adicionarItemOrdemServicoUseCase = adicionarItemOrdemServicoUseCase;
+		this.encerrarComposicaoTecnicaUseCase = encerrarComposicaoTecnicaUseCase;
 	}
 
 	/**
@@ -295,6 +300,21 @@ public class OrdemServicoController {
 					request.getQuantidade());
 		}
 		return ResponseEntity.ok(OrdemServicoDetalheResponse.from(ordemServico));
+	}
+
+	@PatchMapping("/{id}/encerrar-composicao")
+	@PreAuthorize("hasRole('MECANICO')")
+	@Operation(summary = "Encerrar composicao tecnica da OS",
+			description = "Encerra a composicao tecnica e gera um orcamento aguardando aprovacao. Restrito ao perfil MECANICO.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Composicao encerrada e orcamento gerado",
+					content = @Content(schema = @Schema(implementation = OrdemServicoResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Ordem de servico nao encontrada"),
+			@ApiResponse(responseCode = "422", description = "OS nao esta em EM_COMPOSICAO ou sem itens") })
+	public ResponseEntity<OrdemServicoResponse> encerrarComposicao(@PathVariable UUID id) {
+		encerrarComposicaoTecnicaUseCase.executar(id);
+		OrdemServico ordemServico = buscarOrdemServicoPorIdUseCase.executar(id);
+		return ResponseEntity.ok(OrdemServicoResponse.from(ordemServico));
 	}
 
 	@PatchMapping("/{id}/iniciar-execucao")
