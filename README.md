@@ -62,7 +62,7 @@ O projeto foi estruturado com base em conceitos de **Domain-Driven Design (DDD)*
 
 ## Artefatos de Domínio
 - [Dicionário de Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
-- [Diagramas Domain Storytelling](/docs/DDD_storytelling)
+- [Diagramas Domain Storytelling](/docs/domain_storytelling)
 - [Diagramas Event Storming](docs/event_storming/README.md)
 
 ---
@@ -235,7 +235,7 @@ Em breve: vídeo demonstrativo da aplicação e dos fluxos principais do sistema
 ## Artefatos e Documentação
 
 - [Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
-- [Domain Storytelling](/docs/DDD_storytelling)
+- [Domain Storytelling](/docs/domain_storytelling)
 - [Fluxo JWT e RBAC](docs/autenticacao-jwt-rbac/README.md)
 - [Event Storming](docs/event_storming/README.md)
 - [Documento de Entrega](em construção)
