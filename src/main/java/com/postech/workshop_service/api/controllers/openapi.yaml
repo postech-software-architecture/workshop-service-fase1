@@ -19,6 +19,8 @@ tags:
     description: Gerenciamento do ciclo de vida das ordens de serviço
   - name: Orçamentos
     description: Aprovação e rejeição de orçamentos vinculados a ordens de serviço
+  - name: Métricas
+    description: Monitoramento do tempo médio de execução das ordens de serviço (perfil ADMINISTRADOR)
 
 paths:
 
@@ -899,6 +901,48 @@ paths:
         '422':
           description: Orçamento não está pendente de aprovação ou OS em estado inválido
 
+  # ─── Métricas ───────────────────────────────────────────────────────────────
+
+  /api/v1/metricas/tempo-medio-execucao:
+    get:
+      tags: [Métricas]
+      summary: Tempo médio global de execução
+      description: Retorna média, mínimo, máximo e total de ordens de serviço finalizadas ou entregues. Restrito ao perfil ADMINISTRADOR.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Métricas globais de execução
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TempoMedioExecucaoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado — requer perfil ADMINISTRADOR
+
+  /api/v1/metricas/tempo-medio-execucao/por-tipo-servico:
+    get:
+      tags: [Métricas]
+      summary: Tempo médio de execução por tipo de serviço
+      description: Retorna o tempo médio de execução agrupado pela descrição dos itens de serviço presentes na composição técnica das ordens finalizadas. Restrito ao perfil ADMINISTRADOR.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de métricas agrupadas por tipo de serviço
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TempoMedioPorTipoServicoResponse'
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado — requer perfil ADMINISTRADOR
+
 components:
   schemas:
 
@@ -1444,3 +1488,38 @@ components:
         valor:
           type: number
           example: 100.00
+
+    TempoMedioExecucaoResponse:
+      type: object
+      properties:
+        totalOrdens:
+          type: integer
+          format: int64
+          example: 42
+        tempoMedioExecucaoMinutos:
+          type: number
+          format: double
+          example: 145.5
+        tempoMinimoExecucaoMinutos:
+          type: number
+          format: double
+          example: 30.0
+        tempoMaximoExecucaoMinutos:
+          type: number
+          format: double
+          example: 480.0
+
+    TempoMedioPorTipoServicoResponse:
+      type: object
+      properties:
+        descricaoServico:
+          type: string
+          example: Troca de oleo e filtro
+        totalExecucoes:
+          type: integer
+          format: int64
+          example: 8
+        tempoMedioExecucaoMinutos:
+          type: number
+          format: double
+          example: 45.0
