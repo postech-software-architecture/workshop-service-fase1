@@ -238,7 +238,8 @@ Em breve: vídeo demonstrativo da aplicação e dos fluxos principais do sistema
 - [Domain Storytelling](/docs/domain_storytelling)
 - [Fluxo JWT e RBAC](docs/autenticacao-jwt-rbac/README.md)
 - [Event Storming](docs/event_storming/README.md)
-- [Documento de Entrega](https://docs.google.com/document/d/1AG1UIgyuAokcU_JAC2bleT4IUDj0p0lU/edit?usp=sharing&ouid=118260149834728254325&rtpof=true&sd=true)
+- [Documento de Entrega](https://drive.google.com/file/d/1uuCT6WXVBtCgXTGTUcIQewyFlq2ibbJs/view?usp=sharing)
+- [Vídeo Demonstrativo](https://drive.google.com/file/d/1Uw11BpBvNsuk0mUOFy7ztbR_JtM183Df/view?usp=sharing)
 
 ---
 
