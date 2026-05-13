@@ -224,22 +224,19 @@ public class OrdemServicoController {
 	}
 
 	/**
-	 * Consulta o status atual de uma ordem de servico do cliente autenticado.
-	 * @param id identificador da OS.
-	 * @return status compacto da OS.
+	 * Consulta o status atual de uma ordem de servico pelo numero. Endpoint publico.
+	 * @param numero numero da OS (formato OS-{ANO}-{NNNNN}).
+	 * @return status da OS com itens da composicao tecnica.
 	 */
-	@GetMapping("/{id}/status")
-	@PreAuthorize("hasRole('CLIENTE')")
+	@GetMapping("/{numero}/status")
 	@Operation(summary = "Consultar status da Ordem de Servico",
-			description = "Permite que o cliente acompanhe o progresso da sua OS. "
-					+ "Retorna 403 quando a OS pertence a outro cliente.")
+			description = "Endpoint publico que permite consultar o status e os itens de uma OS pelo numero sequencial.")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "Status atual da OS",
+			@ApiResponse(responseCode = "200", description = "Status atual da OS com itens",
 					content = @Content(schema = @Schema(implementation = StatusOrdemServicoResponse.class))),
-			@ApiResponse(responseCode = "403", description = "OS pertence a outro cliente"),
 			@ApiResponse(responseCode = "404", description = "OS nao encontrada") })
-	public ResponseEntity<StatusOrdemServicoResponse> consultarStatus(@PathVariable UUID id) {
-		OrdemServico ordem = consultarStatusOrdemServicoUseCase.executar(id);
+	public ResponseEntity<StatusOrdemServicoResponse> consultarStatus(@PathVariable String numero) {
+		OrdemServico ordem = consultarStatusOrdemServicoUseCase.executar(numero);
 		return ResponseEntity.ok(StatusOrdemServicoResponse.from(ordem));
 	}
 

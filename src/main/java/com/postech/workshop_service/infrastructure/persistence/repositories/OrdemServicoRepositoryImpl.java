@@ -54,6 +54,12 @@ public class OrdemServicoRepositoryImpl implements OrdemServicoRepository {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public Optional<OrdemServico> buscarPorNumero(String numero) {
+		return jpaOrdemServicoRepository.findByNumero(numero).map(ordemServicoMapper::toDomain);
+	}
+
+	@Override
 	public String gerarProximoNumero(int ano) {
 		String prefixo = "OS-" + ano + "-%";
 		int sequencial = jpaOrdemServicoRepository.buscarProximoSequencial(prefixo);
