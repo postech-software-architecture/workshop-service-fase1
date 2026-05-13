@@ -103,48 +103,9 @@ class OrdemServicoClienteIT extends PostgresTestContainer {
 	}
 
 	@Test
-	void deveRetornarStatusDaOsQuandoPertenceAoCliente() throws Exception {
-		Cliente cliente = clienteRepository
-			.salvar(new Cliente(null, "Cliente Status", new Documento("12345678909"), "status@teste.com", null));
-		registrarUsuarioCliente("cliente1", cliente.getId());
-
-		UUID osId = criarOsViaApi(cliente.getDocumento().getValor(), "STA1T11");
-
-		String token = fazerLogin("cliente1", "senha123");
-
-		mockMvc.perform(get("/api/v1/ordens-servico/{id}/status", osId).header("Authorization", "Bearer " + token))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.id").value(osId.toString()))
-			.andExpect(jsonPath("$.numero").value(org.hamcrest.Matchers.startsWith("OS-")))
-			.andExpect(jsonPath("$.status").value("RECEBIDO"));
-	}
-
-	@Test
-	void deveRetornar403QuandoOsPertenceAOutroCliente() throws Exception {
-		Cliente cliente = clienteRepository
-			.salvar(new Cliente(null, "Cliente Logado", new Documento("12345678909"), "log@teste.com", null));
-		Cliente outro = clienteRepository
-			.salvar(new Cliente(null, "Outro Cliente", new Documento("98765432100"), "outro@teste.com", null));
-		registrarUsuarioCliente("cliente1", cliente.getId());
-
-		UUID osDeOutro = criarOsViaApi(outro.getDocumento().getValor(), "OUT1R11");
-
-		String token = fazerLogin("cliente1", "senha123");
-
-		mockMvc.perform(get("/api/v1/ordens-servico/{id}/status", osDeOutro).header("Authorization", "Bearer " + token))
-			.andExpect(status().isForbidden());
-	}
-
-	@Test
 	void deveRetornar404QuandoOsNaoExiste() throws Exception {
-		Cliente cliente = clienteRepository
-			.salvar(new Cliente(null, "Cliente Logado", new Documento("12345678909"), "log@teste.com", null));
-		registrarUsuarioCliente("cliente1", cliente.getId());
-
-		String token = fazerLogin("cliente1", "senha123");
-
-		mockMvc.perform(
-				get("/api/v1/ordens-servico/{id}/status", UUID.randomUUID()).header("Authorization", "Bearer " + token))
+		// Endpoint agora e publico e usa numero em vez de id
+		mockMvc.perform(get("/api/v1/ordens-servico/{numero}/status", "OS-9999-99999"))
 			.andExpect(status().isNotFound());
 	}
 

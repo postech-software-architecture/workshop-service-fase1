@@ -23,6 +23,14 @@ public interface JpaOrdemServicoRepository
 	Optional<OrdemServicoJpaEntity> findById(UUID id);
 
 	/**
+	 * Busca uma ordem de servico pelo numero sequencial, hidratando os itens.
+	 * @param numero numero da ordem (formato OS-{ANO}-{NNNNN}).
+	 * @return entidade hidratada, se encontrada.
+	 */
+	@EntityGraph(attributePaths = "itensComposicao")
+	Optional<OrdemServicoJpaEntity> findByNumero(String numero);
+
+	/**
 	 * Carrega ordens de servico hidratando a colecao de itens em uma unica consulta,
 	 * evitando o problema de paginacao em memoria quando combinada com Specification.
 	 * @param ids identificadores das ordens de servico desejadas.

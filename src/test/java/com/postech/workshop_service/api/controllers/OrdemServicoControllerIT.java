@@ -153,6 +153,47 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 			.andExpect(jsonPath("$.itens").isEmpty());
 	}
 
+	@Test
+	void shouldAllowPublicAccessToStatusEndpointByNumero() throws Exception {
+		UUID osId = criarOsRecebidaComNumero("Ana Costa", "98712345628", "XYZ9999");
+		String numero = obterNumeroOS(osId);
+
+		mockMvc.perform(get("/api/v1/ordens-servico/{numero}/status", numero))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.numero").value(numero))
+			.andExpect(jsonPath("$.status").value("RECEBIDO"))
+			.andExpect(jsonPath("$.itens").isArray())
+			.andExpect(jsonPath("$.itens").isEmpty());
+	}
+
+	@Test
+	void shouldReturnStatusWithItemsInPublicEndpoint() throws Exception {
+		UUID osId = criarOsRecebidaComNumero("Bruno Lima", "11144477735", "DEF4444");
+		avancaParaComposicao(osId);
+
+		UUID servicoId = criarServico("Alinhamento", new BigDecimal("150.00"));
+		adicionarItemServico(osId, servicoId);
+
+		String numero = obterNumeroOS(osId);
+
+		mockMvc.perform(get("/api/v1/ordens-servico/{numero}/status", numero))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.numero").value(numero))
+			.andExpect(jsonPath("$.status").value("EM_COMPOSICAO"))
+			.andExpect(jsonPath("$.itens").isArray())
+			.andExpect(jsonPath("$.itens[0].descricao").value("Alinhamento"))
+			.andExpect(jsonPath("$.itens[0].tipo").value("SERVICO"))
+			.andExpect(jsonPath("$.itens[0].valor").value(150.00))
+			.andExpect(jsonPath("$.itens[0].statusExecucao").value("PENDENTE"));
+	}
+
+	@Test
+	@WithMockUser(roles = {})
+	void shouldReturn404WhenNumeroNotFound() throws Exception {
+		mockMvc.perform(get("/api/v1/ordens-servico/{numero}/status", "OS-2026-99999"))
+			.andExpect(status().isNotFound());
+	}
+
 	private UUID criarOsRecebida(String nome, String documento, String placa) throws Exception {
 		criarCliente(nome, documento);
 
@@ -201,6 +242,34 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 			.andExpect(status().isCreated())
 			.andReturn();
 		return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText());
+	}
+
+	private UUID criarOsRecebidaComNumero(String nome, String documento, String placa) throws Exception {
+		return criarOsRecebida(nome, documento, placa);
+	}
+
+	private String obterNumeroOS(UUID osId) throws Exception {
+		MvcResult result = mockMvc.perform(get("/api/v1/ordens-servico/{id}", osId))
+			.andExpect(status().isOk())
+			.andReturn();
+		return objectMapper.readTree(result.getResponse().getContentAsString()).get("numero").asText();
+	}
+
+	private void avancaParaComposicao(UUID osId) throws Exception {
+		mockMvc.perform(patch("/api/v1/ordens-servico/{id}/iniciar-diagnostico", osId)).andExpect(status().isOk());
+		mockMvc.perform(patch("/api/v1/ordens-servico/{id}/encerrar-diagnostico", osId)).andExpect(status().isOk());
+	}
+
+	private void adicionarItemServico(UUID osId, UUID servicoId) throws Exception {
+		AdicionarItemOrdemServicoRequest addItem = AdicionarItemOrdemServicoRequest.builder()
+			.tipo(AdicionarItemOrdemServicoRequest.TipoItem.SERVICO)
+			.servicoId(servicoId)
+			.quantidade(BigDecimal.ONE)
+			.build();
+		mockMvc
+			.perform(post("/api/v1/ordens-servico/{id}/itens", osId).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(addItem)))
+			.andExpect(status().isOk());
 	}
 
 }

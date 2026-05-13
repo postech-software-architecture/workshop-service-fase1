@@ -25,6 +25,13 @@ public interface OrdemServicoRepository {
 	Optional<OrdemServico> buscarPorId(UUID id);
 
 	/**
+	 * Busca uma ordem de servico pelo numero sequencial.
+	 * @param numero numero da ordem (formato OS-{ANO}-{NNNNN}).
+	 * @return ordem encontrada, se existir.
+	 */
+	Optional<OrdemServico> buscarPorNumero(String numero);
+
+	/**
 	 * Gera o proximo numero sequencial disponivel para o ano informado.
 	 * @param ano ano de referencia (ex: 2026).
 	 * @return numero formatado no padrao OS-{ANO}-{NNNNN}.

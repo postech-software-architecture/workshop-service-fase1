@@ -1405,31 +1405,29 @@ paths:
         '403':
           description: Conta autenticada sem cliente vinculado ou perfil incompatível
 
-  /api/v1/ordens-servico/{id}/status:
+  /api/v1/ordens-servico/{numero}/status:
     get:
       tags: [Ordens de Serviço]
       summary: Consultar status da Ordem de Serviço
       description: >
-        Restrito ao perfil CLIENTE. Permite que o cliente acompanhe o progresso da sua OS.
-        Retorna 403 quando a OS pertence a outro cliente.
+        Endpoint público sem autenticação. Permite consultar o status atual e os itens
+        da composição técnica de uma ordem de serviço pelo número sequencial.
+      security: []
       parameters:
-        - name: id
+        - name: numero
           in: path
           required: true
           schema:
             type: string
-            format: uuid
+          description: Número sequencial da OS
+          example: OS-2026-00001
       responses:
         '200':
-          description: Status atual da OS
+          description: Status atual da OS com itens da composição técnica
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/StatusOrdemServicoResponse'
-        '401':
-          description: Não autenticado
-        '403':
-          description: OS pertence a outro cliente ou perfil incompatível
         '404':
           description: OS não encontrada
 
@@ -2986,7 +2984,7 @@ components:
 
     StatusOrdemServicoResponse:
       type: object
-      description: Status atual de uma ordem de serviço
+      description: Status atual de uma ordem de serviço com itens da composição
       properties:
         id:
           type: string
@@ -2999,6 +2997,46 @@ components:
         dataUltimaAtualizacao:
           type: string
           format: date-time
+        itens:
+          type: array
+          description: Itens da composição técnica da ordem de serviço
+          items:
+            $ref: '#/components/schemas/ItemComposicaoTecnicaResponse'
+
+    ItemComposicaoTecnicaResponse:
+      type: object
+      description: Informações de um item da composição técnica
+      properties:
+        id:
+          type: string
+          format: uuid
+        descricao:
+          type: string
+          description: Descrição do serviço ou peça
+        valor:
+          type: number
+          format: decimal
+          description: Valor unitário do item
+          example: 150.00
+        tipo:
+          type: string
+          enum: [SERVICO, PECA]
+          description: Tipo do item
+        idPecaInsumo:
+          type: string
+          format: uuid
+          nullable: true
+          description: Identificador da peça (se tipo PECA)
+        idServico:
+          type: string
+          format: uuid
+          nullable: true
+          description: Identificador do serviço (se tipo SERVICO)
+        statusExecucao:
+          type: string
+          enum: [PENDENTE, EM_EXECUCAO, FINALIZADO]
+          nullable: true
+          description: Status de execução (apenas para itens tipo SERVICO)
 
     HistoricoStatusOrdemServicoResponse:
       type: object
