@@ -23,6 +23,19 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+  mail:
+    host: ${MAIL_HOST:mailhog}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:true}
+
+notificacao:
+  canal: ${NOTIFICACAO_CANAL:email}
+  email:
+    remetente: ${MAIL_FROM:no-reply@workshop.local}
 
 management:
   endpoint:

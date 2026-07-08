@@ -212,6 +212,28 @@ public class OrdemServicoController {
 	}
 
 	/**
+	 * Lista a fila de trabalho: ordens ordenadas por prioridade de status (EM_EXECUCAO,
+	 * AGUARDANDO_APROVACAO, EM_DIAGNOSTICO, RECEBIDO) e, dentro do mesmo status, mais
+	 * antigas primeiro. Ordens FINALIZADA, ENTREGUE e CANCELADA sao excluidas
+	 * logicamente.
+	 * @param pagina pagina solicitada (zero-based).
+	 * @param tamanho tamanho da pagina.
+	 * @return resposta paginada com a fila de trabalho priorizada.
+	 */
+	@GetMapping("/fila-trabalho")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
+	@Operation(summary = "Listar fila de trabalho",
+			description = "Lista as ordens ativas ordenadas por prioridade de status e antiguidade, "
+					+ "excluindo as ordens finalizadas, entregues e canceladas.")
+	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Pagina da fila de trabalho",
+			content = @Content(schema = @Schema(implementation = PaginaOrdensServicoResponse.class))) })
+	public ResponseEntity<PaginaOrdensServicoResponse> listarFilaTrabalho(@RequestParam(defaultValue = "0") int pagina,
+			@RequestParam(defaultValue = "20") int tamanho) {
+		PaginaResultado<OrdemServico> resultado = listarOrdensServicoUseCase.executarFilaTrabalho(pagina, tamanho);
+		return ResponseEntity.ok(PaginaOrdensServicoResponse.from(resultado));
+	}
+
+	/**
 	 * Lista as ordens de servico do cliente autenticado.
 	 * @param pagina pagina solicitada.
 	 * @param tamanho tamanho da pagina.
