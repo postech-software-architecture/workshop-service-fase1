@@ -1,4 +1,4 @@
-package com.postech.workshop_service.application.exceptions;
+package com.postech.workshop_service.domain.exceptions;
 
 /**
  * Excecao utilizada para sinalizar violacoes de regras de negocio.

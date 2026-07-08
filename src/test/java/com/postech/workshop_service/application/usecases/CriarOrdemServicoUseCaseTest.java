@@ -1,8 +1,7 @@
 package com.postech.workshop_service.application.usecases;
 
-import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
-import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
-import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.domain.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.Cliente;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
@@ -11,7 +10,6 @@ import com.postech.workshop_service.domain.repositories.ClienteRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import com.postech.workshop_service.domain.repositories.VeiculoRepository;
 import com.postech.workshop_service.domain.valueobjects.Documento;
-import com.postech.workshop_service.domain.valueobjects.Placa;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,13 +56,10 @@ class CriarOrdemServicoUseCaseTest {
 		when(ordemServicoRepository.gerarProximoNumero(anyInt())).thenReturn("OS-2026-00001");
 		when(ordemServicoRepository.salvar(any(OrdemServico.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()
-			.clienteDocumento("12345678909")
-			.veiculoPlaca("ABC1D23")
-			.observacoes("Barulho ao frear")
-			.build();
+		DadosCriacaoOrdemServico dados = new DadosCriacaoOrdemServico("12345678909", "ABC1D23", null, null, null,
+				"Barulho ao frear");
 
-		ResultadoCriacaoOrdemServico resultado = useCase.executar(request);
+		ResultadoCriacaoOrdemServico resultado = useCase.executar(dados);
 
 		assertNotNull(resultado.ordemServico());
 		assertEquals(StatusOrdemServico.RECEBIDO, resultado.ordemServico().getStatus());
@@ -77,12 +72,9 @@ class CriarOrdemServicoUseCaseTest {
 	void shouldRejectWhenClientNotFound() {
 		when(clienteRepository.buscarPorDocumento(anyString(), anyBoolean())).thenReturn(Optional.empty());
 
-		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()
-			.clienteDocumento("00000000000")
-			.veiculoPlaca("ABC1D23")
-			.build();
+		DadosCriacaoOrdemServico dados = new DadosCriacaoOrdemServico("00000000000", "ABC1D23", null, null, null, null);
 
-		assertThrows(RecursoNaoEncontradoException.class, () -> useCase.executar(request));
+		assertThrows(RecursoNaoEncontradoException.class, () -> useCase.executar(dados));
 	}
 
 	@Test
@@ -93,12 +85,9 @@ class CriarOrdemServicoUseCaseTest {
 		when(clienteRepository.buscarPorDocumento(anyString(), anyBoolean())).thenReturn(Optional.of(cliente));
 		when(veiculoRepository.buscarPorPlaca(anyString(), anyBoolean())).thenReturn(Optional.of(veiculoDeOutro));
 
-		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()
-			.clienteDocumento("12345678909")
-			.veiculoPlaca("ABC1D23")
-			.build();
+		DadosCriacaoOrdemServico dados = new DadosCriacaoOrdemServico("12345678909", "ABC1D23", null, null, null, null);
 
-		assertThrows(RegraDeNegocioException.class, () -> useCase.executar(request));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar(dados));
 	}
 
 	@Test
@@ -111,17 +100,10 @@ class CriarOrdemServicoUseCaseTest {
 		when(ordemServicoRepository.gerarProximoNumero(anyInt())).thenReturn("OS-2026-00001");
 		when(ordemServicoRepository.salvar(any(OrdemServico.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()
-			.clienteDocumento("12345678909")
-			.veiculoPlaca("ABC1D23")
-			.veiculo(CriarOrdemServicoRequest.DadosVeiculoRequest.builder()
-				.marca("Toyota")
-				.modelo("Corolla")
-				.ano(2020)
-				.build())
-			.build();
+		DadosCriacaoOrdemServico dados = new DadosCriacaoOrdemServico("12345678909", "ABC1D23", "Toyota", "Corolla",
+				2020, null);
 
-		ResultadoCriacaoOrdemServico resultado = useCase.executar(request);
+		ResultadoCriacaoOrdemServico resultado = useCase.executar(dados);
 
 		assertNotNull(resultado.veiculo());
 		assertEquals("ABC1D23", resultado.veiculo().getPlaca().getValor());
@@ -134,12 +116,9 @@ class CriarOrdemServicoUseCaseTest {
 		when(clienteRepository.buscarPorDocumento(anyString(), anyBoolean())).thenReturn(Optional.of(cliente));
 		when(veiculoRepository.buscarPorPlaca(anyString(), anyBoolean())).thenReturn(Optional.empty());
 
-		CriarOrdemServicoRequest request = CriarOrdemServicoRequest.builder()
-			.clienteDocumento("12345678909")
-			.veiculoPlaca("ABC1D23")
-			.build();
+		DadosCriacaoOrdemServico dados = new DadosCriacaoOrdemServico("12345678909", "ABC1D23", null, null, null, null);
 
-		assertThrows(RegraDeNegocioException.class, () -> useCase.executar(request));
+		assertThrows(RegraDeNegocioException.class, () -> useCase.executar(dados));
 	}
 
 	private Cliente criarCliente(String documento) {

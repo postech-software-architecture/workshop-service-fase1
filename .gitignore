@@ -183,3 +183,6 @@ scratch/
 # Local secrets
 .env
 .env.local
+
+# macOS
+.DS_Store

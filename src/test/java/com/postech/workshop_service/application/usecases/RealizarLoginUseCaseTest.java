@@ -7,8 +7,6 @@ import com.postech.workshop_service.domain.entities.Usuario;
 import com.postech.workshop_service.domain.enums.Role;
 import com.postech.workshop_service.domain.repositories.RefreshTokenRepository;
 import com.postech.workshop_service.domain.repositories.UsuarioRepository;
-import com.postech.workshop_service.infrastructure.security.JwtTokenService;
-import com.postech.workshop_service.infrastructure.security.UsuarioAutenticadoPrincipal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,7 +42,7 @@ class RealizarLoginUseCaseTest {
 	private RefreshTokenRepository refreshTokenRepository;
 
 	@Mock
-	private JwtTokenService jwtTokenService;
+	private TokenService jwtTokenService;
 
 	@InjectMocks
 	private RealizarLoginUseCase useCase;
@@ -53,12 +51,10 @@ class RealizarLoginUseCaseTest {
 	void shouldLoginSuccessfully() {
 		Usuario usuario = new Usuario(UUID.randomUUID(), "admin", "admin@teste.com", "hash", Set.of(Role.ADMINISTRADOR),
 				null, true, false, LocalDateTime.now(), LocalDateTime.now(), null);
-		UsuarioAutenticadoPrincipal principal = UsuarioAutenticadoPrincipal.fromDomain(usuario);
-		Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null,
-				principal.getAuthorities());
+		Authentication authentication = new UsernamePasswordAuthenticationToken("admin", null, java.util.List.of());
 
 		when(authenticationManager.authenticate(any())).thenReturn(authentication);
-		when(usuarioRepository.buscarPorId(usuario.getId())).thenReturn(Optional.of(usuario));
+		when(usuarioRepository.buscarPorUsernameOuEmail("admin")).thenReturn(Optional.of(usuario));
 		when(jwtTokenService.gerarAccessToken(usuario)).thenReturn("access-token");
 		when(jwtTokenService.gerarRefreshToken()).thenReturn("refresh-token");
 		when(jwtTokenService.calcularExpiracaoRefreshToken()).thenReturn(LocalDateTime.now().plusDays(7));
@@ -83,14 +79,10 @@ class RealizarLoginUseCaseTest {
 
 	@Test
 	void shouldThrowWhenPrincipalUserDoesNotExist() {
-		Usuario usuario = new Usuario(UUID.randomUUID(), "admin", "admin@teste.com", "hash", Set.of(Role.ADMINISTRADOR),
-				null, true, false, LocalDateTime.now(), LocalDateTime.now(), null);
-		UsuarioAutenticadoPrincipal principal = UsuarioAutenticadoPrincipal.fromDomain(usuario);
-		Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null,
-				principal.getAuthorities());
+		Authentication authentication = new UsernamePasswordAuthenticationToken("admin", null, java.util.List.of());
 
 		when(authenticationManager.authenticate(any())).thenReturn(authentication);
-		when(usuarioRepository.buscarPorId(usuario.getId())).thenReturn(Optional.empty());
+		when(usuarioRepository.buscarPorUsernameOuEmail("admin")).thenReturn(Optional.empty());
 
 		assertThrows(CredenciaisInvalidasException.class, () -> useCase.executar("admin", "senha123"));
 	}

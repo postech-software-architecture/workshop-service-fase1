@@ -6,8 +6,6 @@ import com.postech.workshop_service.domain.entities.RefreshToken;
 import com.postech.workshop_service.domain.entities.Usuario;
 import com.postech.workshop_service.domain.repositories.RefreshTokenRepository;
 import com.postech.workshop_service.domain.repositories.UsuarioRepository;
-import com.postech.workshop_service.infrastructure.security.JwtTokenService;
-import com.postech.workshop_service.infrastructure.security.UsuarioAutenticadoPrincipal;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -29,10 +27,10 @@ public class RealizarLoginUseCase {
 
 	private final RefreshTokenRepository refreshTokenRepository;
 
-	private final JwtTokenService jwtTokenService;
+	private final TokenService jwtTokenService;
 
 	public RealizarLoginUseCase(AuthenticationManager authenticationManager, UsuarioRepository usuarioRepository,
-			RefreshTokenRepository refreshTokenRepository, JwtTokenService jwtTokenService) {
+			RefreshTokenRepository refreshTokenRepository, TokenService jwtTokenService) {
 		this.authenticationManager = authenticationManager;
 		this.usuarioRepository = usuarioRepository;
 		this.refreshTokenRepository = refreshTokenRepository;
@@ -50,8 +48,7 @@ public class RealizarLoginUseCase {
 		try {
 			Authentication authentication = authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(identificador, senha));
-			UsuarioAutenticadoPrincipal principal = (UsuarioAutenticadoPrincipal) authentication.getPrincipal();
-			Usuario usuario = usuarioRepository.buscarPorId(principal.getId())
+			Usuario usuario = usuarioRepository.buscarPorUsernameOuEmail(authentication.getName())
 				.orElseThrow(() -> new CredenciaisInvalidasException("Credenciais invalidas."));
 			String accessToken = jwtTokenService.gerarAccessToken(usuario);
 			RefreshToken refreshPersistido = refreshTokenRepository
