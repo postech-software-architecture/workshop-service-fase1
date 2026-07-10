@@ -1,0 +1,76 @@
+name: CD — Deploy to Kubernetes
+
+# Deploy manual (workflow_dispatch) enquanto os manifestos do Dev 3 (/k8s) e o cluster do
+# Dev 4 nao estao prontos. O gatilho automatico por push na main sera habilitado quando o
+# handoff estiver completo (bloco 'push' abaixo, comentado).
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag da imagem a implantar (ex.: sha-<sha> ou latest)'
+        required: true
+        default: latest
+  # push:
+  #   branches: [ main ]
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/workshop-service
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    # environment: production   # opcional: exige aprovacao antes do deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+
+      # KUBECONFIG_B64 = `base64 -w0 ~/.kube/config` do cluster do Dev 4, salvo como secret.
+      - name: Configura acesso ao cluster
+        run: |
+          if [ -z "${{ secrets.KUBECONFIG_B64 }}" ]; then
+            echo "::error::Secret KUBECONFIG_B64 nao configurado (cluster do Dev 4 pendente)."
+            exit 1
+          fi
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > "$HOME/.kube/config"
+          kubectl config current-context
+
+      # Aplicacao dos manifestos do Dev 3. Mantido comentado ate /k8s existir no repo
+      # (referenciar arquivos inexistentes faria o job falhar). Descomentar no handoff.
+      #
+      # - name: imagePullSecret (GHCR) — apenas se a imagem for privada
+      #   run: |
+      #     kubectl create secret docker-registry ghcr-pull \
+      #       --docker-server=ghcr.io \
+      #       --docker-username=${{ github.actor }} \
+      #       --docker-password=${{ secrets.GHCR_PULL_TOKEN }} \
+      #       --namespace=workshop \
+      #       --dry-run=client -o yaml | kubectl apply -f -
+      #
+      # - name: Aplica banco e configs (Dev 3)
+      #   run: |
+      #     kubectl apply -f k8s/namespace.yaml
+      #     kubectl apply -f k8s/postgres/
+      #     kubectl apply -f k8s/configmap.yaml
+      #     kubectl apply -f k8s/secret.yaml
+      #
+      # - name: Aplica a aplicacao e injeta a tag imutavel
+      #   run: |
+      #     TAG="${{ github.event.inputs.image_tag || format('sha-{0}', github.sha) }}"
+      #     kubectl apply -f k8s/
+      #     kubectl -n workshop set image deployment/workshop-service \
+      #       workshop-service=${{ env.IMAGE }}:${TAG}
+      #
+      # - name: Aguarda rollout
+      #   run: kubectl -n workshop rollout status deployment/workshop-service --timeout=180s
+
+      - name: Placeholder (aguardando handoff Dev 3/Dev 4)
+        run: |
+          echo "Cluster acessivel. Manifestos /k8s (Dev 3) ainda nao versionados;"
+          echo "steps de kubectl apply estao comentados no cd.yml ate o handoff."
