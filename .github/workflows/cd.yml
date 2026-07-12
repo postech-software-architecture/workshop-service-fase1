@@ -32,13 +32,15 @@ jobs:
 
       # KUBECONFIG_B64 = `base64 -w0 ~/.kube/config` do cluster do Dev 4, salvo como secret.
       - name: Configura acesso ao cluster
+        env:
+          KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
         run: |
-          if [ -z "${{ secrets.KUBECONFIG_B64 }}" ]; then
+          if [ -z "$KUBECONFIG_B64" ]; then
             echo "::error::Secret KUBECONFIG_B64 nao configurado (cluster do Dev 4 pendente)."
             exit 1
           fi
           mkdir -p "$HOME/.kube"
-          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > "$HOME/.kube/config"
+          echo "$KUBECONFIG_B64" | base64 -d > "$HOME/.kube/config"
           kubectl config current-context
 
       # Aplicacao dos manifestos do Dev 3. Mantido comentado ate /k8s existir no repo
