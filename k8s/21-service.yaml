@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: workshop-service
+  namespace: workshop
+  labels:
+    app.kubernetes.io/name: workshop-service
+    app.kubernetes.io/part-of: workshop-service
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: workshop-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

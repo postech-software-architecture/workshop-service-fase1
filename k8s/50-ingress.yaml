@@ -1,0 +1,22 @@
+# Opcional — exposicao externa. Requer um Ingress Controller instalado no cluster
+# (ex.: ingress-nginx), o que e infra do Dev 4. Em cloud, ajustar o host para o dominio real.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: workshop-service
+  namespace: workshop
+  labels:
+    app.kubernetes.io/name: workshop-service
+    app.kubernetes.io/part-of: workshop-service
+spec:
+  rules:
+    - host: workshop.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: workshop-service
+                port:
+                  number: 8080
