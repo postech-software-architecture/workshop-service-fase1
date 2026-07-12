@@ -5,6 +5,8 @@ import com.postech.workshop_service.api.dtos.OrcamentoResponse;
 import com.postech.workshop_service.api.dtos.OrcamentoResponse.ItemOrcamentoResponse;
 import com.postech.workshop_service.api.dtos.WebhookDecisaoOrcamentoRequest;
 import com.postech.workshop_service.application.usecases.AprovarOrcamentoUseCase;
+import com.postech.workshop_service.application.usecases.AtorSistemaContext;
+import com.postech.workshop_service.application.usecases.RegistroEventoWebhook;
 import com.postech.workshop_service.application.usecases.RejeitarOrcamentoUseCase;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,9 +33,11 @@ import java.util.UUID;
  *
  * <p>
  * A recusa (RECUSADO) delega ao caso de uso de rejeicao, que mantem a OS viva e a retorna
- * a composicao, permitindo um novo orcamento. Idempotencia: uma reentrega do mesmo evento
- * encontra o orcamento em estado ja alterado e resulta em 422 (nunca aplica o efeito duas
- * vezes).
+ * a composicao, permitindo um novo orcamento. Idempotencia: quando o payload traz
+ * {@code idEvento}, reentregas do mesmo evento (inclusive concorrentes) sao rejeitadas
+ * com 409 via registro atomico; sem {@code idEvento}, cai no baseline por estado (a
+ * segunda entrega encontra o orcamento nao-PENDENTE e resulta em 422). Nunca aplica o
+ * efeito duas vezes.
  * </p>
  */
 @RestController
@@ -47,17 +51,22 @@ public class WebhookOrcamentoController {
 
 	private final RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase;
 
+	private final RegistroEventoWebhook registroEventoWebhook;
+
 	/**
 	 * Construtor para injecao de dependencias.
 	 * @param tokenValidator validador do token de servico do webhook.
 	 * @param aprovarOrcamentoUseCase caso de uso de aprovacao de orcamento.
 	 * @param rejeitarOrcamentoUseCase caso de uso de rejeicao de orcamento.
+	 * @param registroEventoWebhook registro de idempotencia de eventos.
 	 */
 	public WebhookOrcamentoController(WebhookTokenValidator tokenValidator,
-			AprovarOrcamentoUseCase aprovarOrcamentoUseCase, RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase) {
+			AprovarOrcamentoUseCase aprovarOrcamentoUseCase, RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase,
+			RegistroEventoWebhook registroEventoWebhook) {
 		this.tokenValidator = tokenValidator;
 		this.aprovarOrcamentoUseCase = aprovarOrcamentoUseCase;
 		this.rejeitarOrcamentoUseCase = rejeitarOrcamentoUseCase;
+		this.registroEventoWebhook = registroEventoWebhook;
 	}
 
 	/**
@@ -76,6 +85,7 @@ public class WebhookOrcamentoController {
 					content = @Content(schema = @Schema(implementation = OrcamentoResponse.class))),
 			@ApiResponse(responseCode = "401", description = "Token ausente ou invalido"),
 			@ApiResponse(responseCode = "404", description = "Orcamento nao encontrado"),
+			@ApiResponse(responseCode = "409", description = "Evento ja processado (reentrega/idempotencia)"),
 			@ApiResponse(responseCode = "422", description = "Orcamento nao esta pendente / OS em estado invalido") })
 	public ResponseEntity<OrcamentoResponse> receberDecisao(@PathVariable UUID id,
 			@RequestHeader(value = "X-Webhook-Token", required = false) String token,
@@ -84,10 +94,24 @@ public class WebhookOrcamentoController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 
-		Orcamento orcamento = switch (request.getDecisao()) {
+		// Idempotencia: registra o idEvento de forma atomica (PK unica). Reentrega do
+		// mesmo
+		// evento — inclusive concorrente — e rejeitada com 409, antes de aplicar a
+		// decisao.
+		if (!registroEventoWebhook.registrarSeInedito(request.getIdEvento(), request.getOrigem())) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).build();
+		}
+
+		// Marca explicitamente que a transicao e operada por um ator de sistema
+		// (integracao),
+		// para o registro de historico auditar como sistema em vez de exigir usuario
+		// logado.
+		String ator = "webhook:" + (request.getOrigem() != null && !request.getOrigem().isBlank() ? request.getOrigem()
+				: "desconhecida");
+		Orcamento orcamento = AtorSistemaContext.executarComo(ator, () -> switch (request.getDecisao()) {
 			case APROVADO -> aprovarOrcamentoUseCase.executar(id);
 			case RECUSADO -> rejeitarOrcamentoUseCase.executar(id);
-		};
+		});
 		return ResponseEntity.ok(toResponse(orcamento));
 	}
 

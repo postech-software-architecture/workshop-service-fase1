@@ -6,14 +6,16 @@ import com.postech.workshop_service.api.dtos.AdicionarItemOrdemServicoRequest;
 import com.postech.workshop_service.api.dtos.CadastroClienteRequest;
 import com.postech.workshop_service.api.dtos.CadastroServicoRequest;
 import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
+import com.postech.workshop_service.api.controllers.support.AutenticacaoTestSupport;
 import com.postech.workshop_service.config.PostgresTestContainer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -21,6 +23,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@WithMockUser(roles = { "ADMINISTRADOR", "ATENDENTE", "MECANICO" })
 @TestPropertySource(properties = "webhook.orcamento.token=test-token")
 class WebhookOrcamentoControllerIT extends PostgresTestContainer {
 
@@ -47,15 +49,30 @@ class WebhookOrcamentoControllerIT extends PostgresTestContainer {
 	@BeforeEach
 	void limparDados() {
 		jdbcTemplate.execute("TRUNCATE TABLE historico_status_os, orcamentos_itens, orcamentos, ordens_servico_itens, "
-				+ "ordens_servico, servicos, pecas_insumos, estoques, movimentacoes_estoque RESTART IDENTITY CASCADE");
+				+ "ordens_servico, servicos, pecas_insumos, estoques, movimentacoes_estoque, "
+				+ "webhook_eventos_processados RESTART IDENTITY CASCADE");
+		// Setup (criar OS, avancar ate orcamento pendente) roda como staff autenticado
+		// real;
+		// as chamadas do proprio webhook usam .with(anonymous()) para validar o
+		// permitAll.
+		SecurityContextHolder.getContext().setAuthentication(AutenticacaoTestSupport.autenticacaoStaff());
+	}
+
+	@AfterEach
+	void limparContexto() {
+		SecurityContextHolder.clearContext();
 	}
 
 	@Test
 	void shouldApproveBudgetWithValidToken() throws Exception {
 		UUID orcamentoId = criarOrcamentoPendente("Joao", "12345678909", "ABC1D23");
 
+		// Chamada anonima (sem usuario) valida de fato o permitAll do webhook: a
+		// autenticacao
+		// e apenas pelo X-Webhook-Token.
 		mockMvc
-			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).header("X-Webhook-Token", TOKEN)
+			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).with(anonymous())
+				.header("X-Webhook-Token", TOKEN)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"decisao\":\"APROVADO\",\"origem\":\"teste\",\"idEvento\":\"" + UUID.randomUUID() + "\"}"))
 			.andExpect(status().isOk())
@@ -67,7 +84,8 @@ class WebhookOrcamentoControllerIT extends PostgresTestContainer {
 		UUID orcamentoId = criarOrcamentoPendente("Maria", "98765432100", "BRA2E19");
 
 		mockMvc
-			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).header("X-Webhook-Token", TOKEN)
+			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).with(anonymous())
+				.header("X-Webhook-Token", TOKEN)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"decisao\":\"RECUSADO\",\"origem\":\"teste\"}"))
 			.andExpect(status().isOk())
@@ -79,7 +97,7 @@ class WebhookOrcamentoControllerIT extends PostgresTestContainer {
 		UUID orcamentoId = criarOrcamentoPendente("Carlos", "11144477735", "FRT5A42");
 
 		mockMvc
-			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId)
+			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).with(anonymous())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"decisao\":\"APROVADO\"}"))
 			.andExpect(status().isUnauthorized());
@@ -90,7 +108,8 @@ class WebhookOrcamentoControllerIT extends PostgresTestContainer {
 		UUID orcamentoId = criarOrcamentoPendente("Ana", "71428793860", "TST0001");
 
 		mockMvc
-			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).header("X-Webhook-Token", "errado")
+			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).with(anonymous())
+				.header("X-Webhook-Token", "errado")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"decisao\":\"APROVADO\"}"))
 			.andExpect(status().isUnauthorized());
@@ -99,28 +118,52 @@ class WebhookOrcamentoControllerIT extends PostgresTestContainer {
 	@Test
 	void shouldReturnNotFoundForUnknownBudget() throws Exception {
 		mockMvc
-			.perform(
-					post("/api/v1/webhooks/orcamentos/{id}/decisao", UUID.randomUUID()).header("X-Webhook-Token", TOKEN)
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"decisao\":\"APROVADO\"}"))
+			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", UUID.randomUUID()).with(anonymous())
+				.header("X-Webhook-Token", TOKEN)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("{\"decisao\":\"APROVADO\"}"))
 			.andExpect(status().isNotFound());
 	}
 
 	@Test
-	void shouldNotDuplicateEffectOnReplay() throws Exception {
+	void shouldRejectReplayOfSameEventWith409() throws Exception {
 		UUID orcamentoId = criarOrcamentoPendente("Bruno", "52998224725", "XYZ9999");
-		String evento = UUID.randomUUID().toString();
-		String payload = "{\"decisao\":\"APROVADO\",\"idEvento\":\"" + evento + "\"}";
+		String payload = "{\"decisao\":\"APROVADO\",\"idEvento\":\"" + UUID.randomUUID() + "\"}";
 
 		mockMvc
-			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).header("X-Webhook-Token", TOKEN)
+			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).with(anonymous())
+				.header("X-Webhook-Token", TOKEN)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 			.andExpect(status().isOk());
 
-		// Reentrega do mesmo evento: orcamento ja nao esta pendente -> 422 (baseline).
+		// Reentrega do MESMO idEvento -> 409 (idempotencia explicita), sem reaplicar o
+		// efeito.
 		mockMvc
-			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).header("X-Webhook-Token", TOKEN)
+			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).with(anonymous())
+				.header("X-Webhook-Token", TOKEN)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(payload))
+			.andExpect(status().isConflict());
+	}
+
+	@Test
+	void shouldFallBackToStateGuardWhenNoEventIdOnReplay() throws Exception {
+		UUID orcamentoId = criarOrcamentoPendente("Diana", "39053344705", "ZZZ1A11");
+		// Sem idEvento: dedup por estado. Primeira aprova; segunda cai em 422
+		// (nao-PENDENTE).
+		String payload = "{\"decisao\":\"APROVADO\"}";
+
+		mockMvc
+			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).with(anonymous())
+				.header("X-Webhook-Token", TOKEN)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(payload))
+			.andExpect(status().isOk());
+
+		mockMvc
+			.perform(post("/api/v1/webhooks/orcamentos/{id}/decisao", orcamentoId).with(anonymous())
+				.header("X-Webhook-Token", TOKEN)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(payload))
 			.andExpect(status().isUnprocessableEntity());
