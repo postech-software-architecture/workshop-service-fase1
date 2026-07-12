@@ -51,9 +51,20 @@ module "eks" {
   create_iam_role = false
   iam_role_arn    = data.aws_iam_role.lab.arn
 
-  # Acesso: API + aws-auth (necessario mapear a role do lab como admin via access entry).
+  # Academy Learner Lab bloqueia IAM e KMS: desabilita tudo que exigiria criar um
+  # OIDC provider (IRSA), uma KMS key (encriptacao de secrets) ou um log group —
+  # cada um daria AccessDenied e faria o apply falhar no meio.
+  enable_irsa                 = false
+  create_kms_key              = false
+  cluster_encryption_config   = {}
+  create_cloudwatch_log_group = false
+  cluster_enabled_log_types   = []
+
+  # Acesso ao cluster: mapeia AUTOMATICAMENTE quem cria o cluster (a role "voclabs"
+  # das credenciais do lab) como admin — sem isso o kubectl fica Unauthorized. O
+  # access_entry explicito da LabRole abaixo cobre a LabRole operar o cluster tambem.
   authentication_mode                      = "API_AND_CONFIG_MAP"
-  enable_cluster_creator_admin_permissions = false
+  enable_cluster_creator_admin_permissions = true
 
   access_entries = {
     lab = {
