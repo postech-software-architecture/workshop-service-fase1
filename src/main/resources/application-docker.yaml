@@ -49,3 +49,9 @@ management:
     web:
       exposure:
         include: health,info
+  health:
+    # Notificacao por e-mail e opcional/best-effort (canal padrao "log", envio assincrono).
+    # Sem este ajuste, o MailHealthIndicator tenta conectar no SMTP (ex.: mailhog) e, quando
+    # indisponivel, derruba o /actuator/health agregado para DOWN (503) mesmo com o app ok.
+    mail:
+      enabled: false
