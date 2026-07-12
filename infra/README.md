@@ -1,8 +1,13 @@
 # Infra (Terraform) — `workshop-service`
 
-Provisiona a infraestrutura da Fase 2 via IaC. **Trilha A** (recomendada, entrega): cluster
-`kind` + Postgres (chart bitnami) via Helm — zero custo, local. **Trilha B** (`eks/`): esqueleto
-EKS + RDS, só documentado (não aplicar).
+Provisiona a infraestrutura da Fase 2 via IaC. Duas trilhas:
+
+- **Trilha B (`eks/`) — entrega em nuvem (AWS Academy).** EKS + RDS adaptado ao Academy Learner
+  Lab (reusa a `LabRole`, instala metrics-server para o HPA). É a trilha que roda em **nuvem** e
+  atende ao direcionamento de usar o AWS Academy. Ver [`eks/README.md`](eks/README.md).
+- **Trilha A (raiz) — dev local.** cluster `kind` + Postgres (Helm bitnami) — zero custo, roda na
+  máquina/CI. **Não é nuvem** (Kubernetes em Docker): serve para desenvolvimento e validação
+  local dos manifestos, não para a publicação no Academy.
 
 ## Pré-requisitos
 

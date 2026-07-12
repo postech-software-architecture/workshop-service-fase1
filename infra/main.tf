@@ -40,10 +40,16 @@ resource "helm_release" "postgresql" {
 
   # A Bitnami moveu as imagens publicas de docker.io/bitnami/* para o catalogo legacy
   # (docker.io/bitnamilegacy/*) em 2025; o chart aponta para uma tag que nao existe mais no
-  # repositorio antigo. Apontamos a imagem para o registro legacy (gratuito) para o pull funcionar.
+  # repositorio antigo. Apontamos a imagem para o registro legacy (gratuito) e PINAMOS a tag
+  # comprovadamente presente no legacy — sem fixar a tag, a default do chart pode nao existir
+  # no bitnamilegacy e o Postgres nao sobe.
   set {
     name  = "image.repository"
     value = "bitnamilegacy/postgresql"
+  }
+  set {
+    name  = "image.tag"
+    value = "17.1.0-debian-12-r0"
   }
 
   # Autenticacao — alinhada aos outputs consumidos pelo Dev 3.

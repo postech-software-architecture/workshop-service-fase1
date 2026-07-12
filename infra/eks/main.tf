@@ -1,9 +1,20 @@
-# Trilha B — EKS + RDS. Esqueleto documentado; NAO aplicar na entrega (gera custo AWS).
-# Validacao estatica apenas: terraform init -backend=false && terraform validate.
+# Trilha B — EKS + RDS adaptada ao AWS Academy Learner Lab (entrega em nuvem).
+# O Academy bloqueia criacao de IAM (so a LabRole existente e usavel), entao NAO criamos
+# roles: reusamos a LabRole no cluster e nos nodes, e mapeamos a role do lab como admin.
+# Aplicar com credenciais do Academy (AWS Details -> inclui aws_session_token, expira ~4h).
+# Ver infra/eks/README.md. Sempre `terraform destroy` ao final.
 
 data "aws_availability_zones" "available" {
   state = "available"
 }
+
+# LabRole pre-existente do Academy — unica role usavel (nao ha permissao para criar IAM).
+data "aws_iam_role" "lab" {
+  name = "LabRole"
+}
+
+# Identidade do caller (a role do lab, ex.: voclabs) — mapeada como admin do cluster.
+data "aws_caller_identity" "current" {}
 
 # --- Rede ---
 module "vpc" {
@@ -36,16 +47,58 @@ module "eks" {
 
   cluster_endpoint_public_access = true
 
+  # Academy: nao criar IAM role do cluster — reusar a LabRole.
+  create_iam_role = false
+  iam_role_arn    = data.aws_iam_role.lab.arn
+
+  # Acesso: API + aws-auth (necessario mapear a role do lab como admin via access entry).
+  authentication_mode                      = "API_AND_CONFIG_MAP"
+  enable_cluster_creator_admin_permissions = false
+
+  access_entries = {
+    lab = {
+      principal_arn = data.aws_iam_role.lab.arn
+      policy_associations = {
+        admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   eks_managed_node_groups = {
     default = {
       instance_types = ["t3.medium"]
       min_size       = 1
       max_size       = 3
       desired_size   = 2
+
+      # Academy: nodes tambem reusam a LabRole (sem criar IAM role do node group).
+      create_iam_role = false
+      iam_role_arn    = data.aws_iam_role.lab.arn
     }
   }
 
   tags = { Project = var.project }
+}
+
+# --- metrics-server (necessario para o HPA do Dev 3 ler CPU) ---
+# Instalado via Helm apos o cluster existir; sem ele o autoscaling nao mede nada.
+resource "helm_release" "metrics_server" {
+  name       = "metrics-server"
+  namespace  = "kube-system"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+
+  set {
+    name  = "args[0]"
+    value = "--kubelet-insecure-tls"
+  }
+
+  depends_on = [module.eks]
 }
 
 # --- Banco RDS Postgres ---
