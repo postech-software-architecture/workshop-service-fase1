@@ -29,8 +29,10 @@ spring:
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
     properties:
-      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
-      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:true}
+      # Default false para nao exigir credenciais quando MAIL_USERNAME/PASSWORD estao vazios
+      # (evita AuthenticationFailedException silenciosa). Relays reais ligam via env.
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:false}
 
 notificacao:
   canal: ${NOTIFICACAO_CANAL:email}
