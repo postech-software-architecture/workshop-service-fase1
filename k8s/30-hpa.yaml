@@ -1,0 +1,28 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: workshop-service
+  namespace: workshop
+  labels:
+    app.kubernetes.io/name: workshop-service
+    app.kubernetes.io/part-of: workshop-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: workshop-service
+  minReplicas: 2
+  maxReplicas: 10
+  # Autoscaling apenas por CPU: a JVM reserva ~MaxRAMPercentage do limit e segura, entao a
+  # utilizacao de memoria fica cronicamente alta e nao reflete a carga real — usada como
+  # metrica de HPA, faria escalar ate o maximo sem voltar. CPU reflete a demanda.
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 120

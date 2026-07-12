@@ -24,8 +24,8 @@ RUN ./mvnw -B -q clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine AS runtime
 
 RUN apk add --no-cache curl \
-	&& addgroup -S spring \
-	&& adduser -S -G spring -h /app -s /sbin/nologin spring
+	&& addgroup -g 1000 -S spring \
+	&& adduser -u 1000 -S -G spring -h /app -s /sbin/nologin spring
 
 WORKDIR /app
 
