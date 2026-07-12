@@ -4,7 +4,7 @@ import com.postech.workshop_service.api.dtos.AtualizarServicoRequest;
 import com.postech.workshop_service.api.dtos.CadastroServicoRequest;
 import com.postech.workshop_service.api.dtos.PaginaServicosResponse;
 import com.postech.workshop_service.api.dtos.ServicoResponse;
-import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.domain.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.application.usecases.AtualizarServicoUseCase;
 import com.postech.workshop_service.application.usecases.BuscarServicoPorIdUseCase;
 import com.postech.workshop_service.application.usecases.CriarServicoUseCase;

@@ -1,6 +1,6 @@
 package com.postech.workshop_service.application.usecases;
 
-import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.domain.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
 import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;

@@ -1,21 +1,14 @@
 package com.postech.workshop_service.application.usecases;
 
-import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
-import com.postech.workshop_service.domain.entities.Estoque;
-import com.postech.workshop_service.domain.entities.ItemComposicaoTecnica;
+import com.postech.workshop_service.domain.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.ItemOrcamento;
-import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrcamento;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
-import com.postech.workshop_service.domain.entities.TipoItemComposicaoTecnica;
 import com.postech.workshop_service.domain.entities.TipoOrcamento;
-import com.postech.workshop_service.domain.repositories.EstoqueRepository;
-import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
-import com.postech.workshop_service.domain.valueobjects.TipoMovimentacao;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +24,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,10 +39,7 @@ class RejeitarOrcamentoUseCaseTest {
 	private OrdemServicoRepository ordemServicoRepository;
 
 	@Mock
-	private EstoqueRepository estoqueRepository;
-
-	@Mock
-	private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+	private LiberarReservasEstoqueService liberarReservasEstoqueService;
 
 	@Mock
 	private MecanicoNotificationService mecanicoNotificationService;
@@ -77,34 +68,19 @@ class RejeitarOrcamentoUseCaseTest {
 
 	@Test
 	void shouldReleaseStockReservationOnRejection() {
-		UUID pecaId = UUID.randomUUID();
-		ItemComposicaoTecnica itemPeca = new ItemComposicaoTecnica("Oleo 5W30", new BigDecimal("100.00"),
-				TipoItemComposicaoTecnica.PECA, pecaId);
-		UUID estoqueId = UUID.randomUUID();
-		Estoque estoque = new Estoque(estoqueId, pecaId, "Prateleira A", new BigDecimal("10"));
-		BigDecimal quantidadeReservada = new BigDecimal("2");
-
 		Orcamento orcamento = criarOrcamento(StatusOrcamento.PENDENTE_APROVACAO);
 		OrdemServico ordemServico = new OrdemServico(orcamento.getIdOrdemServico(), UUID.randomUUID(),
-				UUID.randomUUID(), StatusOrdemServico.AGUARDANDO_APROVACAO, List.of(itemPeca), "OS-2026-00001", null,
+				UUID.randomUUID(), StatusOrdemServico.AGUARDANDO_APROVACAO, List.of(), "OS-2026-00001", null,
 				LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), null);
-		MovimentacaoEstoque reservaOriginal = new MovimentacaoEstoque(UUID.randomUUID(), estoqueId,
-				TipoMovimentacao.RESERVA, quantidadeReservada, new BigDecimal("10"), new BigDecimal("8"),
-				"Reserva para OS " + ordemServico.getNumero(), ordemServico.getId(), orcamento.getId());
 
 		when(orcamentoRepository.buscarPorId(orcamento.getId())).thenReturn(Optional.of(orcamento));
 		when(ordemServicoRepository.buscarPorId(orcamento.getIdOrdemServico())).thenReturn(Optional.of(ordemServico));
-		when(movimentacaoEstoqueRepository.listarPorOrdemServico(ordemServico.getId()))
-			.thenReturn(List.of(reservaOriginal));
-		when(estoqueRepository.buscarPorId(estoqueId, true)).thenReturn(Optional.of(estoque));
 		when(orcamentoRepository.salvar(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
 		rejeitarOrcamentoUseCase.executar(orcamento.getId());
 
-		verify(movimentacaoEstoqueRepository).listarPorOrdemServico(ordemServico.getId());
-		verify(estoqueRepository).buscarPorId(estoqueId, true);
-		verify(estoqueRepository).salvar(estoque);
-		verify(movimentacaoEstoqueRepository).salvar(any());
+		verify(liberarReservasEstoqueService).executar(eq(ordemServico),
+				eq("Liberacao de reserva - orcamento rejeitado OS " + ordemServico.getNumero()));
 	}
 
 	@Test

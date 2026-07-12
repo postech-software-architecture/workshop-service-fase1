@@ -3,7 +3,7 @@ package com.postech.workshop_service.api.controllers;
 import com.postech.workshop_service.api.dtos.CadastroClienteRequest;
 import com.postech.workshop_service.api.dtos.MovimentacaoRequest;
 import com.postech.workshop_service.application.exceptions.AcessoNegadoException;
-import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.domain.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.application.usecases.AprovarOrcamentoUseCase;
 import com.postech.workshop_service.application.usecases.AtualizarClienteUseCase;
 import com.postech.workshop_service.application.usecases.AtualizarVeiculoUseCase;
