@@ -5,7 +5,7 @@ import com.postech.workshop_service.api.dtos.CadastroVeiculoRequest;
 import com.postech.workshop_service.api.dtos.ClienteVinculadoResponse;
 import com.postech.workshop_service.api.dtos.PaginaVeiculosResponse;
 import com.postech.workshop_service.api.dtos.VeiculoResponse;
-import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.domain.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.application.usecases.AtualizarVeiculoUseCase;
 import com.postech.workshop_service.application.usecases.BuscarClientePorIdUseCase;
 import com.postech.workshop_service.application.usecases.BuscarVeiculoPorIdUseCase;

@@ -1,11 +1,16 @@
 package com.postech.workshop_service.infrastructure.persistence.repositories;
 
 import com.postech.workshop_service.domain.entities.OrdemServico;
+import com.postech.workshop_service.domain.entities.StatusOrdemServico;
 import com.postech.workshop_service.domain.repositories.FiltrosOrdemServico;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import com.postech.workshop_service.domain.repositories.PaginaResultado;
 import com.postech.workshop_service.infrastructure.persistence.entities.OrdemServicoJpaEntity;
 import com.postech.workshop_service.infrastructure.persistence.mappers.OrdemServicoMapper;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -73,8 +78,12 @@ public class OrdemServicoRepositoryImpl implements OrdemServicoRepository {
 		Specification<OrdemServicoJpaEntity> spec = filtrarPor(criterios);
 
 		// Two-phase fetch: paginar IDs primeiro para evitar HHH000104 (collection
-		// fetch + paginacao com EAGER + OrderColumn).
-		PageRequest pageRequest = PageRequest.of(pagina, tamanho, Sort.by(Sort.Direction.DESC, "dataCriacao"));
+		// fetch + paginacao com EAGER + OrderColumn). No modo fila, a ordenacao composta
+		// (prioridade de status + antiguidade) vive no Specification via
+		// query.orderBy(...),
+		// entao o PageRequest vai sem Sort para nao conflitar.
+		PageRequest pageRequest = criterios.apenasFilaTrabalho() ? PageRequest.of(pagina, tamanho)
+				: PageRequest.of(pagina, tamanho, Sort.by(Sort.Direction.DESC, "dataCriacao"));
 		Page<UUID> paginaIds = jpaOrdemServicoRepository.findAll(spec, pageRequest).map(OrdemServicoJpaEntity::getId);
 
 		List<UUID> ids = paginaIds.getContent();
@@ -90,6 +99,7 @@ public class OrdemServicoRepositoryImpl implements OrdemServicoRepository {
 			.collect(Collectors.toMap(OrdemServicoJpaEntity::getId, Function.identity(),
 					(primeira, ignorada) -> primeira));
 
+		// A ordem da primeira fase (paginacao de IDs) e preservada ao hidratar.
 		List<OrdemServico> itens = ids.stream().map(porId::get).map(ordemServicoMapper::toDomain).toList();
 
 		return new PaginaResultado<>(itens, paginaIds.getTotalElements(), paginaIds.getTotalPages(), pagina, tamanho);
@@ -114,8 +124,34 @@ public class OrdemServicoRepositoryImpl implements OrdemServicoRepository {
 				predicates = criteriaBuilder.and(predicates,
 						criteriaBuilder.lessThan(root.get("dataCriacao"), filtros.dataFim()));
 			}
+			if (filtros.apenasFilaTrabalho()) {
+				predicates = criteriaBuilder.and(predicates,
+						criteriaBuilder.not(root.get("status").in(StatusOrdemServico.ENCERRADOS)));
+				ordenarPorFila(root, query, criteriaBuilder);
+			}
 			return predicates;
 		};
+	}
+
+	/**
+	 * Ordena a fila de trabalho por prioridade de status (mais urgente primeiro) e,
+	 * dentro do mesmo status, por antiguidade (dataCriacao ASC). A prioridade e expressa
+	 * via CASE porque a ordem natural do enum no banco nao corresponde a prioridade
+	 * desejada.
+	 */
+	private void ordenarPorFila(Root<OrdemServicoJpaEntity> root, CriteriaQuery<?> query,
+			CriteriaBuilder criteriaBuilder) {
+		Expression<Object> prioridade = criteriaBuilder.selectCase()
+			.when(criteriaBuilder.equal(root.get("status"), StatusOrdemServico.EM_EXECUCAO),
+					StatusOrdemServico.EM_EXECUCAO.prioridadeFila())
+			.when(criteriaBuilder.equal(root.get("status"), StatusOrdemServico.AGUARDANDO_APROVACAO),
+					StatusOrdemServico.AGUARDANDO_APROVACAO.prioridadeFila())
+			.when(criteriaBuilder.equal(root.get("status"), StatusOrdemServico.EM_DIAGNOSTICO),
+					StatusOrdemServico.EM_DIAGNOSTICO.prioridadeFila())
+			.when(criteriaBuilder.equal(root.get("status"), StatusOrdemServico.RECEBIDO),
+					StatusOrdemServico.RECEBIDO.prioridadeFila())
+			.otherwise(Integer.MAX_VALUE);
+		query.orderBy(criteriaBuilder.asc(prioridade), criteriaBuilder.asc(root.get("dataCriacao")));
 	}
 
 }

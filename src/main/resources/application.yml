@@ -18,8 +18,22 @@ spring:
     enabled: true
     baseline-on-migrate: true
     out-of-order: true
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:false}
 seguranca:
   jwt:
     secret: ${JWT_SECRET:d3f8a1c2b4e7f0a9d6c3b8e5f2a1d4c7b0e3f6a9d2c5b8e1f4a7d0c3b6e9f2a5}
     expiracao-access-segundos: ${JWT_ACCESS_EXPIRATION_SECONDS:3600}
     expiracao-refresh-dias: ${JWT_REFRESH_EXPIRATION_DAYS:7}
+webhook:
+  orcamento:
+    token: ${WEBHOOK_ORCAMENTO_TOKEN:}
+notificacao:
+  email:
+    remetente: ${MAIL_FROM:no-reply@workshop.local}

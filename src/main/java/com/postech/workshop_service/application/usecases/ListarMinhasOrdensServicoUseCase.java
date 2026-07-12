@@ -40,7 +40,7 @@ public class ListarMinhasOrdensServicoUseCase {
 	 */
 	public PaginaResultado<OrdemServico> executar(int pagina, int tamanho, StatusOrdemServico status) {
 		UUID clienteId = buscarUsuarioAutenticadoUseCase.obterClienteIdObrigatorio();
-		FiltrosOrdemServico filtros = new FiltrosOrdemServico(status, clienteId, null, null);
+		FiltrosOrdemServico filtros = FiltrosOrdemServico.listagem(status, clienteId, null, null);
 		return ordemServicoRepository.listar(pagina, tamanho, filtros);
 	}
 

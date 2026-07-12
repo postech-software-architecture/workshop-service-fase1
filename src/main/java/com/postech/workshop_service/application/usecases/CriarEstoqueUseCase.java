@@ -1,6 +1,6 @@
 package com.postech.workshop_service.application.usecases;
 
-import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.Estoque;
 import com.postech.workshop_service.domain.repositories.EstoqueRepository;
 import com.postech.workshop_service.domain.repositories.PecaInsumoRepository;

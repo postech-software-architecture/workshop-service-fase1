@@ -1,6 +1,6 @@
 package com.postech.workshop_service.domain.entities;
 
-import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.exceptions.RegraDeNegocioException;
 import lombok.Getter;
 
 import java.math.BigDecimal;

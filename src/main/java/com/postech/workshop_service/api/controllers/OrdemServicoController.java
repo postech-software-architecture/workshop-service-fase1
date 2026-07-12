@@ -12,6 +12,7 @@ import com.postech.workshop_service.application.usecases.BuscarOrdemServicoPorId
 import com.postech.workshop_service.application.usecases.ConsultarHistoricoOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.ConsultarStatusOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.CriarOrdemServicoUseCase;
+import com.postech.workshop_service.application.usecases.DadosCriacaoOrdemServico;
 import com.postech.workshop_service.application.usecases.EncerrarComposicaoTecnicaUseCase;
 import com.postech.workshop_service.application.usecases.EncerrarDiagnosticoUseCase;
 import com.postech.workshop_service.application.usecases.EntregarVeiculoUseCase;
@@ -26,6 +27,7 @@ import com.postech.workshop_service.application.usecases.ResultadoCriacaoOrdemSe
 import com.postech.workshop_service.domain.entities.HistoricoStatusOrdemServico;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
+import com.postech.workshop_service.domain.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.repositories.PaginaResultado;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -153,8 +155,15 @@ public class OrdemServicoController {
 			@ApiResponse(responseCode = "422",
 					description = "Regra de negocio violada (veiculo de outro cliente, estoque insuficiente, etc.)") })
 	public ResponseEntity<OrdemServicoResponse> criar(@RequestBody @Valid CriarOrdemServicoRequest request) {
-		ResultadoCriacaoOrdemServico resultado = criarOrdemServicoUseCase.executar(request);
+		ResultadoCriacaoOrdemServico resultado = criarOrdemServicoUseCase.executar(toDadosCriacao(request));
 		return ResponseEntity.status(HttpStatus.CREATED).body(OrdemServicoResponse.from(resultado));
+	}
+
+	private DadosCriacaoOrdemServico toDadosCriacao(CriarOrdemServicoRequest request) {
+		CriarOrdemServicoRequest.DadosVeiculoRequest veiculo = request.getVeiculo();
+		return new DadosCriacaoOrdemServico(request.getClienteDocumento(), request.getVeiculoPlaca(),
+				veiculo != null ? veiculo.getMarca() : null, veiculo != null ? veiculo.getModelo() : null,
+				veiculo != null ? veiculo.getAno() : null, request.getObservacoes());
 	}
 
 	/**
@@ -199,6 +208,28 @@ public class OrdemServicoController {
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFim) {
 		PaginaResultado<OrdemServico> resultado = listarOrdensServicoUseCase.executar(pagina, tamanho, status,
 				idCliente, dataInicio, dataFim);
+		return ResponseEntity.ok(PaginaOrdensServicoResponse.from(resultado));
+	}
+
+	/**
+	 * Lista a fila de trabalho: ordens ordenadas por prioridade de status (EM_EXECUCAO,
+	 * AGUARDANDO_APROVACAO, EM_DIAGNOSTICO, RECEBIDO) e, dentro do mesmo status, mais
+	 * antigas primeiro. Ordens FINALIZADA, ENTREGUE e CANCELADA sao excluidas
+	 * logicamente.
+	 * @param pagina pagina solicitada (zero-based).
+	 * @param tamanho tamanho da pagina.
+	 * @return resposta paginada com a fila de trabalho priorizada.
+	 */
+	@GetMapping("/fila-trabalho")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE', 'MECANICO')")
+	@Operation(summary = "Listar fila de trabalho",
+			description = "Lista as ordens ativas ordenadas por prioridade de status e antiguidade, "
+					+ "excluindo as ordens finalizadas, entregues e canceladas.")
+	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Pagina da fila de trabalho",
+			content = @Content(schema = @Schema(implementation = PaginaOrdensServicoResponse.class))) })
+	public ResponseEntity<PaginaOrdensServicoResponse> listarFilaTrabalho(@RequestParam(defaultValue = "0") int pagina,
+			@RequestParam(defaultValue = "20") int tamanho) {
+		PaginaResultado<OrdemServico> resultado = listarOrdensServicoUseCase.executarFilaTrabalho(pagina, tamanho);
 		return ResponseEntity.ok(PaginaOrdensServicoResponse.from(resultado));
 	}
 
@@ -282,7 +313,7 @@ public class OrdemServicoController {
 		OrdemServico ordemServico;
 		if (request.getTipo() == AdicionarItemOrdemServicoRequest.TipoItem.SERVICO) {
 			if (request.getServicoId() == null) {
-				throw new com.postech.workshop_service.application.exceptions.RegraDeNegocioException(
+				throw new RegraDeNegocioException(
 						"O identificador do servico e obrigatorio para itens do tipo SERVICO.");
 			}
 			ordemServico = adicionarItemOrdemServicoUseCase.executarServico(id, request.getServicoId(),
@@ -290,8 +321,7 @@ public class OrdemServicoController {
 		}
 		else {
 			if (request.getPecaId() == null) {
-				throw new com.postech.workshop_service.application.exceptions.RegraDeNegocioException(
-						"O identificador da peca e obrigatorio para itens do tipo PECA.");
+				throw new RegraDeNegocioException("O identificador da peca e obrigatorio para itens do tipo PECA.");
 			}
 			ordemServico = adicionarItemOrdemServicoUseCase.executarPeca(id, request.getPecaId(),
 					request.getQuantidade());

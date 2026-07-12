@@ -6,7 +6,6 @@ import com.postech.workshop_service.domain.entities.RefreshToken;
 import com.postech.workshop_service.domain.entities.Usuario;
 import com.postech.workshop_service.domain.repositories.RefreshTokenRepository;
 import com.postech.workshop_service.domain.repositories.UsuarioRepository;
-import com.postech.workshop_service.infrastructure.security.JwtTokenService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +19,10 @@ public class RenovarSessaoUseCase {
 
 	private final UsuarioRepository usuarioRepository;
 
-	private final JwtTokenService jwtTokenService;
+	private final TokenService jwtTokenService;
 
 	public RenovarSessaoUseCase(RefreshTokenRepository refreshTokenRepository, UsuarioRepository usuarioRepository,
-			JwtTokenService jwtTokenService) {
+			TokenService jwtTokenService) {
 		this.refreshTokenRepository = refreshTokenRepository;
 		this.usuarioRepository = usuarioRepository;
 		this.jwtTokenService = jwtTokenService;
