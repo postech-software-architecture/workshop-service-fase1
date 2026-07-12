@@ -19,7 +19,8 @@ variable "namespace" {
 variable "db_name" {
   description = "Nome do banco de dados da aplicacao"
   type        = string
-  default     = "workshop"
+  # Alinhado ao contrato do repo (compose.yaml, application*.yaml, k8s ConfigMap): mydatabase.
+  default     = "mydatabase"
 }
 
 variable "db_username" {

@@ -52,6 +52,13 @@ resource "helm_release" "postgresql" {
     value = "17.1.0-debian-12-r0"
   }
 
+  # Nome do Service = "postgres" (contrato do repo: ConfigMap DB_HOST=postgres e
+  # application-docker.yaml usam esse host). Sem o override, o chart geraria "postgresql".
+  set {
+    name  = "fullnameOverride"
+    value = "postgres"
+  }
+
   # Autenticacao — alinhada aos outputs consumidos pelo Dev 3.
   set {
     name  = "auth.username"

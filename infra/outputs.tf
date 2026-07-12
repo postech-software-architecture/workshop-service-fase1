@@ -10,7 +10,7 @@ output "kubeconfig_path" {
 
 output "db_host" {
   description = "Host do Postgres dentro do cluster (Dev 3 -> DB_HOST)"
-  value       = "postgresql.${var.namespace}.svc.cluster.local"
+  value       = "postgres.${var.namespace}.svc.cluster.local"
 }
 
 output "db_port" {
@@ -36,5 +36,5 @@ output "db_password" {
 
 output "db_jdbc_url" {
   description = "JDBC URL de conveniencia"
-  value       = "jdbc:postgresql://postgresql.${var.namespace}.svc.cluster.local:5432/${var.db_name}"
+  value       = "jdbc:postgresql://postgres.${var.namespace}.svc.cluster.local:5432/${var.db_name}"
 }

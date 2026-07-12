@@ -2,7 +2,7 @@
 cluster_name           = "workshop"
 kubeconfig_path        = "./kubeconfig"
 namespace              = "workshop"
-db_name                = "workshop"
+db_name                = "mydatabase"
 db_username            = "workshop"
 db_password            = "workshop" # troque em qualquer ambiente que nao seja descartavel
 postgres_chart_version = "16.2.1"
