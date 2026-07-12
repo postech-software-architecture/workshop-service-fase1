@@ -1,6 +1,6 @@
 package com.postech.workshop_service.application.usecases;
 
-import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.Veiculo;
 import com.postech.workshop_service.domain.repositories.ClienteRepository;
 import com.postech.workshop_service.domain.repositories.VeiculoRepository;

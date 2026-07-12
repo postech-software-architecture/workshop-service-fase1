@@ -22,11 +22,11 @@ in-cluster (opcional), Deployment, Service, HPA e Ingress (opcional).
 |---|---|
 | `00-namespace.yaml` | Namespace `workshop` |
 | `01-configmap.yaml` | ConfigMap `workshop-config` (não sensível) |
-| `02-secret.example.yaml` | **Template** do Secret `workshop-secret` — copiar para `02-secret.yaml` e preencher |
+| `examples/secret.example.yaml` | **Template** do Secret `workshop-secret` — copiar para `02-secret.yaml` e preencher. Fica em `examples/` (fora do path de `apply -f k8s/`) para nao aplicar placeholders por engano |
 | `10-postgres.yaml` | Postgres in-cluster (Opção A) — **não aplicar** se o banco vier do Dev 4 |
 | `20-deployment.yaml` | Deployment da aplicação (2 réplicas, probes, requests/limits) |
 | `21-service.yaml` | Service ClusterIP :8080 |
-| `30-hpa.yaml` | HPA (CPU 70% / memória 80%, 2–10 réplicas) |
+| `30-hpa.yaml` | HPA (CPU 70%, 2–10 réplicas) |
 | `50-ingress.yaml` | Ingress (opcional) |
 
 ## Config vs. Secret
@@ -51,7 +51,7 @@ O Secret real (`02-secret.yaml`) está no `.gitignore` — **nunca commitar valo
 
 ```bash
 # Secret real a partir do template (ou via CI, abaixo)
-cp k8s/02-secret.example.yaml k8s/02-secret.yaml   # preencher os CHANGE_ME
+cp k8s/examples/secret.example.yaml k8s/02-secret.yaml   # preencher os CHANGE_ME
 
 kubectl apply -f k8s/00-namespace.yaml
 kubectl apply -f k8s/01-configmap.yaml
@@ -88,7 +88,7 @@ kubeconform -strict -summary -skip Secret k8s/*.yaml   # ou: kubectl apply --dry
 kind create cluster --name workshop
 kind load docker-image workshop-service:local --name workshop
 kubectl apply -f k8s/00-namespace.yaml -f k8s/01-configmap.yaml
-cp k8s/02-secret.example.yaml k8s/02-secret.yaml && kubectl apply -f k8s/02-secret.yaml
+cp k8s/examples/secret.example.yaml k8s/02-secret.yaml && kubectl apply -f k8s/02-secret.yaml
 kubectl apply -f k8s/10-postgres.yaml
 # apontar o Deployment para workshop-service:local para o teste local
 kubectl apply -f k8s/20-deployment.yaml -f k8s/21-service.yaml -f k8s/30-hpa.yaml

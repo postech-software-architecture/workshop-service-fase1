@@ -23,6 +23,21 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+  mail:
+    host: ${MAIL_HOST:mailhog}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      # Default false para nao exigir credenciais quando MAIL_USERNAME/PASSWORD estao vazios
+      # (evita AuthenticationFailedException silenciosa). Relays reais ligam via env.
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:false}
+
+notificacao:
+  canal: ${NOTIFICACAO_CANAL:email}
+  email:
+    remetente: ${MAIL_FROM:no-reply@workshop.local}
 
 management:
   endpoint:

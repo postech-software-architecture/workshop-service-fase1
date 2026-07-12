@@ -1,5 +1,6 @@
 package com.postech.workshop_service.infrastructure.security;
 
+import com.postech.workshop_service.application.usecases.TokenService;
 import com.postech.workshop_service.domain.entities.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -19,7 +20,7 @@ import java.util.UUID;
  * Servico responsavel pela emissao e validacao de JWTs.
  */
 @Service
-public class JwtTokenService {
+public class JwtTokenService implements TokenService {
 
 	private static final int TAMANHO_MINIMO_SECRET_EM_BYTES = 32;
 
@@ -37,6 +38,7 @@ public class JwtTokenService {
 	 * @param usuario usuario autenticado.
 	 * @return token JWT assinado.
 	 */
+	@Override
 	public String gerarAccessToken(Usuario usuario) {
 		Instant agora = Instant.now();
 		Instant expiracao = agora.plusSeconds(properties.getExpiracaoAccessSegundos());
@@ -54,6 +56,7 @@ public class JwtTokenService {
 	 * Gera um valor opaco para refresh token.
 	 * @return valor opaco e unico.
 	 */
+	@Override
 	public String gerarRefreshToken() {
 		byte[] aleatorio = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
 		return Base64.getUrlEncoder().withoutPadding().encodeToString(aleatorio) + UUID.randomUUID();
@@ -88,6 +91,7 @@ public class JwtTokenService {
 	 * Retorna o tempo de vida configurado do access token em segundos.
 	 * @return expiracao configurada.
 	 */
+	@Override
 	public long getExpiracaoAccessSegundos() {
 		return properties.getExpiracaoAccessSegundos();
 	}
@@ -96,6 +100,7 @@ public class JwtTokenService {
 	 * Calcula a data de expiracao do refresh token.
 	 * @return data de expiracao a partir da configuracao atual.
 	 */
+	@Override
 	public LocalDateTime calcularExpiracaoRefreshToken() {
 		return LocalDateTime.now().plusDays(properties.getExpiracaoRefreshDias());
 	}

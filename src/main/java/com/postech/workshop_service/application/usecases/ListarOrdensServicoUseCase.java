@@ -39,8 +39,20 @@ public class ListarOrdensServicoUseCase {
 	 */
 	public PaginaResultado<OrdemServico> executar(int pagina, int tamanho, StatusOrdemServico status, UUID idCliente,
 			LocalDateTime dataInicio, LocalDateTime dataFim) {
-		FiltrosOrdemServico filtros = new FiltrosOrdemServico(status, idCliente, dataInicio, dataFim);
+		FiltrosOrdemServico filtros = FiltrosOrdemServico.listagem(status, idCliente, dataInicio, dataFim);
 		return ordemServicoRepository.listar(pagina, tamanho, filtros);
+	}
+
+	/**
+	 * Lista a fila de trabalho: exclui ordens encerradas (FINALIZADA, ENTREGUE,
+	 * CANCELADA) e ordena por prioridade de status e, dentro do mesmo status, por
+	 * antiguidade.
+	 * @param pagina pagina solicitada.
+	 * @param tamanho tamanho da pagina.
+	 * @return resultado paginado no modo fila de trabalho.
+	 */
+	public PaginaResultado<OrdemServico> executarFilaTrabalho(int pagina, int tamanho) {
+		return ordemServicoRepository.listar(pagina, tamanho, FiltrosOrdemServico.filaTrabalho(null));
 	}
 
 }

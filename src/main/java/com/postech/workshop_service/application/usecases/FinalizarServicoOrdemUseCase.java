@@ -1,6 +1,6 @@
 package com.postech.workshop_service.application.usecases;
 
-import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.domain.exceptions.RecursoNaoEncontradoException;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import org.springframework.stereotype.Service;

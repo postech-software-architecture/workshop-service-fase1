@@ -1,11 +1,9 @@
 package com.postech.workshop_service.application.usecases;
 
-import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
-import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
-import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.domain.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.Cliente;
 import com.postech.workshop_service.domain.entities.OrdemServico;
-import com.postech.workshop_service.domain.entities.StatusOrdemServico;
 import com.postech.workshop_service.domain.entities.Veiculo;
 import com.postech.workshop_service.domain.repositories.ClienteRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
@@ -42,20 +40,15 @@ public class CriarOrdemServicoUseCase {
 	}
 
 	@Transactional
-	public ResultadoCriacaoOrdemServico executar(CriarOrdemServicoRequest request) {
+	public ResultadoCriacaoOrdemServico executar(DadosCriacaoOrdemServico dados) {
 		try {
-			String clienteDocumento = request.getClienteDocumento();
-			String veiculoPlaca = request.getVeiculoPlaca();
-			String veiculoMarca = request.getVeiculo() != null ? request.getVeiculo().getMarca() : null;
-			String veiculoModelo = request.getVeiculo() != null ? request.getVeiculo().getModelo() : null;
-			Integer veiculoAno = request.getVeiculo() != null ? request.getVeiculo().getAno() : null;
-			String observacoes = request.getObservacoes();
-
-			Cliente cliente = resolverCliente(clienteDocumento);
-			Veiculo veiculo = resolverVeiculo(veiculoPlaca, veiculoMarca, veiculoModelo, veiculoAno, cliente);
+			Cliente cliente = resolverCliente(dados.clienteDocumento());
+			Veiculo veiculo = resolverVeiculo(dados.veiculoPlaca(), dados.veiculoMarca(), dados.veiculoModelo(),
+					dados.veiculoAno(), cliente);
 
 			String numero = ordemServicoRepository.gerarProximoNumero(LocalDate.now().getYear());
-			OrdemServico os = new OrdemServico(null, cliente.getId(), veiculo.getId(), numero, observacoes, List.of());
+			OrdemServico os = new OrdemServico(null, cliente.getId(), veiculo.getId(), numero, dados.observacoes(),
+					List.of());
 			OrdemServico osSalva = ordemServicoRepository.salvar(os);
 
 			return new ResultadoCriacaoOrdemServico(osSalva, null, cliente, veiculo);

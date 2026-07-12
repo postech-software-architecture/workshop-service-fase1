@@ -1,14 +1,10 @@
 package com.postech.workshop_service.application.usecases;
 
-import com.postech.workshop_service.application.exceptions.RecursoNaoEncontradoException;
-import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
-import com.postech.workshop_service.domain.entities.Estoque;
-import com.postech.workshop_service.domain.entities.MovimentacaoEstoque;
+import com.postech.workshop_service.domain.exceptions.RecursoNaoEncontradoException;
+import com.postech.workshop_service.domain.exceptions.RegraDeNegocioException;
 import com.postech.workshop_service.domain.entities.Orcamento;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
-import com.postech.workshop_service.domain.repositories.EstoqueRepository;
-import com.postech.workshop_service.domain.repositories.MovimentacaoEstoqueRepository;
 import com.postech.workshop_service.domain.repositories.OrcamentoRepository;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import org.slf4j.Logger;
@@ -30,9 +26,7 @@ public class RejeitarOrcamentoUseCase {
 
 	private final OrdemServicoRepository ordemServicoRepository;
 
-	private final EstoqueRepository estoqueRepository;
-
-	private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+	private final LiberarReservasEstoqueService liberarReservasEstoqueService;
 
 	private final MecanicoNotificationService mecanicoNotificationService;
 
@@ -42,19 +36,18 @@ public class RejeitarOrcamentoUseCase {
 	 * Construtor para injecao das dependencias do caso de uso.
 	 * @param orcamentoRepository repositorio de orcamentos.
 	 * @param ordemServicoRepository repositorio de ordens.
-	 * @param estoqueRepository repositorio de estoques.
-	 * @param movimentacaoEstoqueRepository repositorio de movimentacoes.
+	 * @param liberarReservasEstoqueService colaborador de liberacao de reservas de
+	 * estoque.
 	 * @param mecanicoNotificationService service de notificacao do mecanico.
+	 * @param registrarHistoricoUseCase caso de uso de registro de historico de status.
 	 */
 	public RejeitarOrcamentoUseCase(OrcamentoRepository orcamentoRepository,
-			OrdemServicoRepository ordemServicoRepository, EstoqueRepository estoqueRepository,
-			MovimentacaoEstoqueRepository movimentacaoEstoqueRepository,
+			OrdemServicoRepository ordemServicoRepository, LiberarReservasEstoqueService liberarReservasEstoqueService,
 			MecanicoNotificationService mecanicoNotificationService,
 			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase) {
 		this.orcamentoRepository = orcamentoRepository;
 		this.ordemServicoRepository = ordemServicoRepository;
-		this.estoqueRepository = estoqueRepository;
-		this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
+		this.liberarReservasEstoqueService = liberarReservasEstoqueService;
 		this.mecanicoNotificationService = mecanicoNotificationService;
 		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
 	}
@@ -80,7 +73,8 @@ public class RejeitarOrcamentoUseCase {
 		StatusOrdemServico statusAnterior = ordemServico.getStatus();
 		ordemServico.voltarParaComposicao();
 
-		liberarReservasDeEstoque(ordemServico);
+		liberarReservasEstoqueService.executar(ordemServico,
+				"Liberacao de reserva - orcamento rejeitado OS " + ordemServico.getNumero());
 
 		ordemServicoRepository.salvar(ordemServico);
 		registrarHistoricoUseCase.executar(ordemServico.getId(), statusAnterior, ordemServico.getStatus());
@@ -93,29 +87,6 @@ public class RejeitarOrcamentoUseCase {
 					ex.getMessage());
 		}
 		return orcamentoPersistido;
-	}
-
-	private void liberarReservasDeEstoque(OrdemServico ordemServico) {
-		String motivoLiberacao = "Liberacao de reserva - orcamento rejeitado OS " + ordemServico.getNumero();
-		java.util.List<MovimentacaoEstoque> movimentacoes = movimentacaoEstoqueRepository
-			.listarPorOrdemServico(ordemServico.getId());
-		boolean houveBaixa = movimentacoes.stream()
-			.anyMatch(m -> m.getTipo() == com.postech.workshop_service.domain.valueobjects.TipoMovimentacao.SAIDA);
-		if (houveBaixa) {
-			return;
-		}
-		for (MovimentacaoEstoque reservaOriginal : movimentacoes.stream()
-			.filter(mov -> mov.getTipo() == com.postech.workshop_service.domain.valueobjects.TipoMovimentacao.RESERVA)
-			.toList()) {
-			Estoque estoque = estoqueRepository.buscarPorId(reservaOriginal.getEstoqueId(), true).orElse(null);
-			if (estoque == null) {
-				continue;
-			}
-			MovimentacaoEstoque liberacao = estoque.liberarReserva(reservaOriginal.getQuantidade(), motivoLiberacao,
-					ordemServico.getId(), reservaOriginal.getOrcamentoId());
-			estoqueRepository.salvar(estoque);
-			movimentacaoEstoqueRepository.salvar(liberacao);
-		}
 	}
 
 }

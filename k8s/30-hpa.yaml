@@ -13,6 +13,9 @@ spec:
     name: workshop-service
   minReplicas: 2
   maxReplicas: 10
+  # Autoscaling apenas por CPU: a JVM reserva ~MaxRAMPercentage do limit e segura, entao a
+  # utilizacao de memoria fica cronicamente alta e nao reflete a carga real — usada como
+  # metrica de HPA, faria escalar ate o maximo sem voltar. CPU reflete a demanda.
   metrics:
     - type: Resource
       resource:
@@ -20,12 +23,6 @@ spec:
         target:
           type: Utilization
           averageUtilization: 70
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 80
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 120

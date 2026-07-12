@@ -1,4 +1,4 @@
-package com.postech.workshop_service.application.exceptions;
+package com.postech.workshop_service.domain.exceptions;
 
 /**
  * Excecao utilizada quando um recurso solicitado nao e encontrado.

@@ -1,0 +1,79 @@
+name: CD — Deploy to Kubernetes
+
+# Deploy manual (workflow_dispatch) enquanto o cluster do Dev 4 nao esta pronto. Os manifestos
+# do Dev 3 ja existem em /k8s; os steps de kubectl apply abaixo referenciam os arquivos reais e
+# serao reativados quando houver um cluster (secret KUBECONFIG_B64). O gatilho automatico por
+# push na main sera habilitado no mesmo momento.
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag da imagem a implantar (ex.: sha-<sha> ou latest)'
+        required: true
+        default: latest
+  # push:
+  #   branches: [ main ]
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/workshop-service
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    # environment: production   # opcional: exige aprovacao antes do deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+
+      # KUBECONFIG_B64 = `base64 -w0 ~/.kube/config` do cluster do Dev 4, salvo como secret.
+      - name: Configura acesso ao cluster
+        env:
+          KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
+        run: |
+          if [ -z "$KUBECONFIG_B64" ]; then
+            echo "::error::Secret KUBECONFIG_B64 nao configurado (cluster do Dev 4 pendente)."
+            exit 1
+          fi
+          mkdir -p "$HOME/.kube"
+          echo "$KUBECONFIG_B64" | base64 -d > "$HOME/.kube/config"
+          kubectl config current-context
+
+      # Aplicacao dos manifestos do Dev 3 (/k8s). Mantido comentado ate haver um cluster real
+      # (KUBECONFIG_B64 do Dev 4) para aplicar. Descomentar no handoff do Dev 4.
+      #
+      # - name: imagePullSecret (GHCR) — apenas se a imagem for privada
+      #   env:
+      #     GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+      #   run: |
+      #     kubectl create secret docker-registry ghcr-pull \
+      #       --docker-server=ghcr.io \
+      #       --docker-username="${{ github.actor }}" \
+      #       --docker-password="$GHCR_PULL_TOKEN" \
+      #       --namespace=workshop \
+      #       --dry-run=client -o yaml | kubectl apply -f -
+      #
+      # - name: Aplica base (namespace, config, secret, banco in-cluster)
+      #   run: |
+      #     kubectl apply -f k8s/00-namespace.yaml
+      #     kubectl apply -f k8s/01-configmap.yaml
+      #     kubectl apply -f k8s/02-secret.yaml     # real (via CI/secret), nao o .example
+      #     kubectl apply -f k8s/10-postgres.yaml   # PULAR se banco vier do Dev 4 (Opcao B)
+      #
+      # - name: Aplica a aplicacao e injeta a tag imutavel
+      #   run: |
+      #     TAG="${{ github.event.inputs.image_tag || format('sha-{0}', github.sha) }}"
+      #     kubectl apply -f k8s/20-deployment.yaml -f k8s/21-service.yaml -f k8s/30-hpa.yaml
+      #     kubectl -n workshop set image deployment/workshop-service \
+      #       workshop-service="${{ env.IMAGE }}:${TAG}"
+      #
+      # - name: Aguarda rollout
+      #   run: kubectl -n workshop rollout status deployment/workshop-service --timeout=180s
+
+      - name: No-op (aguardando cluster do Dev 4)
+        run: |
+          echo "::notice::Deploy no-op — cluster (KUBECONFIG_B64/Dev 4) pendente; steps de kubectl apply comentados. Nenhum recurso foi aplicado."

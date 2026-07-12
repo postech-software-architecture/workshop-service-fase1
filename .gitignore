@@ -184,6 +184,9 @@ scratch/
 .env
 .env.local
 
+# macOS
+.DS_Store
+
 # Kubernetes secrets com valores reais (nunca commitar; apenas o template .example vai ao git)
 k8s/02-secret.yaml
 k8s/*.secret.yaml

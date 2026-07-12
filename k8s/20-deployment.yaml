@@ -74,10 +74,11 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
-            # UID/GID numericos do usuario "spring" da imagem (Dockerfile do Dev 2). Sem o UID
-            # numerico o kubelet nao consegue verificar runAsNonRoot (imagem usa nome, nao UID).
-            runAsUser: 100
-            runAsGroup: 101
+            # UID/GID fixos do usuario "spring" (Dockerfile do Dev 2 usa adduser -u 1000 /
+            # addgroup -g 1000). Necessario porque runAsNonRoot exige UID numerico para o
+            # kubelet verificar que nao e root; fixar no Dockerfile evita palpite de UID.
+            runAsUser: 1000
+            runAsGroup: 1000
             capabilities:
               drop: ["ALL"]
       # Se a imagem for privada no GHCR, criar o secret ghcr-pull (ver k8s/README.md) e

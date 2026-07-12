@@ -7,7 +7,6 @@ import com.postech.workshop_service.domain.entities.Usuario;
 import com.postech.workshop_service.domain.enums.Role;
 import com.postech.workshop_service.domain.repositories.RefreshTokenRepository;
 import com.postech.workshop_service.domain.repositories.UsuarioRepository;
-import com.postech.workshop_service.infrastructure.security.JwtTokenService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +33,7 @@ class RenovarSessaoUseCaseTest {
 	private UsuarioRepository usuarioRepository;
 
 	@Mock
-	private JwtTokenService jwtTokenService;
+	private TokenService jwtTokenService;
 
 	@InjectMocks
 	private RenovarSessaoUseCase useCase;

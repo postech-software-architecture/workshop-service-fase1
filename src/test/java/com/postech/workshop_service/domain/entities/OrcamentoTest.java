@@ -1,6 +1,6 @@
 package com.postech.workshop_service.domain.entities;
 
-import com.postech.workshop_service.application.exceptions.RegraDeNegocioException;
+import com.postech.workshop_service.domain.exceptions.RegraDeNegocioException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

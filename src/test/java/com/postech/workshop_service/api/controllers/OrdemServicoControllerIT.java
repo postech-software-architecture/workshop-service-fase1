@@ -6,14 +6,16 @@ import com.postech.workshop_service.api.dtos.AdicionarItemOrdemServicoRequest;
 import com.postech.workshop_service.api.dtos.CadastroClienteRequest;
 import com.postech.workshop_service.api.dtos.CadastroServicoRequest;
 import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
+import com.postech.workshop_service.api.controllers.support.AutenticacaoTestSupport;
 import com.postech.workshop_service.config.PostgresTestContainer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -27,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@WithMockUser(roles = { "ADMINISTRADOR", "ATENDENTE", "MECANICO" })
 class OrdemServicoControllerIT extends PostgresTestContainer {
 
 	@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -44,6 +45,16 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 	void limparDadosOS() {
 		jdbcTemplate.execute("TRUNCATE TABLE historico_status_os, orcamentos_itens, orcamentos, ordens_servico_itens, "
 				+ "ordens_servico, servicos, pecas_insumos, estoques, movimentacoes_estoque RESTART IDENTITY CASCADE");
+		// Autentica com um UsuarioAutenticadoPrincipal REAL (staff), como o filtro JWT
+		// faz em
+		// producao. Necessario porque as transicoes resolvem o responsavel via esse
+		// principal.
+		SecurityContextHolder.getContext().setAuthentication(AutenticacaoTestSupport.autenticacaoStaff());
+	}
+
+	@AfterEach
+	void limparContexto() {
+		SecurityContextHolder.clearContext();
 	}
 
 	@Test
@@ -188,7 +199,6 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 	}
 
 	@Test
-	@WithMockUser(roles = {})
 	void shouldReturn404WhenNumeroNotFound() throws Exception {
 		mockMvc.perform(get("/api/v1/ordens-servico/{numero}/status", "OS-2026-99999"))
 			.andExpect(status().isNotFound());
