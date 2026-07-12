@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Ambiente AWS (Academy / EKS): o banco e o RDS provisionado pelo Terraform (infra/eks).
+# NAO sobe Postgres in-cluster — o DB_HOST aponta para o endpoint do RDS.
+namespace: workshop
+
+resources:
+  - ../../base
+
+configMapGenerator:
+  - name: workshop-config
+    envs:
+      - config.env
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+# O Secret "workshop-secret" NAO e gerado aqui de proposito: credenciais de nuvem nao vao
+# ao git. Crie-o a partir dos outputs do Terraform ANTES do apply (ver README.md deste dir).
