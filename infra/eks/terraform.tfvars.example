@@ -1,0 +1,6 @@
+# Copie para terraform.tfvars e ajuste. NAO aplicar na entrega (gera custo AWS).
+region      = "us-east-1"
+project     = "workshop"
+db_name     = "workshop"
+db_username = "workshop"
+db_password = "workshop" # em producao use secret manager, nunca hardcode

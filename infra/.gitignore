@@ -1,0 +1,19 @@
+# Estado e cache do Terraform (contem segredos — nunca commitar)
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# tfvars reais (podem conter senhas); apenas o .example vai ao git
+*.tfvars
+!*.tfvars.example
+
+# kubeconfig gerado pelo cluster kind
+kubeconfig
+kubeconfig-*.yaml
+
+# overrides locais
+override.tf
+override.tf.json
+.terraform.lock.hcl.bak
