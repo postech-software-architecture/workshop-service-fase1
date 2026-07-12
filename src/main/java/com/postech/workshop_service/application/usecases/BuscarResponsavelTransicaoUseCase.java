@@ -1,24 +1,24 @@
 package com.postech.workshop_service.application.usecases;
 
+import com.postech.workshop_service.application.exceptions.AcessoNegadoException;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
- * Resolve o responsavel auditavel de transicoes de status. Quando ha um usuario
- * autenticado no contexto, ele e o responsavel; nas transicoes originadas de integracao
- * maquina-a-maquina (ex.: webhook de decisao de orcamento), onde nao ha usuario logado,
- * usa-se um responsavel de sistema para preservar a auditoria sem bloquear a operacao.
+ * Resolve o responsavel auditavel de transicoes de status.
+ *
+ * <p>
+ * Regra fail-closed: quando ha um usuario autenticado no contexto, ele e o responsavel;
+ * quando NAO ha usuario, so e permitido resolver um responsavel de sistema se a operacao
+ * estiver explicitamente marcada como ator de sistema ({@link AtorSistemaContext}) — o
+ * caso do webhook de integracao. Fora disso, ausencia de usuario e um erro (403),
+ * preservando a confiabilidade da trilha de auditoria.
+ * </p>
  */
 @Service
 public class BuscarResponsavelTransicaoUseCase {
-
-	/** Username do responsavel de sistema usado em transicoes sem usuario autenticado. */
-	static final String RESPONSAVEL_SISTEMA = "sistema-integracao";
-
-	private static final UUID ID_RESPONSAVEL_SISTEMA = UUID
-		.nameUUIDFromBytes(RESPONSAVEL_SISTEMA.getBytes(StandardCharsets.UTF_8));
 
 	private final ContextoSegurancaProvider contextoSegurancaProvider;
 
@@ -27,14 +27,23 @@ public class BuscarResponsavelTransicaoUseCase {
 	}
 
 	/**
-	 * Obtem o responsavel a partir do contexto de seguranca atual, com fallback para o
-	 * responsavel de sistema quando nao ha usuario autenticado.
-	 * @return identificador e username do responsavel pela transicao.
+	 * Obtem o responsavel pela transicao.
+	 * @return identificador e username do responsavel.
+	 * @throws AcessoNegadoException quando nao ha usuario autenticado nem ator de sistema
+	 * explicito.
 	 */
 	public ResponsavelTransicao executar() {
 		return contextoSegurancaProvider.identidadeAtual()
 			.map(identidade -> new ResponsavelTransicao(identidade.id(), identidade.username()))
-			.orElseGet(() -> new ResponsavelTransicao(ID_RESPONSAVEL_SISTEMA, RESPONSAVEL_SISTEMA));
+			.orElseGet(this::responsavelDeSistemaOuFalha);
+	}
+
+	private ResponsavelTransicao responsavelDeSistemaOuFalha() {
+		String ator = AtorSistemaContext.atorAtual()
+			.orElseThrow(() -> new AcessoNegadoException(
+					"Usuario autenticado e obrigatorio para alterar status da ordem de servico."));
+		UUID idAtor = UUID.nameUUIDFromBytes(ator.getBytes(StandardCharsets.UTF_8));
+		return new ResponsavelTransicao(idAtor, ator);
 	}
 
 }

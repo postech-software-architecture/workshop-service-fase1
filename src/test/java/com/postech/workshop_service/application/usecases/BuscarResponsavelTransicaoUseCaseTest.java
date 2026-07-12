@@ -1,5 +1,6 @@
 package com.postech.workshop_service.application.usecases;
 
+import com.postech.workshop_service.application.exceptions.AcessoNegadoException;
 import com.postech.workshop_service.domain.enums.Role;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,13 +39,20 @@ class BuscarResponsavelTransicaoUseCaseTest {
 	}
 
 	@Test
-	void shouldFallBackToSystemResponsibleWhenNoAuthenticatedUser() {
+	void shouldFailClosedWhenNoUserAndNoSystemActor() {
 		when(contextoSegurancaProvider.identidadeAtual()).thenReturn(Optional.empty());
 
-		ResponsavelTransicao responsavel = useCase.executar();
+		assertThrows(AcessoNegadoException.class, () -> useCase.executar());
+	}
+
+	@Test
+	void shouldUseSystemActorWhenMarkedAndNoUser() {
+		when(contextoSegurancaProvider.identidadeAtual()).thenReturn(Optional.empty());
+
+		ResponsavelTransicao responsavel = AtorSistemaContext.executarComo("webhook:teste", () -> useCase.executar());
 
 		assertNotNull(responsavel.idUsuario());
-		assertEquals(BuscarResponsavelTransicaoUseCase.RESPONSAVEL_SISTEMA, responsavel.username());
+		assertEquals("webhook:teste", responsavel.username());
 	}
 
 }

@@ -49,18 +49,16 @@ class ContextoSegurancaProviderImplTest {
 	}
 
 	@Test
-	void shouldDeriveIdentityFromUsernameWhenPrincipalIsNotUsuarioAutenticado() {
+	void shouldReturnEmptyWhenPrincipalIsNotUsuarioAutenticado() {
+		// Fail-closed: um principal que nao e UsuarioAutenticadoPrincipal (ex.: String de
+		// um
+		// usuario mock) NAO gera identidade sintetica — retorna vazio.
 		SecurityContextHolder.getContext()
 			.setAuthentication(new UsernamePasswordAuthenticationToken("mecanico", null,
 					java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(
 							"ROLE_" + Role.MECANICO.name()))));
 
-		Optional<IdentidadeAutenticada> identidade = provider.identidadeAtual();
-
-		assertTrue(identidade.isPresent());
-		assertEquals("mecanico", identidade.get().username());
-		assertTrue(identidade.get().roles().contains(Role.MECANICO));
-		assertTrue(identidade.get().clienteId() == null);
+		assertTrue(provider.identidadeAtual().isEmpty());
 	}
 
 	@Test
@@ -69,6 +67,32 @@ class ContextoSegurancaProviderImplTest {
 			.setAuthentication(new UsernamePasswordAuthenticationToken("anonymousUser", null, java.util.List.of()));
 
 		assertTrue(provider.identidadeAtual().isEmpty());
+	}
+
+	@Test
+	void shouldIgnoreUnknownRoleAuthoritiesWithout500() {
+		// Authority com prefixo ROLE_ mas sufixo que nao e um Role conhecido (ex.:
+		// ROLE_USER)
+		// deve ser ignorada, sem lancar IllegalArgumentException (evita 500).
+		Usuario usuario = new Usuario(UUID.randomUUID(), "cliente1", "cliente@teste.com", "hash", Set.of(Role.CLIENTE),
+				UUID.randomUUID(), true, false, LocalDateTime.now(), LocalDateTime.now(), null);
+		UsuarioAutenticadoPrincipal principal = org.mockito.Mockito.mock(UsuarioAutenticadoPrincipal.class);
+		org.mockito.Mockito.when(principal.getId()).thenReturn(usuario.getId());
+		org.mockito.Mockito.when(principal.getUsername()).thenReturn("cliente1");
+		org.mockito.Mockito.when(principal.getClienteId()).thenReturn(usuario.getClienteId());
+		org.mockito.Mockito.<java.util.Collection<? extends org.springframework.security.core.GrantedAuthority>>when(
+				principal.getAuthorities())
+			.thenReturn(java.util.List.of(
+					new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"),
+					new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_CLIENTE")));
+		SecurityContextHolder.getContext()
+			.setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities()));
+
+		Optional<IdentidadeAutenticada> identidade = provider.identidadeAtual();
+
+		assertTrue(identidade.isPresent());
+		assertTrue(identidade.get().roles().contains(Role.CLIENTE));
+		assertEquals(1, identidade.get().roles().size());
 	}
 
 }
