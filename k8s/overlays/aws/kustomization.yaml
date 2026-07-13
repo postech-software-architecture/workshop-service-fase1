@@ -7,6 +7,7 @@ namespace: workshop
 
 resources:
   - ../../base
+  - service-lb.yaml # expoe a API publicamente via ELB (so na AWS)
 
 configMapGenerator:
   - name: workshop-config
