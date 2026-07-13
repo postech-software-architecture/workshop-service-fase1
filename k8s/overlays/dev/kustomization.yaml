@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Ambiente DEV (local / kind): o Postgres roda DENTRO do cluster (service "postgres").
+# Autocontido: `kubectl apply -k k8s/overlays/dev` sobe app + banco de uma vez.
+namespace: workshop
+
+resources:
+  - ../../base
+  - postgres.yaml # Postgres in-cluster (service "postgres")
+
+# ConfigMap e Secret gerados a partir de arquivos .env. Nomes fixos (sem hash) para
+# casar com os `configMapRef/secretRef` do Deployment e com o `10-postgres`.
+configMapGenerator:
+  - name: workshop-config
+    envs:
+      - config.env
+secretGenerator:
+  - name: workshop-secret
+    envs:
+      - secret.env
+
+generatorOptions:
+  disableNameSuffixHash: true

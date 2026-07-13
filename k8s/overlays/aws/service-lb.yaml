@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: workshop-api
+  labels:
+    app.kubernetes.io/name: workshop-service
+    app.kubernetes.io/part-of: workshop-service
+# Exposicao PUBLICA da API (so no ambiente AWS). Ao criar um Service type=LoadBalancer,
+# o cloud-controller do EKS provisiona um ELB na AWS automaticamente e devolve o DNS
+# publico. Local (overlay dev) nao usa isto — la o acesso e via kubectl port-forward.
+#
+# ATENCAO ao destruir: este Service (o ELB) NAO esta no state do Terraform. Antes de
+# `terraform destroy`, rode `kubectl delete -k k8s/overlays/aws` (ou delete este Service)
+# para o k8s remover o ELB — senao ele fica orfao e trava a exclusao da VPC.
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: workshop-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

@@ -30,6 +30,10 @@ services:
       DB_NAME: ${POSTGRES_DB:-mydatabase}
       DB_USER: ${POSTGRES_USER:-myuser}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      # JWT_SECRET nao tem default (nao commitar segredo). Defina no arquivo .env local
+      # (gitignored): copie de .env.example. Fail-fast se ausente.
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env (cp .env.example .env)}
+      WEBHOOK_ORCAMENTO_TOKEN: ${WEBHOOK_ORCAMENTO_TOKEN:-local-token}
     ports:
       - "8080:8080"
     depends_on:
