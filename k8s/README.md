@@ -11,7 +11,7 @@ k8s/
 │   ├── namespace.yaml       # Namespace workshop
 │   ├── deployment.yaml      # Deployment (2 réplicas, probes, requests/limits, securityContext)
 │   ├── service.yaml         # Service ClusterIP :8080
-│   ├── hpa.yaml             # HPA por CPU (70%, 2→10 réplicas)
+│   ├── hpa.yaml             # HPA CPU 70% + memória 850Mi/pod (2→10 réplicas)
 │   └── kustomization.yaml
 ├── overlays/
 │   ├── dev/                 # local (kind/minikube): Postgres IN-CLUSTER
@@ -75,11 +75,17 @@ kubectl kustomize k8s/overlays/dev     # ou overlays/aws
 
 ## Escalabilidade (HPA)
 
-O HPA escala por **CPU** (70% de utilização, 2→10 réplicas). Requer o `metrics-server` no cluster
-(instalado pelo Terraform no EKS; no `kind` local, instalar à parte).
+O HPA escala de **2→10 réplicas** pelo **maior** entre dois sinais:
+
+- **CPU** — `Utilization` 70% (relativa ao *request* de CPU). Métrica primária: reflete a demanda.
+- **Memória** — `AverageValue` **absoluto** de `850Mi`/pod (rede de segurança). Absoluto de
+  propósito: a JVM reserva `-XX:MaxRAMPercentage=75%` do limit (~768Mi de 1Gi), então a
+  utilização relativa ao *request* (512Mi) ficaria cronicamente >100% e travaria o HPA no máximo.
+
+Requer o `metrics-server` no cluster (instalado pelo Terraform no EKS; no `kind` local, instalar à parte).
 
 ```bash
-kubectl -n workshop get hpa workshop-service   # TARGETS não pode estar <unknown>
+kubectl -n workshop get hpa workshop-service   # TARGETS (cpu + memory) não pode estar <unknown>
 ```
 
 ## Imagem privada no GHCR (opcional)

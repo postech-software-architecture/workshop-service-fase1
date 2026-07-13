@@ -13,7 +13,7 @@ Por isso este código **não cria roles**:
 - `module.eks` usa `create_iam_role = false` + `iam_role_arn = LabRole` (no cluster **e** no node group).
 - A role do lab é mapeada como admin do cluster via **EKS access entry**
   (`AmazonEKSClusterAdminPolicy`), senão o cluster sobe mas `kubectl` não acessa.
-- Um `helm_release "metrics-server"` é instalado — **o HPA do Dev 3 depende dele** para ler CPU.
+- Um `helm_release "metrics-server"` é instalado — **o HPA depende dele** para ler CPU e memória dos pods.
 - Região `us-east-1` (default do Academy).
 
 ## Pré-requisitos
@@ -56,10 +56,11 @@ sed -i '' "s|^DB_HOST=.*|DB_HOST=$(terraform output -raw db_host)|" ../../k8s/ov
 kubectl apply -k ../../k8s/overlays/aws
 
 # 3) gerar carga e mostrar a escala automatica
-kubectl -n workshop get hpa -w      # REPLICAS sobem sob carga (HPA por CPU)
+kubectl -n workshop get hpa -w      # REPLICAS sobem sob carga (HPA por CPU e memória)
 kubectl -n workshop get pods -w
 
-# 4) destruir tudo depois de gravar (remova o Service LoadBalancer antes p/ o ELB nao ficar orfao)
+# 4) SO no encerramento do lab Academy (ver nota abaixo) — nao faz parte do fluxo de deploy.
+#    Remova o Service LoadBalancer antes, p/ o ELB nao ficar orfao e travar a exclusao da VPC.
 kubectl delete -k ../../k8s/overlays/aws
 terraform destroy
 ```
@@ -68,12 +69,17 @@ terraform destroy
 > autentica na AWS, cria o `workshop-secret` a partir dos GitHub Secrets, injeta o `DB_HOST` do
 > RDS e aplica o overlay `aws`. O `db_host` do RDS é o endpoint do `aws_db_instance.postgres`.
 
-## Custo (crédito ~US$100 do lab)
+## Ciclo de vida no AWS Academy (por que destruímos ao final)
 
-Control plane EKS ~US$0,10/h + 2× EC2 t3.medium + RDS db.t3.micro + NAT Gateway (~US$0,045/h)
-+ tráfego → poucos dólares por algumas horas. **Sempre `terraform destroy` no fim.** Manter o
-node group pequeno (1–2 nós). A senha do banco usa `var.db_password`; em produção real, use
-`aws_secretsmanager_secret`.
+> ⚠️ O `terraform destroy` acima **não** é parte do fluxo de deploy — em um ambiente real a
+> infraestrutura fica **de pé**. Ele existe aqui só porque o **AWS Academy Learner Lab** é um
+> sandbox de estudo com **orçamento reduzido e sessão temporária** (as credenciais expiram e o
+> crédito é limitado). Por isso, o padrão neste projeto é: **subir para a demonstração → gravar →
+> derrubar** para não consumir o crédito do lab. Em produção você provisiona uma vez e mantém.
+
+Boas práticas nesse contexto de custo baixo: manter o node group pequeno (1–2 nós t3.medium) e
+RDS `db.t3.micro`. A senha do banco usa `var.db_password`; em produção real, use um segredo
+gerenciado (`aws_secretsmanager_secret`) em vez de variável.
 
 ## Validação estática (sem apply / sem credenciais)
 

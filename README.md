@@ -12,7 +12,7 @@ Na **Fase 1** a entrega foi um MVP de back-end estruturado com DDD e arquitetura
 
 - **Refatoração** seguindo Clean Code + Clean Architecture (separação estrita de camadas e dependências).
 - **Containerização** via Docker + `docker compose` para desenvolvimento local.
-- **Orquestração** em Kubernetes (Deployments, Services, ConfigMaps/Secrets e **HPA** por CPU).
+- **Orquestração** em Kubernetes (Deployments, Services, ConfigMaps/Secrets e **HPA** por CPU e memória).
 - **Infraestrutura como Código** com Terraform (cluster **EKS** + banco **RDS** na AWS).
 - **CI/CD** com GitHub Actions (build, testes, cobertura, build/push da imagem no GHCR e deploy no cluster).
 
@@ -23,7 +23,7 @@ Na **Fase 1** a entrega foi um MVP de back-end estruturado com DDD e arquitetura
 | Reduzir riscos operacionais com infra escalável | EKS multi-nó + HPA (2→10 réplicas) + RDS gerenciado |
 | Automatizar provisionamento e deploy | Terraform (`infra/`) + pipeline CI/CD (`.github/workflows/`) |
 | Qualidade e organização do código | Clean Architecture + testes (unit + integração) + cobertura mínima 80% (JaCoCo) |
-| Suportar picos de ordens de serviço | Escalabilidade horizontal automática via HPA por consumo de CPU |
+| Suportar picos de ordens de serviço | Escalabilidade horizontal automática via HPA por consumo de CPU e memória |
 
 ---
 
@@ -58,10 +58,10 @@ flowchart TB
         subgraph EKS["EKS — namespace workshop"]
             direction TB
             DEP["Deployment workshop-service<br/>2→10 réplicas"]
-            HPA["HPA (CPU 70%)"]
+            HPA["HPA (CPU 70% + memória)"]
             MS["metrics-server"]
             HPA -. escala .-> DEP
-            MS -. métricas CPU .-> HPA
+            MS -. métricas CPU/memória .-> HPA
         end
         RDS[("RDS PostgreSQL<br/>workshop-db")]
     end
@@ -74,7 +74,7 @@ flowchart TB
     DEP -->|JDBC :5432| RDS
 ```
 
-- **Cluster:** Amazon **EKS** (`workshop-eks`), node group com EC2 (t3.medium), `metrics-server` para o HPA.
+- **Cluster:** Amazon **EKS** (`workshop-eks`), node group com EC2 (t3.medium), `metrics-server` para o HPA (CPU + memória).
 - **Banco:** Amazon **RDS PostgreSQL** (`workshop-db`), fora do cluster (não é Postgres in-cluster).
 - **Exposição:** `Service type=LoadBalancer` → o cloud-controller do EKS provisiona um **ELB** público.
 - **Registry:** imagem publicada no **GHCR** (GitHub Container Registry) — o EKS puxa de lá.
@@ -139,7 +139,7 @@ aws eks update-kubeconfig --name workshop-eks --region us-east-1
 terraform output                                  # db_host, db_username, cluster_name...
 ```
 
-> **Sempre** rode `terraform destroy` ao final (o lab gera custo). Detalhes, custo e a variante **local com `kind`** em [`infra/README.md`](infra/README.md).
+> No **AWS Academy** (sandbox de estudo com crédito limitado), derrube o ambiente com `terraform destroy` após a demonstração — isso é uma restrição do lab, **não** parte do fluxo de deploy: em produção a infraestrutura permanece de pé. Detalhes e a variante **local com `kind`** em [`infra/README.md`](infra/README.md).
 
 ### 3. Deploy em Kubernetes
 
@@ -160,7 +160,7 @@ O `workshop-secret` (credenciais sensíveis) **não** é versionado — é criad
 **Escalabilidade automática (HPA):**
 
 ```bash
-kubectl -n workshop get hpa workshop-service -w   # REPLICAS sobem sob carga de CPU (2→10)
+kubectl -n workshop get hpa workshop-service -w   # REPLICAS sobem sob carga de CPU/memória (2→10)
 ```
 
 ---

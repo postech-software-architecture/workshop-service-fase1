@@ -115,7 +115,10 @@ aws eks update-kubeconfig --name workshop-eks --region us-east-1
 
 O deploy dos manifestos é feito pela pipeline **CD** (`.github/workflows/cd.yml`) — que autentica
 na AWS, cria o `workshop-secret` a partir dos GitHub Secrets e aplica `k8s/overlays/aws` — ou
-manualmente via `kubectl apply -k ../k8s/overlays/aws`. **Sempre `terraform destroy` no fim.**
-Passo a passo, custo e credenciais em [`eks/README.md`](eks/README.md).
+manualmente via `kubectl apply -k ../k8s/overlays/aws`.
+
+> No **AWS Academy** (sandbox de crédito limitado), derruba-se o ambiente com `terraform destroy`
+> após a demonstração. Isso é uma restrição do lab, **não** parte do deploy — em produção a infra
+> permanece de pé. Passo a passo e credenciais em [`eks/README.md`](eks/README.md).
 
 Validação estática (sem apply/credenciais): `terraform init -backend=false && terraform validate`.

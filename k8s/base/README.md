@@ -8,7 +8,7 @@ referenciam esta base e adicionam/ajustam o que muda por ambiente (banco, exposi
 | `namespace.yaml` | Namespace `workshop` | |
 | `deployment.yaml` | Deployment `workshop-service` | 2 réplicas, probes (startup/readiness/liveness), requests/limits, `securityContext` non-root (UID 1000) |
 | `service.yaml` | Service `ClusterIP` :8080 | acesso interno; exposição pública é no overlay `aws` |
-| `hpa.yaml` | HorizontalPodAutoscaler | CPU 70%, **2→10 réplicas**, `scaleDown` estabilizado em 120s |
+| `hpa.yaml` | HorizontalPodAutoscaler | **2→10 réplicas** pelo maior sinal: CPU 70% (Utilization) + memória 850Mi/pod (AverageValue absoluto); `scaleDown` estabilizado em 120s |
 | `kustomization.yaml` | agrega os recursos acima | |
 
 > O ConfigMap `workshop-config` e o Secret `workshop-secret` **não** ficam aqui — cada overlay
