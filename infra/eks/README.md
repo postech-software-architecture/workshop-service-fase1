@@ -41,22 +41,32 @@ terraform init
 terraform apply                     # cria VPC + EKS (LabRole) + RDS + metrics-server
 aws eks update-kubeconfig --name workshop-eks --region us-east-1
 
-# 2) manifestos do Dev 3 (o metrics-server ja foi instalado pelo terraform)
-kubectl apply -f ../../k8s/00-namespace.yaml -f ../../k8s/01-configmap.yaml \
-              -f ../../k8s/02-secret.yaml \
-              -f ../../k8s/20-deployment.yaml -f ../../k8s/21-service.yaml -f ../../k8s/30-hpa.yaml
+# 2) Secret com as credenciais do RDS (nao vai ao git) + manifestos via Kustomize
+#    (o metrics-server ja foi instalado pelo terraform)
+kubectl create namespace workshop --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n workshop create secret generic workshop-secret \
+  --from-literal=DB_USER="$(terraform output -raw db_username)" \
+  --from-literal=DB_PASSWORD="$(terraform output -raw db_password)" \
+  --from-literal=JWT_SECRET="$(openssl rand -hex 32)" \
+  --from-literal=WEBHOOK_ORCAMENTO_TOKEN="$(openssl rand -hex 16)" \
+  --from-literal=MAIL_USERNAME=dummy --from-literal=MAIL_PASSWORD=dummy \
+  --dry-run=client -o yaml | kubectl apply -f -
+# injeta o endpoint do RDS no ConfigMap do overlay e aplica
+sed -i '' "s|^DB_HOST=.*|DB_HOST=$(terraform output -raw db_host)|" ../../k8s/overlays/aws/config.env
+kubectl apply -k ../../k8s/overlays/aws
 
 # 3) gerar carga e mostrar a escala automatica
 kubectl -n workshop get hpa -w      # REPLICAS sobem sob carga (HPA por CPU)
 kubectl -n workshop get pods -w
 
-# 4) destruir tudo depois de gravar
+# 4) destruir tudo depois de gravar (remova o Service LoadBalancer antes p/ o ELB nao ficar orfao)
+kubectl delete -k ../../k8s/overlays/aws
 terraform destroy
 ```
 
-> O `DB_HOST`/credenciais do RDS vêm dos outputs (`terraform output`) — alimente o
-> `k8s/02-secret.yaml`/`workshop-config` com eles (Opção B do Dev 3). O `db_host` do RDS é o
-> endpoint do `aws_db_instance.postgres`.
+> Na entrega, os passos 2–3 são feitos pela pipeline **CD** (`.github/workflows/cd.yml`), que já
+> autentica na AWS, cria o `workshop-secret` a partir dos GitHub Secrets, injeta o `DB_HOST` do
+> RDS e aplica o overlay `aws`. O `db_host` do RDS é o endpoint do `aws_db_instance.postgres`.
 
 ## Custo (crédito ~US$100 do lab)
 

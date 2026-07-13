@@ -1,210 +1,224 @@
-# Workshop Service - Fase 1
+# Workshop Service — Fase 2
 
-> MVP de back-end para gestão de oficinas mecânicas, desenvolvido com foco em Domain-Driven Design (DDD), rastreabilidade operacional e evolução contínua do domínio.
-
----
-
-## Sobre o Projeto
-
-O Workshop Service foi desenvolvido como parte do **Tech Challenge - Fase 1** da Pós-Graduação em Software Architecture da POSTECH.
-
-O projeto busca estruturar digitalmente processos operacionais de oficinas mecânicas, reduzindo problemas relacionados à rastreabilidade, controle de informações e padronização dos atendimentos.
-
-A solução foi construída como um MVP de back-end voltado à gestão de clientes e veículos, estabelecendo uma base arquitetural preparada para futuras expansões do domínio, como:
-
-- Ordens de Serviço
-- Diagnóstico técnico
-- Orçamentos
-- Controle de estoque
-- Fluxo de execução
-- Rastreamento operacional
+> Evolução do back-end de gestão de oficinas mecânicas com foco em **qualidade, resiliência e escalabilidade**: Clean Architecture, containerização, orquestração em Kubernetes, Infraestrutura como Código (Terraform) e pipeline de CI/CD.
 
 ---
 
-## Objetivo do Projeto
+## Sobre a solução
 
-Centralizar o gerenciamento de clientes e veículos em um sistema estruturado, garantindo:
+O **Workshop Service** é a API REST que digitaliza os processos operacionais de uma oficina mecânica — clientes, veículos, peças/insumos, estoque, ordens de serviço, orçamentos e execução.
 
-- Consistência dos dados
-- Rastreabilidade das operações
-- Padronização das informações
-- Base sólida para evolução contínua do domínio
+Na **Fase 1** a entrega foi um MVP de back-end estruturado com DDD e arquitetura em camadas. Na **Fase 2**, a aplicação evolui para operar com **alta disponibilidade e escalabilidade dinâmica**, incorporando práticas modernas de infraestrutura e automação:
 
----
+- **Refatoração** seguindo Clean Code + Clean Architecture (separação estrita de camadas e dependências).
+- **Containerização** via Docker + `docker compose` para desenvolvimento local.
+- **Orquestração** em Kubernetes (Deployments, Services, ConfigMaps/Secrets e **HPA** por CPU).
+- **Infraestrutura como Código** com Terraform (cluster **EKS** + banco **RDS** na AWS).
+- **CI/CD** com GitHub Actions (build, testes, cobertura, build/push da imagem no GHCR e deploy no cluster).
 
-## Arquitetura e Modelagem de Domínio
+### Objetivos desta fase
 
-O projeto foi estruturado com base em conceitos de **Domain-Driven Design (DDD)**, buscando alinhar regras de negócio, comunicação técnica e evolução arquitetural.
-
-### Conceitos aplicados
-
-- Linguagem Ubíqua
-- Separação entre Core Domain e Supporting Domain
-- Arquitetura em camadas
-- Organização orientada à evolução do domínio
-- Preservação de histórico através de remoção lógica
-
-### Arquitetura em Camadas
-
-```text
-┌─────────────────────────────────┐
-│ API / Presentation Layer        │
-├─────────────────────────────────┤
-│ Application Layer               │
-├─────────────────────────────────┤
-│ Domain Layer                    │
-├─────────────────────────────────┤
-│ Infrastructure Layer            │
-└─────────────────────────────────┘
-```
+| Objetivo (Tech Challenge) | Como é atendido |
+|---|---|
+| Reduzir riscos operacionais com infra escalável | EKS multi-nó + HPA (2→10 réplicas) + RDS gerenciado |
+| Automatizar provisionamento e deploy | Terraform (`infra/`) + pipeline CI/CD (`.github/workflows/`) |
+| Qualidade e organização do código | Clean Architecture + testes (unit + integração) + cobertura mínima 80% (JaCoCo) |
+| Suportar picos de ordens de serviço | Escalabilidade horizontal automática via HPA por consumo de CPU |
 
 ---
 
-## Artefatos de Domínio
-- [Dicionário de Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
-- [Diagramas Domain Storytelling](/docs/domain_storytelling)
-- [Diagramas Event Storming](docs/event_storming/README.md)
+## Arquitetura proposta
 
----
-## Funcionalidades Principais
+### Componentes da aplicação
 
-- Gestão de Clientes e Veículos
-- Gestão de Ordens de Serviço
-- Diagnóstico e Orçamento
-- Fluxo de Aprovação e Execução
-- Acompanhamento Operacional
-- Gestão Administrativa
-- Autenticação e Segurança
-
----
-
-## Tecnologias Utilizadas
-### Backend:
-[![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.java.com/) [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.1-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot) [![Spring Web](https://img.shields.io/badge/Spring_Web-6DB33F?style=for-the-badge)](https://spring.io/projects/spring-framework) [![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge)](https://spring.io/projects/spring-data-jpa) [![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
-
-### Qualidade e Testes:
-[![JUnit5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white)](https://junit.org/junit5/) [![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge)](https://site.mockito.org/) [![Testcontainers](https://img.shields.io/badge/Testcontainers-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://testcontainers.com/) [![JaCoCo](https://img.shields.io/badge/JaCoCo-Coverage-red?style=for-the-badge)](https://www.jacoco.org/)
-
-### Banco de Dados:
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/) [![Flyway](https://img.shields.io/badge/Flyway-CC0200?style=for-the-badge&logo=flyway&logoColor=white)](https://flywaydb.org/)
-
-### Produtividade:
-[![Lombok](https://img.shields.io/badge/Lombok-BC4521?style=for-the-badge)](https://projectlombok.org/) [![MapStruct](https://img.shields.io/badge/MapStruct-009688?style=for-the-badge)](https://mapstruct.org/)
-
----
-
-## Estrutura
-O projeto segue um modelo em camadas inspirado em Clean Architecture:
+A API segue **Clean Architecture** — dependências sempre apontam para o domínio, que é puro (sem Spring).
 
 ```text
 src/main/java/com/postech/workshop_service/
-├── api/
-│   ├── controllers/
-│   └── dtos/
-├── application/
-│   └── usecases/
-├── domain/
-│   ├── entities/
-│   ├── repositories/
-│   └── valueobjects/
-└── infrastructure/
-    ├── config/
-    └── persistence/
-        ├── entities/
-        ├── mappers/
-        └── repositories/
+├── api/              → Controllers REST + DTOs        (entrada HTTP)
+├── application/      → Use Cases                       (regras de negócio, 1 arquivo por ação)
+├── domain/           → Entidades, Value Objects, Enums, interfaces de repositório (puro)
+└── infrastructure/   → JPA Entities, Mappers, Spring Data repos, RepositoryImpl, config
 ```
+
+Principais capacidades expostas: abertura e consulta de **Ordem de Serviço**, aprovação/recusa de **orçamento** (webhook externo), **listagem** de OS ordenada por status (exclusão lógica das finalizadas/entregues) e **atualização de status** com notificação.
+
+### Infraestrutura provisionada (AWS)
+
+```mermaid
+flowchart TB
+    subgraph GitHub
+        CI["GitHub Actions<br/>CI: build + testes + cobertura"]
+        GHCR["GHCR<br/>ghcr.io/.../workshop-service"]
+        CD["GitHub Actions<br/>CD: deploy no EKS"]
+    end
+
+    subgraph AWS["AWS (Academy) — us-east-1"]
+        ELB["ELB / LoadBalancer<br/>(Service type=LoadBalancer)"]
+        subgraph EKS["EKS — namespace workshop"]
+            direction TB
+            DEP["Deployment workshop-service<br/>2→10 réplicas"]
+            HPA["HPA (CPU 70%)"]
+            MS["metrics-server"]
+            HPA -. escala .-> DEP
+            MS -. métricas CPU .-> HPA
+        end
+        RDS[("RDS PostgreSQL<br/>workshop-db")]
+    end
+
+    Dev["Desenvolvedor"] -->|git push main| CI
+    CI --> GHCR
+    CD -->|docker pull| GHCR
+    CD -->|kubectl apply -k| EKS
+    Usuario["Cliente da API"] --> ELB --> DEP
+    DEP -->|JDBC :5432| RDS
+```
+
+- **Cluster:** Amazon **EKS** (`workshop-eks`), node group com EC2 (t3.medium), `metrics-server` para o HPA.
+- **Banco:** Amazon **RDS PostgreSQL** (`workshop-db`), fora do cluster (não é Postgres in-cluster).
+- **Exposição:** `Service type=LoadBalancer` → o cloud-controller do EKS provisiona um **ELB** público.
+- **Registry:** imagem publicada no **GHCR** (GitHub Container Registry) — o EKS puxa de lá.
+- **Provisionamento:** tudo em `infra/eks` via Terraform, adaptado ao **AWS Academy Learner Lab** (reusa a `LabRole`).
+
+### Fluxo de deploy (CI/CD)
+
+```mermaid
+flowchart LR
+    A["push na main"] --> B["CI (ci.yml)<br/>mvn verify<br/>unit + IT + JaCoCo ≥80%"]
+    B --> C["Build & push imagem<br/>GHCR :sha-&lt;sha&gt; / :latest"]
+    C --> D["CD (cd.yml)<br/>workflow_dispatch"]
+    D --> E["auth AWS Academy<br/>update-kubeconfig"]
+    E --> F["kubectl apply -k<br/>k8s/overlays/aws"]
+    F --> G["rollout + ELB público"]
+```
+
+1. **CI** (`.github/workflows/ci.yml`) — em push/PR na `main`: `./mvnw verify` (testes unitários + integração via Testcontainers + gate de cobertura 80%). Em push na `main`, também faz **build e push da imagem** para o GHCR.
+2. **CD** (`.github/workflows/cd.yml`) — `workflow_dispatch`: autentica na AWS Academy (credenciais temporárias com *session token*), gera o kubeconfig do EKS, cria o `workshop-secret`, injeta o endpoint do RDS e aplica o overlay `aws` do Kustomize, seta a tag imutável da imagem e aguarda o rollout.
+
+> Os nomes/segredos necessários no CI/CD estão documentados em [`.github/deploy.env.example`](.github/deploy.env.example).
+
 ---
 
-## Segurança
-- Autenticação baseada em JWT
-- Configuração obrigatória de segredo (JWT_SECRET)
-- Estrutura preparada para RBAC (Role-Based Access Control)
+## Como executar
 
-Detalhes: [Fluxo de autenticação e autorização JWT](docs/autenticacao-jwt-rbac/README.md)
+### 1. Execução local (Docker Compose)
 
-## Event Storming
-- Diagramas de apoio para modelagem dos fluxos centrais do domínio
-- Visões separadas entre fluxo de negócio e análise com agregados
-
-Detalhes: [Artefatos de Event Storming](docs/event_storming/README.md)
-
-## Execução Local
-
-### Pré-requisitos
-
-- Java 21
-- Maven 3.9+
-- Docker Desktop ativo
-
-### Banco de dados
+Pré-requisitos: **Java 21**, **Maven 3.9+**, **Docker Desktop** ativo.
 
 ```bash
+# sobe app + Postgres (e dependências) via compose
+./mvnw spring-boot:run        # sobe o docker-compose automaticamente
+# ou manualmente:
 docker compose up -d
 ```
 
-## Rodando com Docker
-
-Copie `.env.example` para `.env` se quiser ajustar credenciais locais.
+A aplicação fica em `http://localhost:8080`. Copie `.env.example` para `.env` para ajustar credenciais locais.
+Defina o `JWT_SECRET` (mín. 32 chars) antes de subir a API — sem ele o startup falha por segurança:
 
 ```bash
-docker compose up -d
+export JWT_SECRET="$(openssl rand -hex 32)"
 ```
 
-A aplicação fica disponível em `http://localhost:8080`.
-
-Health check:
+Health check e testes:
 
 ```bash
 curl http://localhost:8080/actuator/health
+./mvnw verify                 # testes + cobertura + formatação
 ```
 
-### Testes
+### 2. Provisionamento da infraestrutura (Terraform)
+
+O cluster **EKS + RDS** é provisionado em [`infra/eks`](infra/eks/README.md). Requer credenciais do **AWS Academy** (temporárias, com `aws_session_token`).
 
 ```bash
-mvn test
+cd infra/eks
+cp terraform.tfvars.example terraform.tfvars      # define db_password (não commitar)
+terraform init
+terraform apply                                   # VPC + EKS (LabRole) + RDS + metrics-server
+aws eks update-kubeconfig --name workshop-eks --region us-east-1
+terraform output                                  # db_host, db_username, cluster_name...
 ```
 
-### Aplicação
+> **Sempre** rode `terraform destroy` ao final (o lab gera custo). Detalhes, custo e a variante **local com `kind`** em [`infra/README.md`](infra/README.md).
 
-Antes de iniciar a API, defina a variável de ambiente `JWT_SECRET` com um segredo de pelo menos 32 caracteres.
+### 3. Deploy em Kubernetes
 
-Exemplo no PowerShell:
-
-```powershell
-$env:JWT_SECRET="defina-um-segredo-com-pelo-menos-32-caracteres"
-mvn spring-boot:run
-```
-
-Sem essa variável a aplicação falha no startup por segurança.
-
-Exemplo alternativo passando pela linha de comando:
-
-```powershell
-mvn spring-boot:run "-Dspring-boot.run.arguments=--JWT_SECRET=defina-um-segredo-com-pelo-menos-32-caracteres"
-```
+Manifestos em [`k8s/`](k8s/README.md), organizados com **Kustomize** (base + overlays):
 
 ```bash
-mvn spring-boot:run
+# AWS (EKS + RDS) — geralmente via pipeline CD, mas manualmente:
+kubectl apply -k k8s/overlays/aws
+kubectl -n workshop rollout status deployment/workshop-service
+
+# DEV local (kind/minikube) — sobe app + Postgres in-cluster de uma vez:
+kubectl apply -k k8s/overlays/dev
+kubectl -n workshop port-forward svc/workshop-service 8080:8080
 ```
 
-### Documentação OpenAPI
+O `workshop-secret` (credenciais sensíveis) **não** é versionado — é criado no deploy a partir dos outputs do Terraform / GitHub Secrets. Ver [`k8s/README.md`](k8s/README.md) e [`k8s/overlays/aws/README.md`](k8s/overlays/aws/README.md).
 
-- Swagger UI local: `http://localhost:8080/swagger-ui/index.html`
-- Contrato OpenAPI versionado no repositório: `src/main/java/com/postech/workshop_service/api/controllers/openapi.yaml`
+**Escalabilidade automática (HPA):**
 
-A documentação cobre os fluxos de autenticação, clientes, veículos, serviços, peças e insumos, estoque, ordens de serviço, orçamentos e métricas administrativas. Para acessar o Swagger UI localmente, suba a aplicação com `JWT_SECRET` configurado conforme a seção de execução da aplicação.
-
-## Observações do MVP
-
-- Os endpoints da API usam autenticação JWT e controle de acesso por perfil conforme descrito no contrato OpenAPI.
-- A remoção de veículos é lógica, preservando rastreabilidade e referências históricas.
-- O projeto representa a primeira fase da construção do domínio da oficina mecânica.
+```bash
+kubectl -n workshop get hpa workshop-service -w   # REPLICAS sobem sob carga de CPU (2→10)
+```
 
 ---
+
+## Documentação da API
+
+- **Swagger UI** (local): `http://localhost:8080/swagger-ui/index.html`
+- **Contrato OpenAPI** versionado: [`openapi.yaml`](openapi.yaml)
+- **Collection (Postman/Insomnia):** `<LINK_COLLECTION_API_AQUI>`
+
+---
+
+## Tecnologias
+
+### Backend
+[![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.java.com/) [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.1-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot) [![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
+
+### Qualidade e Testes
+[![JUnit5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white)](https://junit.org/junit5/) [![Mockito](https://img.shields.io/badge/Mockito-78A641?style=for-the-badge)](https://site.mockito.org/) [![Testcontainers](https://img.shields.io/badge/Testcontainers-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://testcontainers.com/) [![JaCoCo](https://img.shields.io/badge/JaCoCo-Coverage-red?style=for-the-badge)](https://www.jacoco.org/)
+
+### Banco de Dados
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/) [![Flyway](https://img.shields.io/badge/Flyway-CC0200?style=for-the-badge&logo=flyway&logoColor=white)](https://flywaydb.org/)
+
+### Infra & DevOps
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/) [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io/) [![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/) [![AWS](https://img.shields.io/badge/AWS-EKS_+_RDS-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/eks/) [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
+
+---
+
+## Segurança
+
+- Autenticação baseada em **JWT** (segredo obrigatório via `JWT_SECRET`).
+- Estrutura preparada para **RBAC**. Detalhes: [Fluxo de autenticação e autorização JWT](docs/autenticacao-jwt-rbac/README.md).
+- Segredos (banco, tokens de serviços externos) via **Kubernetes Secret** / **GitHub Secrets** — nunca versionados.
+
+---
+
+## Artefatos e documentação
+
+- [Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
+- [Domain Storytelling](docs/domain_storytelling)
+- [Event Storming](docs/event_storming/README.md)
+- [Fluxo JWT e RBAC](docs/autenticacao-jwt-rbac/README.md)
+- **Infra (Terraform):** [`infra/README.md`](infra/README.md) · [`infra/eks/README.md`](infra/eks/README.md)
+- **Kubernetes:** [`k8s/README.md`](k8s/README.md)
+
+---
+
+## Vídeo demonstrativo
+
+Demonstra deploy da aplicação, execução do CI/CD, consumo das APIs e escalabilidade automática (até 15 min).
+
+▶️ `<LINK_DO_VIDEO_AQUI>`
+
+---
+
 ## Equipe
 
-Projeto desenvolvido como parte do Tech Challenge da POSTECH da Turma 15SOAT.
+Projeto desenvolvido como parte do Tech Challenge da POSTECH — Turma 15SOAT.
 
 <p align="center">
 <a href="https://github.com/jeanrabello" title="@jeanrabello"><img src="https://github.com/jeanrabello.png" width="80px;" alt="Jean"/></a>&nbsp;&nbsp;&nbsp;
@@ -216,44 +230,12 @@ Projeto desenvolvido como parte do Tech Challenge da POSTECH da Turma 15SOAT.
 
 <p align="center">
 <sub>
-Jean Paes Rabello •
-Marcela Amorim •
-Tassyo Monteiro •
-Suzana Sayori •
-Mateus Paz de Oliveira
+Jean Paes Rabello • Marcela Amorim • Tassyo Monteiro • Suzana Sayori • Mateus Paz de Oliveira
 </sub>
 </p>
 
 ---
 
-## Demonstração
-
-Em breve: vídeo demonstrativo da aplicação e dos fluxos principais do sistema.
-
----
-
-## Artefatos e Documentação
-
-- [Linguagem Ubíqua](docs/linguagem-ubiqua/dicionario_linguagem_ubiqua_completo.pdf)
-- [Domain Storytelling](/docs/domain_storytelling)
-- [Fluxo JWT e RBAC](docs/autenticacao-jwt-rbac/README.md)
-- [Event Storming](docs/event_storming/README.md)
-- [Documento de Entrega](https://drive.google.com/file/d/1uuCT6WXVBtCgXTGTUcIQewyFlq2ibbJs/view?usp=sharing)
-- [Vídeo Demonstrativo](https://drive.google.com/file/d/1Uw11BpBvNsuk0mUOFy7ztbR_JtM183Df/view?usp=sharing)
-
----
-
-## Suporte
-
-Caso encontre algum problema ou deseje contribuir com sugestões:
-
-- Abra uma issue no repositório
-- Entre em contato com a equipe
-
----
-
 <p align="center">
-  <sub>
-    Desenvolvido pelo Grupo 274 • Turma 15SOAT • POSTECH
-  </sub>
+  <sub>Desenvolvido pelo Grupo 274 • Turma 15SOAT • POSTECH</sub>
 </p>
