@@ -24,8 +24,9 @@ variable "db_username" {
 }
 
 variable "db_password" {
-  description = "Senha do banco. Em producao use aws_secretsmanager_secret."
+  # Sem default: obrigatorio via TF_VAR_db_password ou terraform.tfvars (gitignored).
+  # Nao commitar senha real — repo publico. Em producao, aws_secretsmanager_secret.
+  description = "Senha do banco (obrigatoria; nao ha default)."
   type        = string
-  default     = "workshop"
   sensitive   = true
 }
