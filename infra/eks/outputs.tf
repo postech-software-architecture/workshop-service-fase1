@@ -1,7 +1,7 @@
 # Mesmos contratos da Trilha A, para o Dev 3 consumir sem mudar nada.
 output "cluster_name" {
   description = "Nome do cluster EKS"
-  value       = module.eks.cluster_name
+  value       = aws_eks_cluster.this.name
 }
 
 output "db_host" {

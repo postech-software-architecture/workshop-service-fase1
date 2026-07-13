@@ -13,7 +13,8 @@ variable "project" {
 variable "db_name" {
   description = "Nome do banco"
   type        = string
-  default     = "workshop"
+  # Alinhado ao contrato do repo e ao overlay k8s/overlays/aws (DB_NAME=mydatabase).
+  default     = "mydatabase"
 }
 
 variable "db_username" {

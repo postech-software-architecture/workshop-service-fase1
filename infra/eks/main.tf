@@ -34,66 +34,50 @@ module "vpc" {
   tags = { Project = var.project }
 }
 
-# --- Cluster EKS ---
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.24"
+# --- Cluster EKS (recursos crus, NAO o modulo terraform-aws-modules/eks) ---
+# O modulo faz um data.aws_iam_session_context (-> iam:GetRole na propria role voclabs),
+# que o Academy nega explicitamente (policy Pvoclabs2). Com recursos crus evitamos essa
+# introspeccao: a LabRole vira a role do cluster e dos nodes, e o proprio EKS mapeia o
+# criador (voclabs) como admin via bootstrap_cluster_creator_admin_permissions (server-side,
+# sem GetRole).
+resource "aws_eks_cluster" "this" {
+  name     = "${var.project}-eks"
+  version  = "1.30"
+  role_arn = data.aws_iam_role.lab.arn
 
-  cluster_name    = "${var.project}-eks"
-  cluster_version = "1.30"
-
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
-
-  cluster_endpoint_public_access = true
-
-  # Academy: nao criar IAM role do cluster — reusar a LabRole.
-  create_iam_role = false
-  iam_role_arn    = data.aws_iam_role.lab.arn
-
-  # Academy Learner Lab bloqueia IAM e KMS: desabilita tudo que exigiria criar um
-  # OIDC provider (IRSA), uma KMS key (encriptacao de secrets) ou um log group —
-  # cada um daria AccessDenied e faria o apply falhar no meio.
-  enable_irsa                 = false
-  create_kms_key              = false
-  cluster_encryption_config   = {}
-  create_cloudwatch_log_group = false
-  cluster_enabled_log_types   = []
-
-  # Acesso ao cluster: mapeia AUTOMATICAMENTE quem cria o cluster (a role "voclabs"
-  # das credenciais do lab) como admin — sem isso o kubectl fica Unauthorized. O
-  # access_entry explicito da LabRole abaixo cobre a LabRole operar o cluster tambem.
-  authentication_mode                      = "API_AND_CONFIG_MAP"
-  enable_cluster_creator_admin_permissions = true
-
-  access_entries = {
-    lab = {
-      principal_arn = data.aws_iam_role.lab.arn
-      policy_associations = {
-        admin = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
-          }
-        }
-      }
-    }
+  vpc_config {
+    subnet_ids              = concat(module.vpc.private_subnets, module.vpc.public_subnets)
+    endpoint_public_access  = true
+    endpoint_private_access = true
   }
 
-  eks_managed_node_groups = {
-    default = {
-      instance_types = ["t3.medium"]
-      min_size       = 1
-      max_size       = 3
-      desired_size   = 2
-
-      # Academy: nodes tambem reusam a LabRole (sem criar IAM role do node group).
-      create_iam_role = false
-      iam_role_arn    = data.aws_iam_role.lab.arn
-    }
+  access_config {
+    authentication_mode                         = "API"
+    bootstrap_cluster_creator_admin_permissions = true
   }
 
   tags = { Project = var.project }
+
+  depends_on = [module.vpc]
+}
+
+resource "aws_eks_node_group" "default" {
+  cluster_name    = aws_eks_cluster.this.name
+  node_group_name = "default"
+  node_role_arn   = data.aws_iam_role.lab.arn # Academy: nodes reusam a LabRole
+  subnet_ids      = module.vpc.private_subnets
+
+  scaling_config {
+    desired_size = 2
+    min_size     = 1
+    max_size     = 3
+  }
+
+  instance_types = ["t3.medium"]
+
+  tags = { Project = var.project }
+
+  depends_on = [aws_eks_cluster.this]
 }
 
 # --- metrics-server (necessario para o HPA do Dev 3 ler CPU) ---
@@ -109,7 +93,7 @@ resource "helm_release" "metrics_server" {
     value = "--kubelet-insecure-tls"
   }
 
-  depends_on = [module.eks]
+  depends_on = [aws_eks_node_group.default]
 }
 
 # --- Banco RDS Postgres ---
@@ -126,7 +110,7 @@ resource "aws_security_group" "db" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [module.eks.node_security_group_id] # so os nodes acessam
+    security_groups = [aws_eks_cluster.this.vpc_config[0].cluster_security_group_id] # so os nodes acessam
   }
 
   egress {
