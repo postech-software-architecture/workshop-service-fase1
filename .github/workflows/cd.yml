@@ -1,79 +1,129 @@
-name: CD — Deploy to Kubernetes
+name: CD — Deploy to EKS (AWS Academy)
 
-# Deploy manual (workflow_dispatch) enquanto o cluster do Dev 4 nao esta pronto. Os manifestos
-# do Dev 3 ja existem em /k8s; os steps de kubectl apply abaixo referenciam os arquivos reais e
-# serao reativados quando houver um cluster (secret KUBECONFIG_B64). O gatilho automatico por
-# push na main sera habilitado no mesmo momento.
+# Deploy no EKS provisionado em infra/eks (AWS Academy).
+# A imagem vem do GHCR (publicada pelo ci.yml). As credenciais da AWS Academy sao
+# TEMPORARIAS (expiram em algumas horas) e incluem SESSION TOKEN — por isso ficam em
+# GitHub Secrets e precisam ser renovadas quando a sessao do Lab reinicia.
+#
+# Secrets necessarios (Settings > Secrets and variables > Actions):
+#   AWS_ACCESS_KEY_ID       (Academy)
+#   AWS_SECRET_ACCESS_KEY   (Academy)
+#   AWS_SESSION_TOKEN       (Academy — obrigatorio, credencial temporaria)
+#   DB_HOST                 (endpoint do RDS — `terraform -chdir=infra/eks output -raw db_host`)
+#   DB_USER
+#   DB_PASSWORD
+#   JWT_SECRET              (openssl rand -hex 32)
+#   WEBHOOK_ORCAMENTO_TOKEN
+#   MAIL_USERNAME
+#   MAIL_PASSWORD
+# Variables (opcionais — tem default):
+#   AWS_REGION   (default us-east-1)
+#   EKS_CLUSTER  (default workshop-eks)
 on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'Tag da imagem a implantar (ex.: sha-<sha> ou latest)'
+        description: 'Tag da imagem no GHCR (ex.: sha-<sha> ou latest)'
         required: true
         default: latest
+  # Gatilho automatico desabilitado enquanto as credenciais Academy forem manuais:
+  # renovar os secrets a cada sessao e disparar via workflow_dispatch.
   # push:
   #   branches: [ main ]
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/workshop-service
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  EKS_CLUSTER: ${{ vars.EKS_CLUSTER_NAME }}
+  NAMESPACE: workshop
 
 jobs:
   deploy:
-    name: Deploy to Kubernetes
+    name: Deploy to EKS
     runs-on: ubuntu-latest
     # environment: production   # opcional: exige aprovacao antes do deploy
     steps:
       - uses: actions/checkout@v4
+
+      - name: Valida secrets obrigatorios
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+        run: |
+          missing=""
+          [ -z "$AWS_ACCESS_KEY_ID" ]     && missing="$missing AWS_ACCESS_KEY_ID"
+          [ -z "$AWS_SECRET_ACCESS_KEY" ] && missing="$missing AWS_SECRET_ACCESS_KEY"
+          [ -z "$AWS_SESSION_TOKEN" ]     && missing="$missing AWS_SESSION_TOKEN"
+          [ -z "$DB_HOST" ]               && missing="$missing DB_HOST"
+          if [ -n "$missing" ]; then
+            echo "::error::Secrets ausentes:$missing. Renove as credenciais da AWS Academy e reconfigure os secrets."
+            exit 1
+          fi
+
+      - name: Configura credenciais AWS (temporarias)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
           version: 'v1.30.0'
 
-      # KUBECONFIG_B64 = `base64 -w0 ~/.kube/config` do cluster do Dev 4, salvo como secret.
-      - name: Configura acesso ao cluster
-        env:
-          KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
+      - name: Gera kubeconfig do EKS
         run: |
-          if [ -z "$KUBECONFIG_B64" ]; then
-            echo "::error::Secret KUBECONFIG_B64 nao configurado (cluster do Dev 4 pendente)."
-            exit 1
-          fi
-          mkdir -p "$HOME/.kube"
-          echo "$KUBECONFIG_B64" | base64 -d > "$HOME/.kube/config"
+          aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$AWS_REGION"
           kubectl config current-context
 
-      # Aplicacao dos manifestos do Dev 3 (/k8s). Mantido comentado ate haver um cluster real
-      # (KUBECONFIG_B64 do Dev 4) para aplicar. Descomentar no handoff do Dev 4.
-      #
-      # - name: imagePullSecret (GHCR) — apenas se a imagem for privada
-      #   env:
-      #     GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
-      #   run: |
-      #     kubectl create secret docker-registry ghcr-pull \
-      #       --docker-server=ghcr.io \
-      #       --docker-username="${{ github.actor }}" \
-      #       --docker-password="$GHCR_PULL_TOKEN" \
-      #       --namespace=workshop \
-      #       --dry-run=client -o yaml | kubectl apply -f -
-      #
-      # - name: Aplica base (namespace, config, secret, banco in-cluster)
-      #   run: |
-      #     kubectl apply -f k8s/00-namespace.yaml
-      #     kubectl apply -f k8s/01-configmap.yaml
-      #     kubectl apply -f k8s/02-secret.yaml     # real (via CI/secret), nao o .example
-      #     kubectl apply -f k8s/10-postgres.yaml   # PULAR se banco vier do Dev 4 (Opcao B)
-      #
-      # - name: Aplica a aplicacao e injeta a tag imutavel
-      #   run: |
-      #     TAG="${{ github.event.inputs.image_tag || format('sha-{0}', github.sha) }}"
-      #     kubectl apply -f k8s/20-deployment.yaml -f k8s/21-service.yaml -f k8s/30-hpa.yaml
-      #     kubectl -n workshop set image deployment/workshop-service \
-      #       workshop-service="${{ env.IMAGE }}:${TAG}"
-      #
-      # - name: Aguarda rollout
-      #   run: kubectl -n workshop rollout status deployment/workshop-service --timeout=180s
+      - name: Garante o namespace
+        run: kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: No-op (aguardando cluster do Dev 4)
+      - name: Cria/atualiza o Secret da aplicacao
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          WEBHOOK_ORCAMENTO_TOKEN: ${{ secrets.WEBHOOK_ORCAMENTO_TOKEN }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
         run: |
-          echo "::notice::Deploy no-op — cluster (KUBECONFIG_B64/Dev 4) pendente; steps de kubectl apply comentados. Nenhum recurso foi aplicado."
+          kubectl -n "$NAMESPACE" create secret generic workshop-secret \
+            --from-literal=DB_USER="$DB_USER" \
+            --from-literal=DB_PASSWORD="$DB_PASSWORD" \
+            --from-literal=JWT_SECRET="$JWT_SECRET" \
+            --from-literal=WEBHOOK_ORCAMENTO_TOKEN="$WEBHOOK_ORCAMENTO_TOKEN" \
+            --from-literal=MAIL_USERNAME="$MAIL_USERNAME" \
+            --from-literal=MAIL_PASSWORD="$MAIL_PASSWORD" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Injeta o endpoint do RDS no overlay
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+        run: |
+          sed -i "s|^DB_HOST=.*|DB_HOST=${DB_HOST}|" k8s/overlays/aws/config.env
+          grep '^DB_HOST=' k8s/overlays/aws/config.env
+
+      - name: Aplica os manifestos (overlay aws)
+        run: kubectl apply -k k8s/overlays/aws
+
+      - name: Injeta a tag imutavel da imagem
+        run: |
+          TAG="${{ github.event.inputs.image_tag || 'latest' }}"
+          echo "Deploying ${IMAGE}:${TAG}"
+          kubectl -n "$NAMESPACE" set image deployment/workshop-service \
+            workshop-service="${IMAGE}:${TAG}"
+
+      - name: Aguarda rollout
+        run: kubectl -n "$NAMESPACE" rollout status deployment/workshop-service --timeout=300s
+
+      - name: URL publica (ELB)
+        run: |
+          echo "LoadBalancer:"
+          kubectl -n "$NAMESPACE" get svc workshop-api \
+            -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' || true
+          echo
