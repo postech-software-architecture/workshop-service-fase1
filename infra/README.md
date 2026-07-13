@@ -19,18 +19,23 @@ Provisiona a infraestrutura da Fase 2 via IaC. Duas trilhas:
 
 ## Contratos (outputs consumidos por outros tracks)
 
+> **Nota:** a tabela abaixo é da **Trilha A (kind local)**. Na **Trilha B (EKS)**, o CD **não** usa
+> `KUBECONFIG_B64`: autentica na AWS com credenciais do Academy e roda `aws eks update-kubeconfig`.
+> Os outputs de banco (`db_host/port/name/username/password`) têm os **mesmos nomes** nas duas
+> trilhas — no EKS apontam para o RDS. Ver [`eks/README.md`](eks/README.md).
+
 | Output | Consumido por | Uso |
 |---|---|---|
-| `kubeconfig_path` | Dev 2 (CD) | conteúdo em base64 → secret `KUBECONFIG_B64` do GitHub Actions |
-| `cluster_name` | Dev 2/3 | contexto kubectl (`kind-<name>`) |
-| `db_host` | Dev 3 | `DB_HOST` (`postgresql.workshop.svc.cluster.local`) |
-| `db_port` | Dev 3 | `DB_PORT` (5432) |
-| `db_name` | Dev 3 | `DB_NAME` |
-| `db_username` | Dev 3 | `DB_USER` |
-| `db_password` (sensitive) | Dev 3 | `DB_PASSWORD` (vai para Secret) |
-| `db_jdbc_url` | Dev 3 | conveniência |
+| `kubeconfig_path` | CD (kind local) | conteúdo em base64 → secret `KUBECONFIG_B64` do GitHub Actions |
+| `cluster_name` | CD / deploy | contexto kubectl (`kind-<name>`) |
+| `db_host` | Deploy (Secret/Config) | `DB_HOST` (`postgresql.workshop.svc.cluster.local`) |
+| `db_port` | Deploy | `DB_PORT` (5432) |
+| `db_name` | Deploy | `DB_NAME` |
+| `db_username` | Deploy | `DB_USER` |
+| `db_password` (sensitive) | Deploy | `DB_PASSWORD` (vai para Secret) |
+| `db_jdbc_url` | Deploy | conveniência |
 
-Estes valores correspondem à **Opção B** do Dev 3 (banco externo ao Deployment).
+Estes valores correspondem à **Opção B** (banco externo ao Deployment).
 
 ## Trilha A — kind + Postgres
 
@@ -95,13 +100,25 @@ kubectl create configmap workshop-config --namespace workshop \
 - **Evolução:** backend remoto para colaboração/lock — S3 + DynamoDB (AWS) ou GCS (GCP). Ver a
   seção "Backend do state" no README do track (`docs/fase-2/dev-4-terraform-iac/README.md`).
 
-## Trilha B (`eks/`) — EKS + RDS (NÃO aplicar)
+## Trilha B (`eks/`) — EKS + RDS (entrega em nuvem)
 
-Esqueleto de nuvem, gera custo AWS e exige credenciais. Só validação estática:
+Trilha **usada na entrega da Fase 2**: provisiona EKS + RDS no AWS Academy. Gera custo AWS e exige
+credenciais temporárias (com `aws_session_token`).
 
 ```bash
 cd eks
-terraform init -backend=false
-terraform validate
+cp terraform.tfvars.example terraform.tfvars   # define db_password (não commitar)
+terraform init
+terraform apply                                # VPC + EKS (LabRole) + RDS + metrics-server
+aws eks update-kubeconfig --name workshop-eks --region us-east-1
 ```
-Ver `eks/README.md` para custo/credenciais.
+
+O deploy dos manifestos é feito pela pipeline **CD** (`.github/workflows/cd.yml`) — que autentica
+na AWS, cria o `workshop-secret` a partir dos GitHub Secrets e aplica `k8s/overlays/aws` — ou
+manualmente via `kubectl apply -k ../k8s/overlays/aws`.
+
+> No **AWS Academy** (sandbox de crédito limitado), derruba-se o ambiente com `terraform destroy`
+> após a demonstração. Isso é uma restrição do lab, **não** parte do deploy — em produção a infra
+> permanece de pé. Passo a passo e credenciais em [`eks/README.md`](eks/README.md).
+
+Validação estática (sem apply/credenciais): `terraform init -backend=false && terraform validate`.
