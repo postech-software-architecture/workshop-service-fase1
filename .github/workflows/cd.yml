@@ -26,8 +26,21 @@ on:
         description: 'Tag da imagem no GHCR (ex.: sha-<sha> ou latest)'
         required: true
         default: latest
-  # Gatilho automatico desabilitado enquanto as credenciais Academy forem manuais:
-  # renovar os secrets a cada sessao e disparar via workflow_dispatch.
+
+  # ===========================================================================
+  # TEMPORARIO — GRAVACAO DO VIDEO (CI -> CD automatico).
+  # Encadeia o CD logo apos o CI concluir com SUCESSO na main, sem clique.
+  # >>> REMOVER este bloco `workflow_run` (e o ramo workflow_run do `if:` do job
+  #     `deploy` mais abaixo) depois de gravar, voltando ao deploy MANUAL via
+  #     workflow_dispatch. <<<
+  # Obs.: workflow_run so dispara com o cd.yml presente na branch default (main).
+  # ===========================================================================
+  workflow_run:
+    workflows: ["CI — Build, Tests & Coverage"]
+    types: [completed]
+    branches: [main]
+
+  # Gatilho automatico por push desabilitado (credenciais Academy sao manuais).
   # push:
   #   branches: [ main ]
 
@@ -42,6 +55,10 @@ jobs:
     name: Deploy to EKS
     runs-on: ubuntu-latest
     # environment: production   # opcional: exige aprovacao antes do deploy
+    # TEMPORARIO (video): deploya se o disparo foi manual OU se o CI encadeado passou.
+    # >>> Ao voltar ao deploy manual, remover o ramo `workflow_run` deste if (basta
+    #     deixar `if: ${{ github.event_name == 'workflow_dispatch' }}` ou remover o if). <<<
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
 
