@@ -45,34 +45,8 @@ Principais capacidades expostas: abertura e consulta de **Ordem de Serviço**, a
 
 ### Infraestrutura provisionada (AWS)
 
-```mermaid
-flowchart TB
-    subgraph GitHub
-        CI["GitHub Actions<br/>CI: build + testes + cobertura"]
-        GHCR["GHCR<br/>ghcr.io/.../workshop-service"]
-        CD["GitHub Actions<br/>CD: deploy no EKS"]
-    end
-
-    subgraph AWS["AWS (Academy) — us-east-1"]
-        ELB["ELB / LoadBalancer<br/>(Service type=LoadBalancer)"]
-        subgraph EKS["EKS — namespace workshop"]
-            direction TB
-            DEP["Deployment workshop-service<br/>2→10 réplicas"]
-            HPA["HPA (CPU 70% + memória)"]
-            MS["metrics-server"]
-            HPA -. escala .-> DEP
-            MS -. métricas CPU/memória .-> HPA
-        end
-        RDS[("RDS PostgreSQL<br/>workshop-db")]
-    end
-
-    Dev["Desenvolvedor"] -->|git push main| CI
-    CI --> GHCR
-    CD -->|docker pull| GHCR
-    CD -->|kubectl apply -k| EKS
-    Usuario["Cliente da API"] --> ELB --> DEP
-    DEP -->|JDBC :5432| RDS
-```
+![Infra geral](docs/infra/images/workshop_infra-infraestrutura-geral.drawio.png)
+> Diagrama com visão detalhada se encontra na imagem: [Infra fluxo](docs/infra/images/workshop_infra-infraestrutura-fluxo.drawio.png)
 
 - **Cluster:** Amazon **EKS** (`workshop-eks`), node group com EC2 (t3.medium), `metrics-server` para o HPA (CPU + memória).
 - **Banco:** Amazon **RDS PostgreSQL** (`workshop-db`), fora do cluster (não é Postgres in-cluster).
@@ -82,15 +56,8 @@ flowchart TB
 
 ### Fluxo de deploy (CI/CD)
 
-```mermaid
-flowchart LR
-    A["push na main"] --> B["CI (ci.yml)<br/>mvn verify<br/>unit + IT + JaCoCo ≥80%"]
-    B --> C["Build & push imagem<br/>GHCR :sha-&lt;sha&gt; / :latest"]
-    C --> D["CD (cd.yml)<br/>workflow_dispatch"]
-    D --> E["auth AWS Academy<br/>update-kubeconfig"]
-    E --> F["kubectl apply -k<br/>k8s/overlays/aws"]
-    F --> G["rollout + ELB público"]
-```
+![Fluxo deploy](docs/infra/images/workshop_infra-deploy.drawio.png)
+> Diagrama com visão detalhada se encontra na imagem: [Deploy etapas](docs/infra/images/workshop_infra-deploy-etapas.drawio.png)
 
 1. **CI** (`.github/workflows/ci.yml`) — em push/PR na `main`: `./mvnw verify` (testes unitários + integração via Testcontainers + gate de cobertura 80%). Em push na `main`, também faz **build e push da imagem** para o GHCR.
 2. **CD** (`.github/workflows/cd.yml`) — `workflow_dispatch`: autentica na AWS Academy (credenciais temporárias com *session token*), gera o kubeconfig do EKS, cria o `workshop-secret`, injeta o endpoint do RDS e aplica o overlay `aws` do Kustomize, seta a tag imutável da imagem e aguarda o rollout.
