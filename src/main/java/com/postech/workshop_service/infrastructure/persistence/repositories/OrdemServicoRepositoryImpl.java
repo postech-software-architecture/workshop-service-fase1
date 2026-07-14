@@ -7,6 +7,8 @@ import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import com.postech.workshop_service.domain.repositories.PaginaResultado;
 import com.postech.workshop_service.infrastructure.persistence.entities.OrdemServicoJpaEntity;
 import com.postech.workshop_service.infrastructure.persistence.mappers.OrdemServicoMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -35,6 +37,9 @@ public class OrdemServicoRepositoryImpl implements OrdemServicoRepository {
 	private final JpaOrdemServicoRepository jpaOrdemServicoRepository;
 
 	private final OrdemServicoMapper ordemServicoMapper;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	/**
 	 * Construtor para injecao das dependencias do adaptador.
@@ -67,6 +72,12 @@ public class OrdemServicoRepositoryImpl implements OrdemServicoRepository {
 	@Override
 	public String gerarProximoNumero(int ano) {
 		String prefixo = "OS-" + ano + "-%";
+		// Serializa a geracao do sequencial por ano: o advisory lock e mantido ate o
+		// commit da transacao do caso de uso (apos o insert), impedindo que dois nos
+		// leiam o mesmo MAX e gerem numeros duplicados sob concorrencia.
+		entityManager.createNativeQuery("SELECT pg_advisory_xact_lock(hashtext(:prefixo))")
+			.setParameter("prefixo", prefixo)
+			.getSingleResult();
 		int sequencial = jpaOrdemServicoRepository.buscarProximoSequencial(prefixo);
 		return String.format("OS-%d-%05d", ano, sequencial);
 	}
