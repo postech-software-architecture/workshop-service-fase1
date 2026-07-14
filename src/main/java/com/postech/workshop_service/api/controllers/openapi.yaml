@@ -1227,45 +1227,20 @@ paths:
   /api/v1/ordens-servico:
     post:
       tags: [Ordens de Serviço]
-      summary: Abrir Ordem de Serviço
+      summary: Abrir Ordem de Servico sem itens
       description: >
-        Restrito aos perfis ADMINISTRADOR e ATENDENTE. Registra a recepção do veículo,
-        identifica o cliente, calcula o orçamento automaticamente e envia para aprovação.
-        Se o veículo não existir no sistema, é cadastrado automaticamente com os dados informados.
+        Restrito aos perfis ADMINISTRADOR e ATENDENTE. Mantem o contrato original:
+        registra cliente e veiculo e cria a OS em RECEBIDO, sem itens e sem orcamento.
+        Se o veiculo nao existir, ele e cadastrado com os dados informados.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CriarOrdemServicoRequest'
-            examples:
-              com_servico_e_peca:
-                summary: OS com serviço e peça
-                value:
-                  clienteDocumento: "123.456.789-09"
-                  veiculoPlaca: "ABC1D23"
-                  veiculo:
-                    marca: "Toyota"
-                    modelo: "Corolla"
-                    ano: 2020
-                  servicos:
-                    - servicoId: "00000000-0000-0000-0000-000000000001"
-                      quantidade: 1
-                  pecas:
-                    - pecaId: "00000000-0000-0000-0000-000000000002"
-                      quantidade: 2.0
-                  observacoes: "Cliente relatou barulho ao frear"
-              veiculo_ja_cadastrado:
-                summary: OS com veículo já existente
-                value:
-                  clienteDocumento: "98765432100"
-                  veiculoPlaca: "XYZ9G87"
-                  servicos:
-                    - servicoId: "00000000-0000-0000-0000-000000000001"
-                      quantidade: 1
       responses:
         '201':
-          description: OS criada com sucesso — orçamento pendente de aprovação
+          description: OS criada em RECEBIDO, sem itens e sem orcamento
           content:
             application/json:
               schema:
@@ -1281,14 +1256,12 @@ paths:
         '403':
           description: Sem permissão
         '404':
-          description: Cliente ou serviço não encontrado no sistema
+          description: Cliente nao encontrado no sistema
         '422':
           description: >
             Regra de negócio violada:
             - veículo pertence a outro cliente
             - veículo não encontrado e dados para cadastro ausentes
-            - estoque insuficiente para a peça solicitada
-            - serviço inativo no catálogo
           content:
             application/json:
               schema:
@@ -1342,6 +1315,76 @@ paths:
           description: Não autenticado
         '403':
           description: Sem permissão
+
+  /api/v1/ordens-servico/fila-trabalho:
+    get:
+      tags: [Ordens de Servico]
+      summary: Listar fila de trabalho priorizada
+      description: >
+        Restrito aos perfis ADMINISTRADOR, ATENDENTE e MECANICO. Lista ordens ativas
+        por prioridade de status e antiguidade, excluindo finalizadas, entregues e canceladas.
+      parameters:
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: tamanho
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Pagina da fila de trabalho
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginaOrdensServicoResponse'
+        '401':
+          description: Nao autenticado
+        '403':
+          description: Sem permissao
+
+  /api/v1/ordens-servico/com-itens:
+    post:
+      tags: [Ordens de Servico]
+      summary: Abrir Ordem de Servico com composicao inicial
+      description: >
+        Restrito aos perfis ADMINISTRADOR e ATENDENTE. Cria a OS em RECEBIDO
+        com pelo menos um servico, uma peca ou ambos, reservando as pecas no estoque.
+        O orcamento sera gerado apenas ao encerrar a composicao tecnica.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriarOrdemServicoComItensRequest'
+      responses:
+        '201':
+          description: OS criada com itens iniciais, em RECEBIDO e sem orcamento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdemServicoResponse'
+        '400':
+          description: Dados de entrada invalidos ou abertura sem servicos e sem pecas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Nao autenticado
+        '403':
+          description: Sem permissao
+        '404':
+          description: Cliente, servico ou peca nao encontrado
+        '422':
+          description: Veiculo invalido, item inativo ou estoque insuficiente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/v1/ordens-servico/{id}:
     get:
@@ -2753,7 +2796,7 @@ components:
 
     CriarOrdemServicoRequest:
       type: object
-      required: [clienteDocumento, veiculoPlaca, servicos]
+      required: [clienteDocumento, veiculoPlaca]
       properties:
         clienteDocumento:
           type: string
@@ -2767,17 +2810,48 @@ components:
           $ref: '#/components/schemas/DadosVeiculoRequest'
         servicos:
           type: array
-          minItems: 1
+          deprecated: true
+          description: Ignorado neste contrato. Use POST /com-itens para informar servicos.
           items:
             $ref: '#/components/schemas/ItemServicoRequest'
         pecas:
           type: array
+          deprecated: true
+          description: Ignorado neste contrato. Use POST /com-itens para informar pecas.
           items:
             $ref: '#/components/schemas/ItemPecaRequest'
         observacoes:
           type: string
           description: Observações do atendente sobre o veículo ou relato do cliente
           example: Cliente relatou barulho ao frear
+
+    CriarOrdemServicoComItensRequest:
+      allOf:
+        - $ref: '#/components/schemas/CriarOrdemServicoRequest'
+        - type: object
+          description: Informe ao menos um servico, uma peca ou ambos.
+          anyOf:
+            - required: [servicos]
+              properties:
+                servicos:
+                  minItems: 1
+            - required: [pecas]
+              properties:
+                pecas:
+                  minItems: 1
+          properties:
+            servicos:
+              type: array
+              deprecated: false
+              description: Servicos que formam a composicao inicial da OS. Pode ser omitido quando houver pecas.
+              items:
+                $ref: '#/components/schemas/ItemServicoRequest'
+            pecas:
+              type: array
+              deprecated: false
+              description: Pecas reservadas no estoque durante a abertura. Pode ser omitido quando houver servicos.
+              items:
+                $ref: '#/components/schemas/ItemPecaRequest'
 
     ClienteResumoOSResponse:
       type: object

@@ -177,7 +177,7 @@ public class OrdemServicoResponse {
 	@Builder
 	@NoArgsConstructor
 	@AllArgsConstructor
-	@Schema(description = "Orcamento gerado automaticamente na criacao da OS")
+	@Schema(description = "Orcamento atual da OS, quando a composicao tecnica ja foi encerrada")
 	public static class OrcamentoResumoResponse {
 
 		@Schema(description = "Identificador unico do orcamento", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")

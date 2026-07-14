@@ -2,6 +2,7 @@ package com.postech.workshop_service.api.controllers;
 
 import com.postech.workshop_service.api.dtos.AdicionarItemOrdemServicoRequest;
 import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
+import com.postech.workshop_service.api.dtos.CriarOrdemServicoComItensRequest;
 import com.postech.workshop_service.api.dtos.HistoricoStatusOrdemServicoResponse;
 import com.postech.workshop_service.api.dtos.OrdemServicoDetalheResponse;
 import com.postech.workshop_service.api.dtos.OrdemServicoResponse;
@@ -12,7 +13,9 @@ import com.postech.workshop_service.application.usecases.BuscarOrdemServicoPorId
 import com.postech.workshop_service.application.usecases.ConsultarHistoricoOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.ConsultarStatusOrdemServicoUseCase;
 import com.postech.workshop_service.application.usecases.CriarOrdemServicoUseCase;
+import com.postech.workshop_service.application.usecases.CriarOrdemServicoComItensUseCase;
 import com.postech.workshop_service.application.usecases.DadosCriacaoOrdemServico;
+import com.postech.workshop_service.application.usecases.DadosCriacaoOrdemServicoComItens;
 import com.postech.workshop_service.application.usecases.EncerrarComposicaoTecnicaUseCase;
 import com.postech.workshop_service.application.usecases.EncerrarDiagnosticoUseCase;
 import com.postech.workshop_service.application.usecases.EntregarVeiculoUseCase;
@@ -21,6 +24,8 @@ import com.postech.workshop_service.application.usecases.FinalizarServicoOrdemUs
 import com.postech.workshop_service.application.usecases.IniciarDiagnosticoUseCase;
 import com.postech.workshop_service.application.usecases.IniciarExecucaoUseCase;
 import com.postech.workshop_service.application.usecases.IniciarServicoOrdemUseCase;
+import com.postech.workshop_service.application.usecases.ItemPecaSolicitada;
+import com.postech.workshop_service.application.usecases.ItemServicoSolicitado;
 import com.postech.workshop_service.application.usecases.ListarMinhasOrdensServicoUseCase;
 import com.postech.workshop_service.application.usecases.ListarOrdensServicoUseCase;
 import com.postech.workshop_service.application.usecases.ResultadoCriacaoOrdemServico;
@@ -65,6 +70,8 @@ public class OrdemServicoController {
 
 	private final CriarOrdemServicoUseCase criarOrdemServicoUseCase;
 
+	private final CriarOrdemServicoComItensUseCase criarOrdemServicoComItensUseCase;
+
 	private final BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase;
 
 	private final ListarOrdensServicoUseCase listarOrdensServicoUseCase;
@@ -108,6 +115,7 @@ public class OrdemServicoController {
 	 * de transicoes.
 	 */
 	public OrdemServicoController(CriarOrdemServicoUseCase criarOrdemServicoUseCase,
+			CriarOrdemServicoComItensUseCase criarOrdemServicoComItensUseCase,
 			BuscarOrdemServicoPorIdUseCase buscarOrdemServicoPorIdUseCase,
 			ListarOrdensServicoUseCase listarOrdensServicoUseCase,
 			ListarMinhasOrdensServicoUseCase listarMinhasOrdensServicoUseCase,
@@ -121,6 +129,7 @@ public class OrdemServicoController {
 			AdicionarItemOrdemServicoUseCase adicionarItemOrdemServicoUseCase,
 			EncerrarComposicaoTecnicaUseCase encerrarComposicaoTecnicaUseCase) {
 		this.criarOrdemServicoUseCase = criarOrdemServicoUseCase;
+		this.criarOrdemServicoComItensUseCase = criarOrdemServicoComItensUseCase;
 		this.buscarOrdemServicoPorIdUseCase = buscarOrdemServicoPorIdUseCase;
 		this.listarOrdensServicoUseCase = listarOrdensServicoUseCase;
 		this.listarMinhasOrdensServicoUseCase = listarMinhasOrdensServicoUseCase;
@@ -140,13 +149,12 @@ public class OrdemServicoController {
 	/**
 	 * Abre uma nova Ordem de Servico na recepcao do veiculo.
 	 * @param request dados da recepcao.
-	 * @return OS criada com orcamento pendente de aprovacao.
+	 * @return OS criada em status recebido, ainda sem itens ou orcamento.
 	 */
 	@PostMapping
 	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE')")
 	@Operation(summary = "Abrir Ordem de Servico",
-			description = "Registra a recepcao do veiculo, identifica o cliente, "
-					+ "calcula o orcamento automaticamente e envia para aprovacao.")
+			description = "Registra a recepcao do veiculo e cria uma OS sem itens em status RECEBIDO.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "201", description = "OS criada com sucesso",
 					content = @Content(schema = @Schema(implementation = OrdemServicoResponse.class))),
@@ -164,6 +172,45 @@ public class OrdemServicoController {
 		return new DadosCriacaoOrdemServico(request.getClienteDocumento(), request.getVeiculoPlaca(),
 				veiculo != null ? veiculo.getMarca() : null, veiculo != null ? veiculo.getModelo() : null,
 				veiculo != null ? veiculo.getAno() : null, request.getObservacoes());
+	}
+
+	/**
+	 * Abre uma Ordem de Servico com servicos e pecas iniciais.
+	 * @param request dados completos da recepcao.
+	 * @return OS recebida com itens persistidos e sem orcamento.
+	 */
+	@PostMapping("/com-itens")
+	@PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ATENDENTE')")
+	@Operation(summary = "Abrir Ordem de Servico com itens",
+			description = "Cria uma OS em RECEBIDO com servicos, pecas ou ambos. "
+					+ "O orcamento e gerado somente ao encerrar a composicao tecnica.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "201", description = "OS criada com itens iniciais",
+					content = @Content(schema = @Schema(implementation = OrdemServicoResponse.class))),
+			@ApiResponse(responseCode = "400", description = "Dados de entrada invalidos"),
+			@ApiResponse(responseCode = "404", description = "Cliente, servico ou peca nao encontrado"),
+			@ApiResponse(responseCode = "422", description = "Regra de negocio ou estoque insuficiente") })
+	public ResponseEntity<OrdemServicoResponse> criarComItens(
+			@RequestBody @Valid CriarOrdemServicoComItensRequest request) {
+		ResultadoCriacaoOrdemServico resultado = criarOrdemServicoComItensUseCase.executar(toDadosCriacao(request));
+		return ResponseEntity.status(HttpStatus.CREATED).body(OrdemServicoResponse.from(resultado));
+	}
+
+	private DadosCriacaoOrdemServicoComItens toDadosCriacao(CriarOrdemServicoComItensRequest request) {
+		CriarOrdemServicoRequest.DadosVeiculoRequest veiculo = request.getVeiculo();
+		List<ItemServicoSolicitado> servicos = request.getServicos() == null ? List.of()
+				: request.getServicos()
+					.stream()
+					.map(item -> new ItemServicoSolicitado(item.getServicoId(), item.getQuantidade()))
+					.toList();
+		List<ItemPecaSolicitada> pecas = request.getPecas() == null ? List.of()
+				: request.getPecas()
+					.stream()
+					.map(item -> new ItemPecaSolicitada(item.getPecaId(), item.getQuantidade()))
+					.toList();
+		return new DadosCriacaoOrdemServicoComItens(request.getClienteDocumento(), request.getVeiculoPlaca(),
+				veiculo != null ? veiculo.getMarca() : null, veiculo != null ? veiculo.getModelo() : null,
+				veiculo != null ? veiculo.getAno() : null, servicos, pecas, request.getObservacoes());
 	}
 
 	/**
