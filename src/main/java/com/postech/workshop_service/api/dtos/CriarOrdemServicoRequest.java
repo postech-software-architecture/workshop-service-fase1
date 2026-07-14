@@ -3,7 +3,6 @@ package com.postech.workshop_service.api.dtos;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -38,13 +37,13 @@ public class CriarOrdemServicoRequest {
 	private DadosVeiculoRequest veiculo;
 
 	@Valid
-	@Schema(description = "(Deprecated) Servicos do catalogo. A OS agora abre vazia em RECEBIDO; "
-			+ "itens devem ser adicionados via POST /ordens-servico/{id}/itens apos o diagnostico.")
+	@Schema(deprecated = true, description = "Campo mantido por compatibilidade e ignorado nesta rota. "
+			+ "Use POST /api/v1/ordens-servico/com-itens para informar a composicao inicial.")
 	private List<ItemServicoRequest> servicos;
 
 	@Valid
-	@Schema(description = "(Deprecated) Pecas e insumos. A OS agora abre vazia em RECEBIDO; "
-			+ "itens devem ser adicionados via POST /ordens-servico/{id}/itens apos o diagnostico.")
+	@Schema(deprecated = true, description = "Campo mantido por compatibilidade e ignorado nesta rota. "
+			+ "Use POST /api/v1/ordens-servico/com-itens para informar a composicao inicial.")
 	private List<ItemPecaRequest> pecas;
 
 	@Schema(description = "Observacoes do atendente sobre o veiculo ou relato do cliente",
