@@ -130,7 +130,11 @@ jobs:
 
       - name: Injeta a tag imutavel da imagem
         run: |
-          TAG="${{ github.event.inputs.image_tag || 'latest' }}"
+          # Deploy manual (workflow_dispatch): usa a tag informada no input.
+          # Deploy encadeado (workflow_run): usa a SHA imutavel do commit que o CI
+          # buildou (sha-<sha>, publicada pelo ci.yml). Tag unica por build => `set image`
+          # sempre altera o spec => rollout real e rastreavel (evita o no-op do :latest).
+          TAG="${{ github.event.inputs.image_tag || format('sha-{0}', github.event.workflow_run.head_sha) }}"
           echo "Deploying ${IMAGE}:${TAG}"
           kubectl -n "$NAMESPACE" set image deployment/workshop-service \
             workshop-service="${IMAGE}:${TAG}"
