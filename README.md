@@ -135,8 +135,7 @@ kubectl -n workshop get hpa workshop-service -w   # REPLICAS sobem sob carga de 
 ## Documentação da API
 
 - **Swagger UI** (local): `http://localhost:8080/swagger-ui/index.html`
-- **Contrato OpenAPI** versionado: [`openapi.yaml`](openapi.yaml)
-- **Collection (Postman/Insomnia):** `<LINK_COLLECTION_API_AQUI>`
+- **Contrato/collection completa da API (OpenAPI):** [`openapi.yaml`](openapi.yaml)
 
 ---
 
@@ -177,9 +176,9 @@ kubectl -n workshop get hpa workshop-service -w   # REPLICAS sobem sob carga de 
 
 ## Vídeo demonstrativo
 
-Demonstra deploy da aplicação, execução do CI/CD, consumo das APIs e escalabilidade automática (até 15 min).
+Demonstra deploy da aplicação, execução do CI/CD, consumo das APIs e escalabilidade automática.
 
-▶️ `<LINK_DO_VIDEO_AQUI>`
+▶️ [Assistir ao vídeo demonstrativo](https://youtu.be/ZCLG8mFJxQE)
 
 ---
 
