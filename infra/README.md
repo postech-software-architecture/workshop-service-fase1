@@ -1,13 +1,13 @@
 # Infra (Terraform) — `workshop-service`
 
-Provisiona a infraestrutura da Fase 2 via IaC. Duas trilhas:
+Provisiona o ambiente de desenvolvimento local via IaC: cluster `kind` + Postgres
+(Helm bitnami), sem custo de nuvem. Kubernetes em Docker serve para desenvolvimento e
+validação local dos manifestos.
 
-- **Trilha B (`eks/`) — entrega em nuvem (AWS Academy).** EKS + RDS adaptado ao Academy Learner
-  Lab (reusa a `LabRole`, instala metrics-server para o HPA). É a trilha que roda em **nuvem** e
-  atende ao direcionamento de usar o AWS Academy. Ver [`eks/README.md`](eks/README.md).
-- **Trilha A (raiz) — dev local.** cluster `kind` + Postgres (Helm bitnami) — zero custo, roda na
-  máquina/CI. **Não é nuvem** (Kubernetes em Docker): serve para desenvolvimento e validação
-  local dos manifestos, não para a publicação no Academy.
+A infraestrutura AWS tem ciclo de vida e state próprios:
+
+- [`workshop-infra-kubernetes`](https://github.com/postech-software-architecture/workshop-infra-kubernetes): VPC, EKS, node group e add-ons.
+- [`workshop-infra-database`](https://github.com/postech-software-architecture/workshop-infra-database): RDS PostgreSQL.
 
 ## Pré-requisitos
 
@@ -19,10 +19,9 @@ Provisiona a infraestrutura da Fase 2 via IaC. Duas trilhas:
 
 ## Contratos (outputs consumidos por outros tracks)
 
-> **Nota:** a tabela abaixo é da **Trilha A (kind local)**. Na **Trilha B (EKS)**, o CD **não** usa
-> `KUBECONFIG_B64`: autentica na AWS com credenciais do Academy e roda `aws eks update-kubeconfig`.
-> Os outputs de banco (`db_host/port/name/username/password`) têm os **mesmos nomes** nas duas
-> trilhas — no EKS apontam para o RDS. Ver [`eks/README.md`](eks/README.md).
+> **Nota:** a tabela abaixo descreve somente o ambiente `kind` local. No EKS, o CD autentica na
+> AWS com credenciais do Academy e roda `aws eks update-kubeconfig`; consulte os repositórios
+> de infraestrutura acima para seus contratos de outputs.
 
 | Output | Consumido por | Uso |
 |---|---|---|
@@ -37,7 +36,7 @@ Provisiona a infraestrutura da Fase 2 via IaC. Duas trilhas:
 
 Estes valores correspondem à **Opção B** (banco externo ao Deployment).
 
-## Trilha A — kind + Postgres
+## kind + Postgres
 
 ```bash
 cd infra
@@ -100,25 +99,10 @@ kubectl create configmap workshop-config --namespace workshop \
 - **Evolução:** backend remoto para colaboração/lock — S3 + DynamoDB (AWS) ou GCS (GCP). Ver a
   seção "Backend do state" no README do track (`docs/fase-2/dev-4-terraform-iac/README.md`).
 
-## Trilha B (`eks/`) — EKS + RDS (entrega em nuvem)
+## EKS + RDS (entrega em nuvem)
 
-Trilha **usada na entrega da Fase 2**: provisiona EKS + RDS no AWS Academy. Gera custo AWS e exige
-credenciais temporárias (com `aws_session_token`).
-
-```bash
-cd eks
-cp terraform.tfvars.example terraform.tfvars   # define db_password (não commitar)
-terraform init
-terraform apply                                # VPC + EKS (LabRole) + RDS + metrics-server
-aws eks update-kubeconfig --name workshop-eks --region us-east-1
-```
-
-O deploy dos manifestos é feito pela pipeline **CD** (`.github/workflows/cd.yml`) — que autentica
-na AWS, cria o `workshop-secret` a partir dos GitHub Secrets e aplica `k8s/overlays/aws` — ou
-manualmente via `kubectl apply -k ../k8s/overlays/aws`.
-
-> No **AWS Academy** (sandbox de crédito limitado), derruba-se o ambiente com `terraform destroy`
-> após a demonstração. Isso é uma restrição do lab, **não** parte do deploy — em produção a infra
-> permanece de pé. Passo a passo e credenciais em [`eks/README.md`](eks/README.md).
-
-Validação estática (sem apply/credenciais): `terraform init -backend=false && terraform validate`.
+O provisionamento em nuvem foi extraído deste repositório. Siga os READMEs de
+`workshop-infra-kubernetes` e `workshop-infra-database`. Antes do banco, importe os
+três recursos existentes e exija um `terraform plan` sem criação de RDS. O CD AWS só
+deve rodar após o gate W3 conectar os nodes ao SG autorizado pelo RDS; esses pré-requisitos
+estão detalhados em `k8s/overlays/aws/README.md`.

@@ -1,6 +1,6 @@
 name: CD — Deploy to EKS (AWS Academy)
 
-# Deploy no EKS provisionado em infra/eks (AWS Academy).
+# Deploy no EKS provisionado pelo repositorio workshop-infra-kubernetes (AWS Academy).
 # A imagem vem do GHCR (publicada pelo ci.yml). As credenciais da AWS Academy sao
 # TEMPORARIAS (expiram em algumas horas) e incluem SESSION TOKEN — por isso ficam em
 # GitHub Secrets e precisam ser renovadas quando a sessao do Lab reinicia.
@@ -9,7 +9,7 @@ name: CD — Deploy to EKS (AWS Academy)
 #   AWS_ACCESS_KEY_ID       (Academy)
 #   AWS_SECRET_ACCESS_KEY   (Academy)
 #   AWS_SESSION_TOKEN       (Academy — obrigatorio, credencial temporaria)
-#   DB_HOST                 (endpoint do RDS — `terraform -chdir=infra/eks output -raw db_host`)
+#   DB_HOST                 (output `db_host` do repositorio workshop-infra-database)
 #   DB_USER
 #   DB_PASSWORD
 #   JWT_SECRET              (openssl rand -hex 32)
@@ -19,6 +19,7 @@ name: CD — Deploy to EKS (AWS Academy)
 # Variables (opcionais — tem default):
 #   AWS_REGION   (default us-east-1)
 #   EKS_CLUSTER  (default workshop-eks)
+#   DB_NAME      (default workshop; output `db_name` do repo de banco)
 on:
   workflow_dispatch:
     inputs:
@@ -48,6 +49,7 @@ env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/workshop-service
   AWS_REGION: ${{ vars.AWS_REGION }}
   EKS_CLUSTER: ${{ vars.EKS_CLUSTER_NAME }}
+  DB_NAME: ${{ vars.DB_NAME || 'workshop' }}
   NAMESPACE: workshop
 
 jobs:
@@ -90,7 +92,7 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
-          version: 'v1.30.0'
+          version: 'v1.35.0'
 
       - name: Gera kubeconfig do EKS
         run: |
@@ -118,12 +120,14 @@ jobs:
             --from-literal=MAIL_PASSWORD="$MAIL_PASSWORD" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Injeta o endpoint do RDS no overlay
+      - name: Injeta o contrato do RDS no overlay
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ env.DB_NAME }}
         run: |
           sed -i "s|^DB_HOST=.*|DB_HOST=${DB_HOST}|" k8s/overlays/aws/config.env
-          grep '^DB_HOST=' k8s/overlays/aws/config.env
+          sed -i "s|^DB_NAME=.*|DB_NAME=${DB_NAME}|" k8s/overlays/aws/config.env
+          grep -E '^DB_(HOST|NAME)=' k8s/overlays/aws/config.env
 
       - name: Aplica os manifestos (overlay aws)
         run: kubectl apply -k k8s/overlays/aws

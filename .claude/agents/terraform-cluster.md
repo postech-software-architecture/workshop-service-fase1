@@ -23,7 +23,8 @@ caminho**. Se você precisar de uma mudança fora da lista Owns, peça ao agente
   `cluster_name`, `cluster_endpoint`, `cluster_ca`, `node_security_group_id`,
   `db_client_sg_id`)
 - Bootstrap do backend S3 + lock DynamoDB (criado **uma vez, fora** dos 4 states)
-- No repo da app: **remoção** de `infra/eks/**` após a extração (via PR, com tag de baseline)
+- Manter o contrato consumido pela aplicação após a extração; a infraestrutura AWS legada
+  da app foi preservada apenas na tag `phase3-baseline`
 
 ### Não toca
 - Qualquer `aws_db_*` — `aws_db_instance`, `aws_db_subnet_group`, e o SG **do banco**
@@ -37,17 +38,13 @@ caminho**. Se você precisar de uma mudança fora da lista Owns, peça ao agente
 ## Contexto do projeto
 
 ### Estado real verificado (o repo ganha do doc de planejamento)
-- `infra/eks/main.tf` **mistura VPC + EKS + RDS no mesmo state**. A tarefa da W1 é **extrair**
-  VPC+EKS para o repo novo, deixando os blocos `aws_db_*` para `terraform-database`.
-- `infra/eks/outputs.tf` tem **somente** `cluster_name` + 5 outputs `db_*` (`db_host`,
-  `db_port`, `db_name`, `db_username`, `db_password`). **Não existe `vpc_id`, subnets,
-  `cluster_endpoint` nem SG de cliente do banco.** O contrato de outputs entre repos **não
-  existe ainda** — autorá-lo é sua entrega principal da W1, antes de W3/W4 consumirem.
-- State Terraform é **local**, sem backend remoto. Sem ECR (imagens vão para o GHCR).
-- `infra/` (raiz, além de `infra/eks/`) é a trilha local com `kind`. Não é o ambiente de
-  entrega — mova para `examples/local/` ou deixe claramente identificada.
-- Versões atuais e fixadas: módulo VPC `~> 5.13`, módulo EKS `~> 20.24`, EKS **1.30**, nodes
-  `t3.medium` (min 1 / desired 2 / max 3), `single_nat_gateway = true`.
+- O Terraform AWS vive em `workshop-infra-kubernetes`; a app não contém mais uma cópia.
+- O contrato de outputs já inclui rede, cluster, `node_security_group_id` e
+  `db_client_sg_id`. O anexo do SG de cliente aos nodes continua pendente para a W3/ADR-005.
+- O backend remoto definitivo continua pendente. Sem ECR: imagens vão para o GHCR.
+- `infra/` na app é exclusivamente a trilha local com `kind`.
+- Versão atual do EKS: **1.35**, centralizada em `var.cluster_version`; nodes
+  `t3.medium` e NAT único por economia no Academy.
 
 ### Restrições do AWS Academy Learner Lab
 - **`LabRole` é a única role usável** — IAM está bloqueado. O código atual já resolve isso:
@@ -280,9 +277,8 @@ Prova simétrica de que os states estão isolados.
 | README divergir do Terraform | Gerar a tabela de outputs a partir dos nomes efetivos; revisar após cada mudança estrutural |
 
 ## Como usar este agente
-1. Ler `infra/eks/main.tf`, `infra/eks/outputs.tf`, `infra/eks/variables.tf` e
-   `infra/eks/README.md` do repo da app antes de qualquer extração — o código atual já resolve
-   as restrições do Academy e essa solução precisa ser preservada.
+1. Ler o Terraform atual em `workshop-infra-kubernetes`. Para auditoria histórica da
+   extração, consultar a tag `phase3-baseline` da app, sem restaurar a cópia legada.
 2. **W0:** rodar os 2 spikes em branch descartável e registrar os veredictos. Se o spike da
    LabRole falhar, parar e acionar o ADR de fallback antes da W1.
 3. **W1:** extrair VPC + EKS + `metrics-server` para o repo novo, **sem** nenhum `aws_db_*`;

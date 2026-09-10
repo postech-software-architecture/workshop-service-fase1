@@ -52,7 +52,10 @@ Principais capacidades expostas: abertura e consulta de **Ordem de Serviço**, a
 - **Banco:** Amazon **RDS PostgreSQL** (`workshop-db`), fora do cluster (não é Postgres in-cluster).
 - **Exposição:** `Service type=LoadBalancer` → o cloud-controller do EKS provisiona um **ELB** público.
 - **Registry:** imagem publicada no **GHCR** (GitHub Container Registry) — o EKS puxa de lá.
-- **Provisionamento:** tudo em `infra/eks` via Terraform, adaptado ao **AWS Academy Learner Lab** (reusa a `LabRole`).
+- **Provisionamento:** separado nos repositórios
+  [`workshop-infra-kubernetes`](https://github.com/postech-software-architecture/workshop-infra-kubernetes)
+  e [`workshop-infra-database`](https://github.com/postech-software-architecture/workshop-infra-database),
+  ambos adaptados ao **AWS Academy Learner Lab**.
 
 ### Fluxo de deploy (CI/CD)
 
@@ -95,25 +98,27 @@ curl http://localhost:8080/actuator/health
 
 ### 2. Provisionamento da infraestrutura (Terraform)
 
-O cluster **EKS + RDS** é provisionado em [`infra/eks`](infra/eks/README.md). Requer credenciais do **AWS Academy** (temporárias, com `aws_session_token`).
+A infraestrutura AWS foi extraída para repositórios com ciclo de vida e state próprios:
 
-```bash
-cd infra/eks
-cp terraform.tfvars.example terraform.tfvars      # define db_password (não commitar)
-terraform init
-terraform apply                                   # VPC + EKS (LabRole) + RDS + metrics-server
-aws eks update-kubeconfig --name workshop-eks --region us-east-1
-terraform output                                  # db_host, db_username, cluster_name...
-```
+1. [`workshop-infra-kubernetes`](https://github.com/postech-software-architecture/workshop-infra-kubernetes) — VPC, EKS, node group e add-ons.
+2. [`workshop-infra-database`](https://github.com/postech-software-architecture/workshop-infra-database) — RDS PostgreSQL, consumindo os outputs de rede do primeiro repositório.
 
-> No **AWS Academy** (sandbox de estudo com crédito limitado), derrube o ambiente com `terraform destroy` após a demonstração — isso é uma restrição do lab, **não** parte do fluxo de deploy: em produção a infraestrutura permanece de pé. Detalhes e a variante **local com `kind`** em [`infra/README.md`](infra/README.md).
+Antes de qualquer `apply` do banco, importe obrigatoriamente o RDS `workshop-db`, o DB
+subnet group e o security group existentes, conforme o README do repositório de banco.
+Um `terraform plan` que proponha criar `aws_db_instance.postgres` deve ser interrompido.
+
+O deploy AWS permanece bloqueado até a W3 anexar o `db_client_sg_id` aos nodes do EKS
+ou o ADR-005 adotar o `node_security_group_id` como origem autorizada no RDS. Depois
+desse gate, siga os READMEs e aplique cluster e banco nessa ordem. O contrato de nome
+do banco é `workshop`. Ambos requerem credenciais temporárias do **AWS Academy**.
+O ambiente local com `kind` continua disponível em [`infra/`](infra/README.md).
 
 ### 3. Deploy em Kubernetes
 
 Manifestos em [`k8s/`](k8s/README.md), organizados com **Kustomize** (base + overlays):
 
 ```bash
-# AWS (EKS + RDS) — geralmente via pipeline CD, mas manualmente:
+# AWS (EKS + RDS) — somente após import do RDS e gate de conectividade W3:
 kubectl apply -k k8s/overlays/aws
 kubectl -n workshop rollout status deployment/workshop-service
 
@@ -122,7 +127,7 @@ kubectl apply -k k8s/overlays/dev
 kubectl -n workshop port-forward svc/workshop-service 8080:8080
 ```
 
-O `workshop-secret` (credenciais sensíveis) **não** é versionado — é criado no deploy a partir dos outputs do Terraform / GitHub Secrets. Ver [`k8s/README.md`](k8s/README.md) e [`k8s/overlays/aws/README.md`](k8s/overlays/aws/README.md).
+O `workshop-secret` (credenciais sensíveis) **não** é versionado — é criado no deploy a partir dos GitHub Secrets configurados com os dados da infraestrutura. Ver [`k8s/README.md`](k8s/README.md) e [`k8s/overlays/aws/README.md`](k8s/overlays/aws/README.md).
 
 **Escalabilidade automática (HPA):**
 
@@ -169,7 +174,7 @@ kubectl -n workshop get hpa workshop-service -w   # REPLICAS sobem sob carga de 
 - [Domain Storytelling](docs/domain_storytelling)
 - [Event Storming](docs/event_storming/README.md)
 - [Fluxo JWT e RBAC](docs/autenticacao-jwt-rbac/README.md)
-- **Infra (Terraform):** [`infra/README.md`](infra/README.md) · [`infra/eks/README.md`](infra/eks/README.md)
+- **Infra (Terraform):** [`infra/README.md`](infra/README.md) (local) · [`workshop-infra-kubernetes`](https://github.com/postech-software-architecture/workshop-infra-kubernetes) (EKS) · [`workshop-infra-database`](https://github.com/postech-software-architecture/workshop-infra-database) (RDS)
 - **Kubernetes:** [`k8s/README.md`](k8s/README.md)
 
 ---

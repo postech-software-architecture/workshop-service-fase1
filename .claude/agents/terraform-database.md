@@ -19,8 +19,8 @@ caminho**. Se você precisar de uma mudança fora da lista Owns, peça ao agente
 - Recursos: `aws_db_subnet_group`, `aws_security_group` **do banco**, `aws_db_instance`,
   parameter/option groups se usados
 - Outputs não sensíveis: `db_host`, `db_port`, `db_name`, `db_username`
-- No repo da app: **remoção** dos blocos `aws_db_*` de `infra/eks/main.tf` e dos 5 outputs
-  `db_*` de `infra/eks/outputs.tf` — coordenado com `terraform-cluster` no mesmo PR de extração
+- Manter o contrato consumido pela aplicação após a extração; a configuração antiga existe
+  somente na tag `phase3-baseline`
 
 ### Não toca
 - VPC, subnets, NAT, EKS, node group, `metrics-server`, LB Controller
@@ -35,15 +35,12 @@ caminho**. Se você precisar de uma mudança fora da lista Owns, peça ao agente
 ## Contexto do projeto
 
 ### Estado real verificado (o repo ganha do doc de planejamento)
-- `infra/eks/main.tf` contém hoje, no **mesmo state** do EKS:
-  `aws_db_subnet_group.this`, `aws_security_group.db` e `aws_db_instance.postgres`
-  (`engine = postgres`, `engine_version = "15"`, `db.t3.micro`, `allocated_storage = 20`,
-  `skip_final_snapshot = true`, `publicly_accessible = false`).
-- O ingress atual é `security_groups = [module.eks.node_security_group_id]` — só os nodes.
-  Na W3 isso passa a ser o **`db_client_sg_id`** do contrato de outputs, para que Lambda
-  também seja autorizada sem CIDR amplo.
-- `infra/eks/outputs.tf` **emite `db_password` como output** (`sensitive = true`). Isso sai:
-  senha não trafega por state nem por output.
+- O Terraform atual vive em `workshop-infra-database`; a app não contém mais a cópia AWS.
+- O RDS, subnet group e SG existentes precisam ser importados no state novo antes do primeiro
+  apply. Um plan com criação de `aws_db_instance.postgres` é bloqueio.
+- O ingress usa `db_client_sg_id`, mas os nodes ainda não possuem esse SG. A W3/ADR-005 deve
+  anexá-lo aos nodes ou autorizar o `node_security_group_id` antes do deploy.
+- A senha não é output e não trafega pelo state remoto.
 - A aplicação usa PostgreSQL 15, Flyway com **19 migrations**, JPA + JDBC, Testcontainers, 17
   tabelas. Já existe `V0.20260507210000__seed_demo_workshop_data.sql`.
 - State Terraform é **local** hoje, sem backend remoto.
@@ -272,15 +269,15 @@ TESTCONTAINERS_HOST_OVERRIDE=localhost ./mvnw verify
 | Banco público por descuido | `publicly_accessible = false` + policy check na pipeline barrando `true` |
 
 ## Como usar este agente
-1. Ler `infra/eks/main.tf` (blocos `aws_db_*`), `infra/eks/outputs.tf` e
-   `infra/eks/variables.tf` antes de extrair — a config atual é o ponto de partida fiel.
+1. Ler o Terraform atual em `workshop-infra-database`. Para auditoria histórica,
+   consultar a tag `phase3-baseline` da app, sem restaurar a cópia legada.
 2. **W2 (ensaio):** rodar o `terraform import` num state descartável e provar `plan` limpo.
    Documentar os identificadores reais descobertos.
 3. **W3:** criar o repo com state próprio (`database/`), consumir `cluster/` via
    `terraform_remote_state` read-only, importar os 3 recursos, provar `plan` limpo, e só então
    aplicar as mudanças intencionais (ingress via `db_client_sg_id`, `storage_encrypted`,
    backup, remoção do output de senha).
-4. Coordenar com `terraform-cluster` a remoção dos blocos `aws_db_*` do repo do cluster — os
-   dois states nunca podem gerenciar o mesmo recurso simultaneamente.
+4. Coordenar com `terraform-cluster` o SG efetivamente anexado aos nodes; os dois states
+   nunca podem gerenciar o mesmo recurso simultaneamente.
 5. Criar pipeline `fmt` / `validate` / `plan` / `apply` com gate / `destroy` manual e protegida.
 6. Não escrever migrations, entidades JPA nem consultas — isso fica na aplicação.
