@@ -103,16 +103,22 @@ A infraestrutura AWS foi extraída para repositórios com ciclo de vida e state 
 1. [`workshop-infra-kubernetes`](https://github.com/postech-software-architecture/workshop-infra-kubernetes) — VPC, EKS, node group e add-ons.
 2. [`workshop-infra-database`](https://github.com/postech-software-architecture/workshop-infra-database) — RDS PostgreSQL, consumindo os outputs de rede do primeiro repositório.
 
-Siga os READMEs desses repositórios e aplique-os nessa ordem. Ambos requerem credenciais
-temporárias do **AWS Academy**. O ambiente local com `kind` continua disponível em
-[`infra/`](infra/README.md).
+Antes de qualquer `apply` do banco, importe obrigatoriamente o RDS `workshop-db`, o DB
+subnet group e o security group existentes, conforme o README do repositório de banco.
+Um `terraform plan` que proponha criar `aws_db_instance.postgres` deve ser interrompido.
+
+O deploy AWS permanece bloqueado até a W3 anexar o `db_client_sg_id` aos nodes do EKS
+ou o ADR-005 adotar o `node_security_group_id` como origem autorizada no RDS. Depois
+desse gate, siga os READMEs e aplique cluster e banco nessa ordem. O contrato de nome
+do banco é `workshop`. Ambos requerem credenciais temporárias do **AWS Academy**.
+O ambiente local com `kind` continua disponível em [`infra/`](infra/README.md).
 
 ### 3. Deploy em Kubernetes
 
 Manifestos em [`k8s/`](k8s/README.md), organizados com **Kustomize** (base + overlays):
 
 ```bash
-# AWS (EKS + RDS) — geralmente via pipeline CD, mas manualmente:
+# AWS (EKS + RDS) — somente após import do RDS e gate de conectividade W3:
 kubectl apply -k k8s/overlays/aws
 kubectl -n workshop rollout status deployment/workshop-service
 

@@ -19,6 +19,7 @@ name: CD — Deploy to EKS (AWS Academy)
 # Variables (opcionais — tem default):
 #   AWS_REGION   (default us-east-1)
 #   EKS_CLUSTER  (default workshop-eks)
+#   DB_NAME      (default workshop; output `db_name` do repo de banco)
 on:
   workflow_dispatch:
     inputs:
@@ -48,6 +49,7 @@ env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/workshop-service
   AWS_REGION: ${{ vars.AWS_REGION }}
   EKS_CLUSTER: ${{ vars.EKS_CLUSTER_NAME }}
+  DB_NAME: ${{ vars.DB_NAME || 'workshop' }}
   NAMESPACE: workshop
 
 jobs:
@@ -90,7 +92,7 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
-          version: 'v1.30.0'
+          version: 'v1.35.0'
 
       - name: Gera kubeconfig do EKS
         run: |
@@ -118,12 +120,14 @@ jobs:
             --from-literal=MAIL_PASSWORD="$MAIL_PASSWORD" \
             --dry-run=client -o yaml | kubectl apply -f -
 
-      - name: Injeta o endpoint do RDS no overlay
+      - name: Injeta o contrato do RDS no overlay
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ env.DB_NAME }}
         run: |
           sed -i "s|^DB_HOST=.*|DB_HOST=${DB_HOST}|" k8s/overlays/aws/config.env
-          grep '^DB_HOST=' k8s/overlays/aws/config.env
+          sed -i "s|^DB_NAME=.*|DB_NAME=${DB_NAME}|" k8s/overlays/aws/config.env
+          grep -E '^DB_(HOST|NAME)=' k8s/overlays/aws/config.env
 
       - name: Aplica os manifestos (overlay aws)
         run: kubectl apply -k k8s/overlays/aws

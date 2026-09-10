@@ -102,5 +102,7 @@ kubectl create configmap workshop-config --namespace workshop \
 ## EKS + RDS (entrega em nuvem)
 
 O provisionamento em nuvem foi extraído deste repositório. Siga os READMEs de
-`workshop-infra-kubernetes` e `workshop-infra-database`, nessa ordem. A pipeline
-`.github/workflows/cd.yml` permanece responsável por aplicar `k8s/overlays/aws` no cluster.
+`workshop-infra-kubernetes` e `workshop-infra-database`. Antes do banco, importe os
+três recursos existentes e exija um `terraform plan` sem criação de RDS. O CD AWS só
+deve rodar após o gate W3 conectar os nodes ao SG autorizado pelo RDS; esses pré-requisitos
+estão detalhados em `k8s/overlays/aws/README.md`.

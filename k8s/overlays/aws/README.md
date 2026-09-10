@@ -7,15 +7,28 @@ O cluster e a rede são mantidos em
 [`workshop-infra-kubernetes`](https://github.com/postech-software-architecture/workshop-infra-kubernetes).
 Os valores dinâmicos precisam ser configurados na hora do deploy:
 
-## 1. Injetar o endpoint do RDS no ConfigMap
+> **Gate W3:** não execute este overlay até que o `db_client_sg_id` esteja anexado aos
+> nodes do EKS ou o ADR-005 autorize o `node_security_group_id` no RDS. Sem isso, os
+> pods não alcançam o PostgreSQL. Antes de qualquer `apply` do banco, importe a instância
+> `workshop-db`, o subnet group e o security group existentes e confirme que o plan não
+> propõe criar outra `aws_db_instance.postgres`.
 
-Obtenha `db_host` no state do repositório `workshop-infra-database` e configure o secret
-`DB_HOST` no GitHub Actions. A pipeline de CD injeta esse valor em `config.env` antes de
-aplicar o overlay. Em um deploy manual:
+## 1. Injetar endpoint e nome do RDS no ConfigMap
+
+Obtenha `db_host` e `db_name` nos outputs do repositório
+`workshop-infra-database`. Configure `DB_HOST` como secret e `DB_NAME` como variable
+no GitHub Actions. A pipeline injeta ambos antes de aplicar o overlay. Em um deploy manual,
+use `awk` para funcionar tanto com GNU/Linux quanto com macOS:
 
 ```bash
 export DB_HOST='<endpoint-do-rds>'
-sed -i "s|^DB_HOST=.*|DB_HOST=${DB_HOST}|" k8s/overlays/aws/config.env
+export DB_NAME='workshop'
+awk -v host="$DB_HOST" -v name="$DB_NAME" '
+  /^DB_HOST=/ { print "DB_HOST=" host; next }
+  /^DB_NAME=/ { print "DB_NAME=" name; next }
+  { print }
+' k8s/overlays/aws/config.env > k8s/overlays/aws/config.env.tmp
+mv k8s/overlays/aws/config.env.tmp k8s/overlays/aws/config.env
 ```
 
 ## 2. Criar o Secret com as credenciais do banco (não vai ao git)
