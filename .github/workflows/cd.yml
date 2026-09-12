@@ -35,8 +35,8 @@ permissions:
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/workshop-service
-  AWS_REGION: ${{ vars.AWS_REGION }}
-  EKS_CLUSTER: ${{ vars.EKS_CLUSTER_NAME }}
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  EKS_CLUSTER: ${{ vars.EKS_CLUSTER_NAME || 'workshop-eks' }}
   DB_NAME: ${{ vars.DB_NAME || 'workshop' }}
   NAMESPACE: workshop
 
@@ -127,7 +127,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
-          if [[ ! "$IMAGE_TAG" =~ ^sha-[0-9a-f]{7,40}$ ]]; then
+          if [[ ! "$IMAGE_TAG" =~ ^sha-[0-9a-f]{40}$ ]]; then
             echo "::error::image_tag deve ser imutavel e usar o formato sha-<sha>."
             exit 1
           fi
