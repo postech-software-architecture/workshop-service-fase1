@@ -24,26 +24,14 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'Tag da imagem no GHCR (ex.: sha-<sha> ou latest)'
+        description: 'Tag imutavel da imagem no GHCR (sha-<sha>)'
         required: true
-        default: latest
+      confirmacao:
+        description: 'Digite DEPLOY para confirmar o deploy manual em prod'
+        required: true
 
-  # ===========================================================================
-  # TEMPORARIO — GRAVACAO DO VIDEO (CI -> CD automatico).
-  # Encadeia o CD logo apos o CI concluir com SUCESSO na main, sem clique.
-  # >>> REMOVER este bloco `workflow_run` (e o ramo workflow_run do `if:` do job
-  #     `deploy` mais abaixo) depois de gravar, voltando ao deploy MANUAL via
-  #     workflow_dispatch. <<<
-  # Obs.: workflow_run so dispara com o cd.yml presente na branch default (main).
-  # ===========================================================================
-  workflow_run:
-    workflows: ["CI — Build, Tests & Coverage"]
-    types: [completed]
-    branches: [main]
-
-  # Gatilho automatico por push desabilitado (credenciais Academy sao manuais).
-  # push:
-  #   branches: [ main ]
+permissions:
+  contents: read
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/workshop-service
@@ -56,11 +44,14 @@ jobs:
   deploy:
     name: Deploy to EKS
     runs-on: ubuntu-latest
-    # environment: production   # opcional: exige aprovacao antes do deploy
-    # TEMPORARIO (video): deploya se o disparo foi manual OU se o CI encadeado passou.
-    # >>> Ao voltar ao deploy manual, remover o ramo `workflow_run` deste if (basta
-    #     deixar `if: ${{ github.event_name == 'workflow_dispatch' }}` ou remover o if). <<<
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    timeout-minutes: 20
+    environment: prod
+    # Na W3, o deploy e deliberadamente manual e so pode usar a branch main.
+    # A infraestrutura deve existir na ordem cluster -> database -> app.
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.confirmacao == 'DEPLOY' }}
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
@@ -133,15 +124,16 @@ jobs:
         run: kubectl apply -k k8s/overlays/aws
 
       - name: Injeta a tag imutavel da imagem
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
-          # Deploy manual (workflow_dispatch): usa a tag informada no input.
-          # Deploy encadeado (workflow_run): usa a SHA imutavel do commit que o CI
-          # buildou (sha-<sha>, publicada pelo ci.yml). Tag unica por build => `set image`
-          # sempre altera o spec => rollout real e rastreavel (evita o no-op do :latest).
-          TAG="${{ github.event.inputs.image_tag || format('sha-{0}', github.event.workflow_run.head_sha) }}"
-          echo "Deploying ${IMAGE}:${TAG}"
+          if [[ ! "$IMAGE_TAG" =~ ^sha-[0-9a-f]{7,40}$ ]]; then
+            echo "::error::image_tag deve ser imutavel e usar o formato sha-<sha>."
+            exit 1
+          fi
+          echo "Deploying ${IMAGE}:${IMAGE_TAG}"
           kubectl -n "$NAMESPACE" set image deployment/workshop-service \
-            workshop-service="${IMAGE}:${TAG}"
+            workshop-service="${IMAGE}:${IMAGE_TAG}"
 
       - name: Aguarda rollout
         run: kubectl -n "$NAMESPACE" rollout status deployment/workshop-service --timeout=300s
