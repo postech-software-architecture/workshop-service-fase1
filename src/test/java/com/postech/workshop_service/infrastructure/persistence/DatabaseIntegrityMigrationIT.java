@@ -113,11 +113,11 @@ class DatabaseIntegrityMigrationIT {
 
 		expectForeignKeyViolation(
 				"INSERT INTO ordens_servico (id, id_cliente, id_veiculo, status, numero, data_criacao, "
-						+ "data_ultima_atualizacao) VALUES (?, ?, ?, 'RECEBIDA', 'OS-2099-00002', now(), now())",
+						+ "data_ultima_atualizacao) VALUES (?, ?, ?, 'RECEBIDO', 'OS-2099-00002', now(), now())",
 				"fk_ordens_servico_clientes", UUID.randomUUID(), missingId, fixtures.vehicleId());
 		expectForeignKeyViolation(
 				"INSERT INTO ordens_servico (id, id_cliente, id_veiculo, status, numero, data_criacao, "
-						+ "data_ultima_atualizacao) VALUES (?, ?, ?, 'RECEBIDA', 'OS-2099-00003', now(), now())",
+						+ "data_ultima_atualizacao) VALUES (?, ?, ?, 'RECEBIDO', 'OS-2099-00003', now(), now())",
 				"fk_ordens_servico_veiculos", UUID.randomUUID(), fixtures.clientId(), missingId);
 		expectForeignKeyViolation(
 				"INSERT INTO ordens_servico_itens (id, ordem_servico_id, ordem_item, descricao, valor, tipo, "
@@ -126,7 +126,7 @@ class DatabaseIntegrityMigrationIT {
 		expectForeignKeyViolation(
 				"INSERT INTO historico_status_os (id, ordem_servico_id, status_anterior, status_novo, "
 						+ "data_transicao, usuario_id, usuario_username, data_criacao, data_ultima_atualizacao) "
-						+ "VALUES (?, ?, 'RECEBIDA', 'EM_DIAGNOSTICO', now(), ?, 'missing', now(), now())",
+						+ "VALUES (?, ?, 'RECEBIDO', 'EM_DIAGNOSTICO', now(), ?, 'missing', now(), now())",
 				"fk_historico_status_os_usuarios", UUID.randomUUID(), fixtures.orderId(), missingId);
 	}
 
@@ -138,7 +138,7 @@ class DatabaseIntegrityMigrationIT {
 				fixtures.orderId(), fixtures.partId());
 		execute("INSERT INTO historico_status_os (id, ordem_servico_id, status_anterior, status_novo, "
 				+ "data_transicao, usuario_id, usuario_username, data_criacao, data_ultima_atualizacao) "
-				+ "VALUES (?, ?, 'RECEBIDA', 'EM_DIAGNOSTICO', now(), ?, 'w3.user', now(), now())", UUID.randomUUID(),
+				+ "VALUES (?, ?, 'RECEBIDO', 'EM_DIAGNOSTICO', now(), ?, 'w3.user', now(), now())", UUID.randomUUID(),
 				fixtures.orderId(), fixtures.userId());
 
 		expectForeignKeyViolation("DELETE FROM clientes WHERE id = ?", "fk_ordens_servico_clientes",
@@ -163,7 +163,7 @@ class DatabaseIntegrityMigrationIT {
 		execute("INSERT INTO veiculos (id, placa, marca, modelo, ano, ativo, data_criacao, data_ultima_atualizacao) "
 				+ "VALUES (?, ?, 'Marca', 'Modelo', 2026, true, now(), now())", vehicleId, plate(vehicleId));
 		execute("INSERT INTO ordens_servico (id, id_cliente, id_veiculo, status, numero, data_criacao, "
-				+ "data_ultima_atualizacao) VALUES (?, ?, ?, 'RECEBIDA', ?, now(), now())", orderId, clientId,
+				+ "data_ultima_atualizacao) VALUES (?, ?, ?, 'RECEBIDO', ?, now(), now())", orderId, clientId,
 				vehicleId, "OS-W3-" + orderId.toString().substring(0, 8));
 		execute("INSERT INTO pecas_insumos (id, sku, nome, valor_unitario, unidade_medida, tipo_item) "
 				+ "VALUES (?, ?, 'Peca W3', 10, 'UN', 'PECA')", partId, "W3-" + partId.toString().substring(0, 8));
