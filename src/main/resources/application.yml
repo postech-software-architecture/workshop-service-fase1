@@ -40,3 +40,15 @@ webhook:
 notificacao:
   email:
     remetente: ${MAIL_FROM:no-reply@workshop.local}
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTEL_METRICS_ENABLED:false}
+        url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:}
+  observations:
+    key-values:
+      service.name: ${OTEL_SERVICE_NAME:workshop-service}
+      deployment.environment: ${OTEL_ENVIRONMENT:local}
+otel:
+  environment: ${OTEL_ENVIRONMENT:${spring.profiles.active:local}}
