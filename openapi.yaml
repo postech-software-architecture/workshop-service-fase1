@@ -1066,11 +1066,15 @@ paths:
         '403':
           $ref: '#/components/responses/Response403Forbidden'
         '404':
-          description: Cliente ou serviço não encontrado
+          description: Cliente não encontrado para o documento informado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           description: |
-            Regra de negócio violada (veículo de outro cliente, estoque insuficiente,
-            veículo inexistente sem dados para cadastro, serviço inativo)
+            Regra de negócio violada (placa ou dados do veículo inválidos, veículo
+            vinculado a outro cliente ou veículo inexistente sem dados para cadastro)
           content:
             application/json:
               schema:
@@ -2132,6 +2136,7 @@ components:
     # ── Ordens de Serviço ──────────────────────────────────────────────────
     CriarOrdemServicoRequest:
       type: object
+      description: Dados do cliente e do veículo para abrir uma OS sem itens ou orçamento.
       required: [clienteDocumento, veiculoPlaca]
       properties:
         clienteDocumento:
@@ -2260,11 +2265,17 @@ components:
         status:
           $ref: '#/components/schemas/StatusOrdemServico'
         cliente:
-          $ref: '#/components/schemas/OrdemServicoClienteResumo'
+          oneOf:
+            - $ref: '#/components/schemas/OrdemServicoClienteResumo'
+            - type: 'null'
         veiculo:
-          $ref: '#/components/schemas/OrdemServicoVeiculoResumo'
+          oneOf:
+            - $ref: '#/components/schemas/OrdemServicoVeiculoResumo'
+            - type: 'null'
         orcamento:
-          $ref: '#/components/schemas/OrcamentoResumoOS'
+          oneOf:
+            - $ref: '#/components/schemas/OrcamentoResumoOS'
+            - type: 'null'
         observacoes: { type: [string, 'null'] }
         dataCriacao: { type: string, format: date-time }
         dataUltimaAtualizacao: { type: string, format: date-time }
@@ -2353,7 +2364,7 @@ components:
         id: { type: string, format: uuid }
         descricao: { type: string, example: Troca de oleo }
         valor: { type: number, example: 150.00 }
-        tipo: { type: string, enum: [SERVICO, PECA] }
+        tipo: { type: string, enum: [SERVICO, PECA, INSUMO] }
         idPecaInsumo: { type: [string, 'null'], format: uuid }
         idServico: { type: [string, 'null'], format: uuid }
         statusExecucao: { type: [string, 'null'], enum: [PENDENTE, EM_EXECUCAO, FINALIZADO, null] }
