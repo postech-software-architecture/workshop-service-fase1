@@ -7,6 +7,7 @@ import com.postech.workshop_service.api.dtos.CadastroClienteRequest;
 import com.postech.workshop_service.api.dtos.CadastroServicoRequest;
 import com.postech.workshop_service.api.dtos.CriarOrdemServicoRequest;
 import com.postech.workshop_service.api.controllers.support.AutenticacaoTestSupport;
+import com.postech.workshop_service.application.usecases.BuscarResponsavelTransicaoUseCase;
 import com.postech.workshop_service.config.PostgresTestContainer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -77,6 +79,11 @@ class WebhookOrcamentoControllerIT extends PostgresTestContainer {
 				.content("{\"decisao\":\"APROVADO\",\"origem\":\"teste\",\"idEvento\":\"" + UUID.randomUUID() + "\"}"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value("APROVADO"));
+
+		UUID usuarioId = jdbcTemplate.queryForObject(
+				"SELECT usuario_id FROM historico_status_os WHERE usuario_username = ? ORDER BY data_transicao DESC LIMIT 1",
+				UUID.class, "webhook:teste");
+		assertThat(usuarioId).isEqualTo(BuscarResponsavelTransicaoUseCase.USUARIO_TECNICO_ID);
 	}
 
 	@Test

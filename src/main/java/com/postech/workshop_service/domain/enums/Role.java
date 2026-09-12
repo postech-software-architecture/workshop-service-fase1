@@ -11,6 +11,8 @@ public enum Role {
 
 	MECANICO,
 
-	CLIENTE
+	CLIENTE,
+
+	SISTEMA
 
 }

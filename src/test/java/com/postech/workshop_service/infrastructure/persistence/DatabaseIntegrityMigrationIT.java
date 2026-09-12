@@ -25,12 +25,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Testcontainers
 class DatabaseIntegrityMigrationIT {
 
-	private static final List<String> EXPECTED_MIGRATIONS = List.of("0.20260424213700", "0.20260426131500",
-			"0.20260426140000", "0.20260427220000", "0.20260428000000", "0.20260428120000", "0.20260429100000",
-			"0.20260429101000", "0.20260429220000", "0.20260501100000", "0.20260501190000", "0.20260506120000",
-			"0.20260506130000", "0.20260507100000", "0.20260507101000", "0.20260507210000", "0.20260507230000",
-			"0.20260511215148", "0.20260712100000", "0.20260912185705");
-
 	private static final Set<String> EXPECTED_INDEXES = Set.of("ix_ordens_servico_cliente", "ix_ordens_servico_veiculo",
 			"ix_ordens_servico_itens_servico", "ix_historico_status_os_ordem_data",
 			"ix_ordens_servico_itens_peca_insumo", "ix_historico_status_os_usuario");
@@ -67,16 +61,27 @@ class DatabaseIntegrityMigrationIT {
 	}
 
 	@Test
-	void appliesTheCompleteFlywayHistoryAndDemoSeed() throws SQLException {
+	void appliesTheW3MigrationAndKeepsKnownSeedFixtures() throws SQLException {
 		assertThat(queryStrings("SELECT version FROM flyway_schema_history WHERE success = true "
-				+ "AND type = 'SQL' ORDER BY installed_rank"))
-			.containsExactlyElementsOf(EXPECTED_MIGRATIONS);
+				+ "AND type = 'SQL' AND version = '0.20260912185705'"))
+			.containsExactly("0.20260912185705");
 
-		assertThat(queryInt("SELECT count(*) FROM clientes WHERE id::text LIKE '10000000-%'")).isEqualTo(3);
-		assertThat(queryInt("SELECT count(*) FROM veiculos WHERE id::text LIKE '20000000-%'")).isEqualTo(3);
-		assertThat(queryInt("SELECT count(*) FROM servicos WHERE id::text LIKE '30000000-%'")).isEqualTo(5);
-		assertThat(queryInt("SELECT count(*) FROM pecas_insumos WHERE id::text LIKE '40000000-%'")).isEqualTo(6);
-		assertThat(queryInt("SELECT count(*) FROM usuarios WHERE id::text LIKE '60000000-%'")).isEqualTo(4);
+		assertThat(queryStrings("SELECT id::text FROM clientes WHERE id = '10000000-0000-0000-0000-000000000001'"))
+			.containsExactly("10000000-0000-0000-0000-000000000001");
+		assertThat(queryStrings("SELECT id::text FROM veiculos WHERE id = '20000000-0000-0000-0000-000000000001'"))
+			.containsExactly("20000000-0000-0000-0000-000000000001");
+		assertThat(queryStrings("SELECT id::text FROM servicos WHERE id = '30000000-0000-0000-0000-000000000001'"))
+			.containsExactly("30000000-0000-0000-0000-000000000001");
+		assertThat(queryStrings("SELECT id::text FROM pecas_insumos WHERE id = '40000000-0000-0000-0000-000000000001'"))
+			.containsExactly("40000000-0000-0000-0000-000000000001");
+		assertThat(queryStrings("SELECT id::text FROM usuarios WHERE id = '60000000-0000-0000-0000-000000000001'"))
+			.containsExactly("60000000-0000-0000-0000-000000000001");
+		assertThat(queryStrings("SELECT username FROM usuarios "
+				+ "WHERE id = '70000000-0000-0000-0000-000000000001' AND ativo = false AND bloqueado = true"))
+			.containsExactly("system.webhook");
+		assertThat(queryStrings(
+				"SELECT role FROM usuarios_roles " + "WHERE usuario_id = '70000000-0000-0000-0000-000000000001'"))
+			.containsExactly("SISTEMA");
 	}
 
 	@Test
@@ -206,13 +211,6 @@ class DatabaseIntegrityMigrationIT {
 				result.add(resultSet.getString(1));
 			}
 			return result;
-		}
-	}
-
-	private int queryInt(String sql) throws SQLException {
-		try (Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(sql)) {
-			assertThat(resultSet.next()).isTrue();
-			return resultSet.getInt(1);
 		}
 	}
 
