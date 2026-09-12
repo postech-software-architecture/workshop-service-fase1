@@ -48,7 +48,7 @@ o **repo real ganha** e o ADR precisa refletir o repo.
 | JWT emite `sub`, `username`, `roles`, `iat`, `exp`; **sem** `iss`/`aud`/`jti`; assinatura `signWith(secretKey)` com algoritmo implícito | `JwtTokenService.java:45-52`, `:51`, `:126` | Insumo direto do ADR-004 |
 | Roles vêm do **banco** a cada request, não do claim | `JwtAuthenticationFilter.java:45-49` | O ADR-004 registra isso como o motivo de a validação JWT **permanecer** na aplicação |
 | Segredo JWT default de 64 hex commitado | `application.yml:31` | Registrar a rotação como consequência no ADR-004 / evidência de segurança |
-| **Duas `openapi.yaml` divergentes:** raiz (3.1.0, 2013 linhas) e `src/.../api/controllers/openapi.yaml` (3.0.3, 3184 linhas) | ambas | O critério de saída exige **exatamente uma**. O agente `openapi` resolve na W3; este agente **documenta** qual é a canônica |
+| **OpenAPI canônica:** `openapi.yaml` na raiz (3.1.0) | raiz | A cópia divergente em `src/.../api/controllers/` foi removida na W3; toda evolução deve atualizar apenas a raiz |
 | Observabilidade hoje = **só** `spring-boot-starter-actuator`; nenhum logback, zero MDC/correlationId | `pom.xml:57-60` | A seção "situação de partida" dos docs está correta: a F6 é greenfield |
 | FKs ausentes: `ordens_servico.id_cliente`, `.id_veiculo`, `ordens_servico_itens.peca_insumo_id`, `historico_status_os.usuario_id` | migrations | O ER da W3 é do schema **pós-FK**, e a auditoria de órfãos é evidência |
 | ArchUnit trava `api → application → domain ← infrastructure` | `ArchitectureTest.java:20-37` | O diagrama de componentes é **macro/cloud**; a Clean Architecture já foi entregue nas fases anteriores e **não** ocupa o diagrama |
@@ -247,8 +247,8 @@ Roda em paralelo com `terraform-database`, `migration`+`tests` e `openapi`. O ER
 > processo é risco de nota explícito nos docs.
 
 **Gate G3:** ER corresponde ao schema pós-FK; `performance-review.md` com `EXPLAIN` real;
-documentado qual `openapi.yaml` ficou como canônica (a de `src/.../api/controllers/` está
-correta quanto a `{numero}` — `OrdemServicoController.java:262`).
+documentado que `openapi.yaml` da raiz é a única canônica, que a cópia de
+`src/.../api/controllers/` foi removida e que a rota usa `{numero}`.
 
 ---
 
