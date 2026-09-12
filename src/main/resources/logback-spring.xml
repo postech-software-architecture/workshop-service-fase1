@@ -4,7 +4,7 @@
 		defaultValue="workshop-service"/>
 	<springProperty scope="local" name="environment" source="otel.environment" defaultValue="local"/>
 
-	<springProfile name="default,local,test">
+	<springProfile name="default | local | test">
 		<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 			<encoder>
 				<pattern>%d{HH:mm:ss.SSS} %-5level [%X{correlationId:-}] %logger{36} - %msg%n</pattern>
