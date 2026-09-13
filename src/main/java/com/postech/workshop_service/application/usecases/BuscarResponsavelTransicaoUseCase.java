@@ -3,7 +3,6 @@ package com.postech.workshop_service.application.usecases;
 import com.postech.workshop_service.application.exceptions.AcessoNegadoException;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
@@ -19,6 +18,9 @@ import java.util.UUID;
  */
 @Service
 public class BuscarResponsavelTransicaoUseCase {
+
+	/** Identidade persistida da conta tecnica {@code system.webhook}. */
+	public static final UUID USUARIO_TECNICO_ID = UUID.fromString("70000000-0000-0000-0000-000000000001");
 
 	private final ContextoSegurancaProvider contextoSegurancaProvider;
 
@@ -42,8 +44,7 @@ public class BuscarResponsavelTransicaoUseCase {
 		String ator = AtorSistemaContext.atorAtual()
 			.orElseThrow(() -> new AcessoNegadoException(
 					"Usuario autenticado e obrigatorio para alterar status da ordem de servico."));
-		UUID idAtor = UUID.nameUUIDFromBytes(ator.getBytes(StandardCharsets.UTF_8));
-		return new ResponsavelTransicao(idAtor, ator);
+		return new ResponsavelTransicao(USUARIO_TECNICO_ID, ator);
 	}
 
 }

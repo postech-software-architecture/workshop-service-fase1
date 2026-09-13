@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -46,13 +45,16 @@ class BuscarResponsavelTransicaoUseCaseTest {
 	}
 
 	@Test
-	void shouldUseSystemActorWhenMarkedAndNoUser() {
+	void shouldUsePersistedTechnicalUserAndPreserveSystemActorName() {
 		when(contextoSegurancaProvider.identidadeAtual()).thenReturn(Optional.empty());
 
-		ResponsavelTransicao responsavel = AtorSistemaContext.executarComo("webhook:teste", () -> useCase.executar());
+		ResponsavelTransicao teste = AtorSistemaContext.executarComo("webhook:teste", () -> useCase.executar());
+		ResponsavelTransicao parceiro = AtorSistemaContext.executarComo("webhook:parceiro", () -> useCase.executar());
 
-		assertNotNull(responsavel.idUsuario());
-		assertEquals("webhook:teste", responsavel.username());
+		assertEquals(BuscarResponsavelTransicaoUseCase.USUARIO_TECNICO_ID, teste.idUsuario());
+		assertEquals(BuscarResponsavelTransicaoUseCase.USUARIO_TECNICO_ID, parceiro.idUsuario());
+		assertEquals("webhook:teste", teste.username());
+		assertEquals("webhook:parceiro", parceiro.username());
 	}
 
 }
