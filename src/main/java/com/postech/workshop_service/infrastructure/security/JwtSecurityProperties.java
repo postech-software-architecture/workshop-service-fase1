@@ -26,6 +26,10 @@ public class JwtSecurityProperties {
 	@Min(value = 1, message = "A expiracao do refresh token deve ser maior que zero.")
 	private long expiracaoRefreshDias;
 
+	private String issuer = "workshop-auth";
+
+	private String audience = "workshop-service";
+
 	public String getSecret() {
 		return secret;
 	}
@@ -48,6 +52,22 @@ public class JwtSecurityProperties {
 
 	public void setExpiracaoRefreshDias(long expiracaoRefreshDias) {
 		this.expiracaoRefreshDias = expiracaoRefreshDias;
+	}
+
+	public String getIssuer() {
+		return issuer;
+	}
+
+	public void setIssuer(String issuer) {
+		this.issuer = issuer;
+	}
+
+	public String getAudience() {
+		return audience;
+	}
+
+	public void setAudience(String audience) {
+		this.audience = audience;
 	}
 
 }
