@@ -18,6 +18,7 @@ info:
 
     Todas as rotas exigem JWT Bearer (`Authorization: Bearer <accessToken>`), exceto:
     - `/api/auth/login`, `/api/auth/refresh`, `/api/auth/logout`
+    - `/api/v1/ordens-servico/{numero}/status`, `/api/v1/webhooks/**`, `/version`
     - `/swagger-ui/**`, `/v3/api-docs/**`, `/api/public/**`
 
     Obtenha um token em `POST /api/auth/login`. Atualize com `POST /api/auth/refresh` antes do `expiresIn` vencer.
@@ -78,6 +79,12 @@ tags:
     description: Ciclo de vida das ordens de serviço da oficina
   - name: Orcamentos
     description: Gestão dos orçamentos vinculados às ordens de serviço
+  - name: Metricas
+    description: Indicadores operacionais de execução das ordens de serviço
+  - name: Webhooks
+    description: Integrações máquina-a-máquina
+  - name: Version
+    description: Versão da aplicação em execução
 
 security:
   - bearerAuth: []
@@ -1037,8 +1044,8 @@ paths:
       operationId: ordensServicoCriar
       summary: Abrir Ordem de Serviço
       description: |
-        Registra a recepção do veículo, identifica o cliente, calcula o orçamento
-        automaticamente e envia para aprovação. Roles: ADMINISTRADOR, ATENDENTE.
+        Registra a recepção do veículo e cria a OS em RECEBIDO, sem itens ou
+        orçamento. Roles: ADMINISTRADOR, ATENDENTE.
       requestBody:
         required: true
         content:
@@ -1047,7 +1054,7 @@ paths:
               $ref: '#/components/schemas/CriarOrdemServicoRequest'
       responses:
         '201':
-          description: OS criada com sucesso (orçamento pendente)
+          description: OS criada com sucesso em RECEBIDO
           content:
             application/json:
               schema:
@@ -1059,11 +1066,15 @@ paths:
         '403':
           $ref: '#/components/responses/Response403Forbidden'
         '404':
-          description: Cliente ou serviço não encontrado
+          description: Cliente não encontrado para o documento informado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '422':
           description: |
-            Regra de negócio violada (veículo de outro cliente, estoque insuficiente,
-            veículo inexistente sem dados para cadastro, serviço inativo)
+            Regra de negócio violada (placa ou dados do veículo inválidos, veículo
+            vinculado a outro cliente ou veículo inexistente sem dados para cadastro)
           content:
             application/json:
               schema:
@@ -1171,16 +1182,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /api/v1/ordens-servico/{id}/status:
+  /api/v1/ordens-servico/{numero}/status:
     parameters:
-      - $ref: '#/components/parameters/idPath'
+      - name: numero
+        in: path
+        required: true
+        description: Número público da ordem de serviço
+        schema:
+          type: string
+          pattern: '^OS-[0-9]{4}-[0-9]{5}$'
+          example: OS-2026-00001
     get:
       tags: [Ordens de Servico]
       operationId: ordensServicoConsultarStatus
-      summary: Consultar status da OS (cliente)
-      description: |
-        Permite que o cliente acompanhe o status atual da sua OS. Retorna 403
-        quando a OS pertence a outro cliente. Roles: CLIENTE.
+      summary: Consultar publicamente o status da OS pelo número
+      description: Endpoint público compatível com o formato OS-{ANO}-{NNNNN}.
+      security: []
       responses:
         '200':
           description: Status atual da OS
@@ -1188,14 +1205,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StatusOrdemServicoResponse'
-        '401':
-          $ref: '#/components/responses/Response401Unauthorized'
-        '403':
-          description: OS pertence a outro cliente ou conta sem cliente vinculado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '404':
           $ref: '#/components/responses/Response404NotFound'
 
@@ -1275,6 +1284,295 @@ paths:
           $ref: '#/components/responses/Response404NotFound'
         '422':
           $ref: '#/components/responses/Response422UnprocessableEntity'
+
+  /api/v1/estoques/movimentacoes/ordem-servico/{ordemServicoId}:
+    get:
+      tags: [Estoque]
+      operationId: estoquesListarMovimentacoesPorOrdemServico
+      summary: Listar movimentações de estoque de uma OS
+      description: 'Roles: ADMINISTRADOR, ATENDENTE, MECANICO'
+      parameters:
+        - name: ordemServicoId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Movimentações encontradas
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/MovimentacaoResponse' } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+
+  /api/v1/ordens-servico/fila-trabalho:
+    get:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoListarFilaTrabalho
+      summary: Listar fila de trabalho priorizada
+      description: 'Roles: ADMINISTRADOR, ATENDENTE, MECANICO'
+      parameters:
+        - $ref: '#/components/parameters/paginaQuery'
+        - $ref: '#/components/parameters/tamanhoQuery'
+      responses:
+        '200':
+          description: Página da fila de trabalho
+          content: { application/json: { schema: { $ref: '#/components/schemas/PaginaOrdensServicoResponse' } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+
+  /api/v1/ordens-servico/com-itens:
+    post:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoCriarComItens
+      summary: Abrir OS com itens iniciais
+      description: 'Roles: ADMINISTRADOR, ATENDENTE'
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CriarOrdemServicoComItensRequest' } } }
+      responses:
+        '201':
+          description: OS criada com itens
+          content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoResponse' } } }
+        '400': { $ref: '#/components/responses/Response400BadRequest' }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/iniciar-diagnostico:
+    parameters: [{ $ref: '#/components/parameters/idPath' }]
+    patch:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoIniciarDiagnostico
+      summary: Iniciar diagnóstico da OS
+      description: 'Role: MECANICO'
+      responses:
+        '200': { description: Diagnóstico iniciado, content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/encerrar-diagnostico:
+    parameters: [{ $ref: '#/components/parameters/idPath' }]
+    patch:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoEncerrarDiagnostico
+      summary: Encerrar diagnóstico da OS
+      description: 'Role: MECANICO'
+      responses:
+        '200': { description: Diagnóstico encerrado, content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/itens:
+    parameters: [{ $ref: '#/components/parameters/idPath' }]
+    post:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoAdicionarItem
+      summary: Adicionar item à composição técnica
+      description: 'Roles: ADMINISTRADOR, ATENDENTE, MECANICO'
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/AdicionarItemOrdemServicoRequest' } } }
+      responses:
+        '200': { description: Item adicionado, content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoDetalheResponse' } } } }
+        '400': { $ref: '#/components/responses/Response400BadRequest' }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/encerrar-composicao:
+    parameters: [{ $ref: '#/components/parameters/idPath' }]
+    patch:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoEncerrarComposicao
+      summary: Encerrar composição e gerar orçamento
+      description: 'Role: MECANICO'
+      responses:
+        '200': { description: Composição encerrada, content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/iniciar-execucao:
+    parameters: [{ $ref: '#/components/parameters/idPath' }]
+    patch:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoIniciarExecucao
+      summary: Iniciar execução da OS
+      description: 'Roles: ADMINISTRADOR, MECANICO'
+      responses:
+        '200': { description: Execução iniciada, content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/finalizar-execucao:
+    parameters: [{ $ref: '#/components/parameters/idPath' }]
+    patch:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoFinalizarExecucao
+      summary: Finalizar execução da OS
+      description: 'Roles: ADMINISTRADOR, MECANICO'
+      responses:
+        '200': { description: Execução finalizada, content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/itens/{idItem}/iniciar-servico:
+    parameters:
+      - $ref: '#/components/parameters/idPath'
+      - name: idItem
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoIniciarItemServico
+      summary: Iniciar execução de um serviço da OS
+      description: 'Role: MECANICO'
+      responses:
+        '200': { description: Serviço iniciado, content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoDetalheResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/itens/{idItem}/finalizar-servico:
+    parameters:
+      - $ref: '#/components/parameters/idPath'
+      - name: idItem
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoFinalizarItemServico
+      summary: Finalizar execução de um serviço da OS
+      description: 'Role: MECANICO'
+      responses:
+        '200': { description: Serviço finalizado, content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoDetalheResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/entregar:
+    parameters: [{ $ref: '#/components/parameters/idPath' }]
+    patch:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoEntregar
+      summary: Registrar entrega do veículo
+      description: 'Roles: ADMINISTRADOR, ATENDENTE'
+      responses:
+        '200': { description: Veículo entregue, content: { application/json: { schema: { $ref: '#/components/schemas/OrdemServicoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /api/v1/ordens-servico/{id}/historico-status:
+    parameters: [{ $ref: '#/components/parameters/idPath' }]
+    get:
+      tags: [Ordens de Servico]
+      operationId: ordensServicoConsultarHistoricoStatus
+      summary: Consultar histórico de status da OS
+      description: 'Roles: ADMINISTRADOR, ATENDENTE, MECANICO'
+      responses:
+        '200':
+          description: Histórico cronológico
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/HistoricoStatusOrdemServicoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+
+  /api/v1/orcamentos/ordem-servico/{idOrdemServico}:
+    get:
+      tags: [Orcamentos]
+      operationId: orcamentosListarPorOrdemServico
+      summary: Listar orçamentos de uma OS
+      description: 'Roles: ADMINISTRADOR, ATENDENTE, CLIENTE'
+      parameters:
+        - name: idOrdemServico
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Orçamentos da OS
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/OrcamentoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+
+  /api/v1/metricas/tempo-medio-execucao:
+    get:
+      tags: [Metricas]
+      operationId: metricasConsultarTempoMedioExecucao
+      summary: Consultar tempo médio global de execução
+      description: 'Role: ADMINISTRADOR'
+      responses:
+        '200': { description: Métricas globais, content: { application/json: { schema: { $ref: '#/components/schemas/TempoMedioExecucaoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+
+  /api/v1/metricas/tempo-medio-execucao/por-tipo-servico:
+    get:
+      tags: [Metricas]
+      operationId: metricasConsultarTempoMedioPorTipoServico
+      summary: Consultar tempo médio por tipo de serviço
+      description: 'Role: ADMINISTRADOR'
+      responses:
+        '200':
+          description: Métricas agrupadas por serviço
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/TempoMedioPorTipoServicoResponse' } } } }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '403': { $ref: '#/components/responses/Response403Forbidden' }
+
+  /api/v1/webhooks/orcamentos/{id}/decisao:
+    post:
+      tags: [Webhooks]
+      operationId: webhooksReceberDecisaoOrcamento
+      summary: Receber decisão externa de orçamento
+      description: Autenticação máquina-a-máquina pelo header X-Webhook-Token.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - name: X-Webhook-Token
+          in: header
+          required: false
+          description: Quando ausente ou inválido, o endpoint responde 401.
+          schema: { type: string, minLength: 1 }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/WebhookDecisaoOrcamentoRequest' } } }
+      responses:
+        '200': { description: Decisão aplicada, content: { application/json: { schema: { $ref: '#/components/schemas/OrcamentoResponse' } } } }
+        '400': { $ref: '#/components/responses/Response400BadRequest' }
+        '401': { $ref: '#/components/responses/Response401Unauthorized' }
+        '404': { $ref: '#/components/responses/Response404NotFound' }
+        '409': { description: Evento já processado }
+        '422': { $ref: '#/components/responses/Response422UnprocessableEntity' }
+
+  /version:
+    get:
+      tags: [Version]
+      operationId: versionConsultar
+      summary: Consultar versão da aplicação
+      security: []
+      responses:
+        '200':
+          description: Versão do artefato em execução
+          content: { application/json: { schema: { $ref: '#/components/schemas/VersionResponse' } } }
 
 components:
   securitySchemes:
@@ -1480,8 +1778,8 @@ components:
 
     StatusOrdemServico:
       type: string
-      enum: [EM_COMPOSICAO, AGUARDANDO_RESPOSTA_CLIENTE, AGUARDANDO_EXECUCAO, CANCELADA, FINALIZADA]
-      example: AGUARDANDO_RESPOSTA_CLIENTE
+      enum: [RECEBIDO, EM_DIAGNOSTICO, EM_COMPOSICAO, AGUARDANDO_APROVACAO, AGUARDANDO_EXECUCAO, EM_EXECUCAO, CANCELADA, FINALIZADA, ENTREGUE]
+      example: AGUARDANDO_APROVACAO
 
     StatusOrcamento:
       type: string
@@ -1810,7 +2108,7 @@ components:
         estoqueId: { type: string, format: uuid }
         tipo:
           type: string
-          enum: [ENTRADA, SAIDA, AJUSTE, RESERVA, LIBERACAO]
+          enum: [ENTRADA, SAIDA]
           example: ENTRADA
         quantidade: { type: number, minimum: 0, example: 5 }
         motivo:
@@ -1824,6 +2122,8 @@ components:
       properties:
         id: { type: string, format: uuid }
         estoqueId: { type: string, format: uuid }
+        ordemServicoId: { type: [string, 'null'], format: uuid }
+        orcamentoId: { type: [string, 'null'], format: uuid }
         tipo:
           type: string
           enum: [ENTRADA, SAIDA, AJUSTE, RESERVA, LIBERACAO]
@@ -1836,7 +2136,8 @@ components:
     # ── Ordens de Serviço ──────────────────────────────────────────────────
     CriarOrdemServicoRequest:
       type: object
-      required: [clienteDocumento, veiculoPlaca, servicos]
+      description: Dados do cliente e do veículo para abrir uma OS sem itens ou orçamento.
+      required: [clienteDocumento, veiculoPlaca]
       properties:
         clienteDocumento:
           type: string
@@ -1850,16 +2151,62 @@ components:
           $ref: '#/components/schemas/DadosVeiculoRequest'
         servicos:
           type: array
-          minItems: 1
+          deprecated: true
+          description: Ignorado nesta rota; use POST /api/v1/ordens-servico/com-itens.
           items:
             $ref: '#/components/schemas/ItemServicoRequest'
         pecas:
           type: array
+          deprecated: true
+          description: Ignorado nesta rota; use POST /api/v1/ordens-servico/com-itens.
           items:
             $ref: '#/components/schemas/ItemPecaRequest'
         observacoes:
           type: [string, 'null']
           example: Cliente relatou barulho ao frear
+
+    CriarOrdemServicoComItensRequest:
+      allOf:
+        - $ref: '#/components/schemas/CriarOrdemServicoRequest'
+        - type: object
+          description: Informe ao menos um serviço, uma peça ou ambos.
+          anyOf:
+            - required: [servicos]
+              properties:
+                servicos: { minItems: 1 }
+            - required: [pecas]
+              properties:
+                pecas: { minItems: 1 }
+          properties:
+            servicos:
+              type: array
+              deprecated: false
+              items: { $ref: '#/components/schemas/ItemServicoRequest' }
+            pecas:
+              type: array
+              deprecated: false
+              items: { $ref: '#/components/schemas/ItemPecaRequest' }
+
+    AdicionarItemOrdemServicoRequest:
+      type: object
+      required: [tipo]
+      properties:
+        tipo:
+          type: string
+          enum: [SERVICO, PECA]
+          example: SERVICO
+        servicoId:
+          type: [string, 'null']
+          format: uuid
+          description: Obrigatório quando tipo for SERVICO.
+        pecaId:
+          type: [string, 'null']
+          format: uuid
+          description: Obrigatório quando tipo for PECA.
+        quantidade:
+          type: [number, 'null']
+          exclusiveMinimum: 0
+          example: 1
 
     DadosVeiculoRequest:
       type: object
@@ -1911,30 +2258,44 @@ components:
 
     OrdemServicoResponse:
       type: object
-      description: Resposta da criação de OS, com cliente, veículo e orçamento embutidos
+      description: Dados atuais da OS; cliente, veículo e orçamento podem variar conforme a operação.
       properties:
         id: { type: string, format: uuid }
         numero: { type: string, example: OS-2026-00001 }
         status:
           $ref: '#/components/schemas/StatusOrdemServico'
         cliente:
-          $ref: '#/components/schemas/OrdemServicoClienteResumo'
+          oneOf:
+            - $ref: '#/components/schemas/OrdemServicoClienteResumo'
+            - type: 'null'
         veiculo:
-          $ref: '#/components/schemas/OrdemServicoVeiculoResumo'
+          oneOf:
+            - $ref: '#/components/schemas/OrdemServicoVeiculoResumo'
+            - type: 'null'
         orcamento:
-          $ref: '#/components/schemas/OrcamentoResumoOS'
+          oneOf:
+            - $ref: '#/components/schemas/OrcamentoResumoOS'
+            - type: 'null'
         observacoes: { type: [string, 'null'] }
         dataCriacao: { type: string, format: date-time }
         dataUltimaAtualizacao: { type: string, format: date-time }
+        dataInicioExecucao: { type: [string, 'null'], format: date-time }
+        dataFinalizacao: { type: [string, 'null'], format: date-time }
+        dataEntrega: { type: [string, 'null'], format: date-time }
 
     ItemComposicaoResponse:
       type: object
       properties:
+        id: { type: string, format: uuid }
         tipo:
           $ref: '#/components/schemas/TipoItemComposicaoTecnica'
         descricao: { type: string }
         valor: { type: number, example: 150.00 }
         idPecaInsumo: { type: [string, 'null'], format: uuid }
+        idServico: { type: [string, 'null'], format: uuid }
+        statusExecucao: { type: [string, 'null'], enum: [PENDENTE, EM_EXECUCAO, FINALIZADO, null] }
+        dataInicioExecucao: { type: [string, 'null'], format: date-time }
+        dataFinalizacao: { type: [string, 'null'], format: date-time }
 
     OrdemServicoDetalheResponse:
       type: object
@@ -1953,6 +2314,10 @@ components:
         observacoes: { type: [string, 'null'] }
         dataCriacao: { type: string, format: date-time }
         dataUltimaAtualizacao: { type: string, format: date-time }
+        orcamento:
+          oneOf:
+            - $ref: '#/components/schemas/OrcamentoResumoOS'
+            - type: 'null'
 
     OrdemServicoResumoResponse:
       type: object
@@ -1989,6 +2354,31 @@ components:
         status:
           $ref: '#/components/schemas/StatusOrdemServico'
         dataUltimaAtualizacao: { type: string, format: date-time }
+        itens:
+          type: array
+          items: { $ref: '#/components/schemas/ItemComposicaoTecnicaResponse' }
+
+    ItemComposicaoTecnicaResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        descricao: { type: string, example: Troca de oleo }
+        valor: { type: number, example: 150.00 }
+        tipo: { type: string, enum: [SERVICO, PECA, INSUMO] }
+        idPecaInsumo: { type: [string, 'null'], format: uuid }
+        idServico: { type: [string, 'null'], format: uuid }
+        statusExecucao: { type: [string, 'null'], enum: [PENDENTE, EM_EXECUCAO, FINALIZADO, null] }
+
+    HistoricoStatusOrdemServicoResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        idOrdemServico: { type: string, format: uuid }
+        statusAnterior: { $ref: '#/components/schemas/StatusOrdemServico' }
+        statusNovo: { $ref: '#/components/schemas/StatusOrdemServico' }
+        dataTransicao: { type: string, format: date-time }
+        idUsuario: { type: [string, 'null'], format: uuid }
+        usernameUsuario: { type: [string, 'null'] }
 
     # ── Orçamentos ─────────────────────────────────────────────────────────
     ItemOrcamentoResponse:
@@ -2013,3 +2403,35 @@ components:
             $ref: '#/components/schemas/ItemOrcamentoResponse'
         dataCriacao: { type: string, format: date-time }
         dataUltimaAtualizacao: { type: string, format: date-time }
+
+    TempoMedioExecucaoResponse:
+      type: object
+      required: [totalOrdens, tempoMedioExecucaoMinutos, tempoMinimoExecucaoMinutos, tempoMaximoExecucaoMinutos]
+      properties:
+        totalOrdens: { type: integer, format: int64, example: 42 }
+        tempoMedioExecucaoMinutos: { type: number, format: double, example: 145.5 }
+        tempoMinimoExecucaoMinutos: { type: number, format: double, example: 30.0 }
+        tempoMaximoExecucaoMinutos: { type: number, format: double, example: 480.0 }
+
+    TempoMedioPorTipoServicoResponse:
+      type: object
+      required: [descricaoServico, totalExecucoes, tempoMedioExecucaoMinutos]
+      properties:
+        descricaoServico: { type: string, example: Troca de oleo e filtro }
+        totalExecucoes: { type: integer, format: int64, example: 8 }
+        tempoMedioExecucaoMinutos: { type: number, format: double, example: 45.0 }
+
+    WebhookDecisaoOrcamentoRequest:
+      type: object
+      required: [decisao]
+      properties:
+        decisao: { type: string, enum: [APROVADO, RECUSADO], example: APROVADO }
+        origem: { type: [string, 'null'], example: portal-cliente }
+        observacao: { type: [string, 'null'], example: Aprovado pelo cliente via app }
+        idEvento: { type: [string, 'null'], example: e2b1c0a4-1234-4a2b-9c8d-0f1e2d3c4b5a }
+
+    VersionResponse:
+      type: object
+      required: [version]
+      properties:
+        version: { type: string, example: 1.0.0 }
