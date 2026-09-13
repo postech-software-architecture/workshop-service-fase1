@@ -53,6 +53,7 @@ class OrdemServicoControllerIT extends PostgresTestContainer {
 		// faz em
 		// producao. Necessario porque as transicoes resolvem o responsavel via esse
 		// principal.
+		AutenticacaoTestSupport.persistirStaff(jdbcTemplate);
 		SecurityContextHolder.getContext().setAuthentication(AutenticacaoTestSupport.autenticacaoStaff());
 	}
 

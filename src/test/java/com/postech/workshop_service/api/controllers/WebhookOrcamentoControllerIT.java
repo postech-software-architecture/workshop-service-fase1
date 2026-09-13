@@ -57,6 +57,7 @@ class WebhookOrcamentoControllerIT extends PostgresTestContainer {
 		// real;
 		// as chamadas do proprio webhook usam .with(anonymous()) para validar o
 		// permitAll.
+		AutenticacaoTestSupport.persistirStaff(jdbcTemplate);
 		SecurityContextHolder.getContext().setAuthentication(AutenticacaoTestSupport.autenticacaoStaff());
 	}
 
