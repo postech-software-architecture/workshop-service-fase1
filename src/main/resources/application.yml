@@ -54,3 +54,18 @@ management:
       deployment.environment: ${OTEL_ENVIRONMENT:local}
 otel:
   environment: ${OTEL_ENVIRONMENT:${spring.profiles.active:local}}
+  service:
+    name: ${OTEL_SERVICE_NAME:workshop-service}
+    version: ${OTEL_SERVICE_VERSION:unknown}
+  sdk:
+    enabled: ${OTEL_SDK_ENABLED:false}
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:}
+      protocol: ${OTEL_EXPORTER_OTLP_PROTOCOL:grpc}
+  traces:
+    exporter: ${OTEL_TRACES_EXPORTER:none}
+  metrics:
+    exporter: ${OTEL_METRICS_EXPORTER:none}
+  logs:
+    exporter: ${OTEL_LOGS_EXPORTER:none}

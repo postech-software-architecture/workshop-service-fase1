@@ -33,6 +33,7 @@
 		<maven.compiler.release>21</maven.compiler.release>
 		<testcontainers.version>2.0.4</testcontainers.version>
 		<logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
+		<opentelemetry.version>1.46.0</opentelemetry.version>
 		<!-- SonarQube (execução local: sonarqube:community via docker compose) -->
 		<sonar.projectKey>workshop-service</sonar.projectKey>
 		<sonar.projectName>workshop-service</sonar.projectName>
@@ -62,6 +63,11 @@
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-otlp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api</artifactId>
+			<version>${opentelemetry.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.logstash.logback</groupId>

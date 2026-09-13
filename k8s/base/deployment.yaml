@@ -35,6 +35,16 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "docker"
+            # The AWS overlay supplies the collector endpoint and enables OTLP via
+            # the ConfigMap. Docker image defaults keep local/dev deployments exporter-free.
+            - name: OTEL_INSTRUMENTATION_SPRING_WEBMVC_ENABLED
+              value: "true"
+            - name: OTEL_INSTRUMENTATION_JDBC_ENABLED
+              value: "true"
+            - name: OTEL_INSTRUMENTATION_SPRING_WEBMVC_EXCLUDE_URLS
+              value: ".*/actuator/health/.*"
+            - name: OTEL_INSTRUMENTATION_HTTP_SERVER_EXCLUDE_URLS
+              value: ".*/actuator/health/.*"
           envFrom:
             - configMapRef:
                 name: workshop-config

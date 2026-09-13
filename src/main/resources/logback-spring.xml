@@ -7,7 +7,7 @@
 	<springProfile name="default | local | test">
 		<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 			<encoder>
-				<pattern>%d{HH:mm:ss.SSS} %-5level [%X{correlationId:-}] %logger{36} - %msg%n</pattern>
+				<pattern>%d{HH:mm:ss.SSS} %-5level [correlationId=%X{correlationId:-} trace.id=%X{trace.id:-} span.id=%X{span.id:-}] %logger{36} - %msg%n</pattern>
 			</encoder>
 		</appender>
 		<root level="INFO">
@@ -24,6 +24,8 @@
 				<includeMdcKeyName>correlationId</includeMdcKeyName>
 				<includeMdcKeyName>traceId</includeMdcKeyName>
 				<includeMdcKeyName>spanId</includeMdcKeyName>
+				<includeMdcKeyName>trace.id</includeMdcKeyName>
+				<includeMdcKeyName>span.id</includeMdcKeyName>
 				<customFields>{"service":"${serviceName}","environment":"${environment}","event":"application_log"}</customFields>
 			</encoder>
 		</appender>

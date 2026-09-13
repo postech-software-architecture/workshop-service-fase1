@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -31,6 +33,10 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
 
 	static final String MDC_SPAN_ID = "spanId";
 
+	private static final String MDC_OTEL_TRACE_ID = "trace.id";
+
+	private static final String MDC_OTEL_SPAN_ID = "span.id";
+
 	private static final Pattern TRACEPARENT_PATTERN = Pattern
 		.compile("(?i)^00-([0-9a-f]{32})-([0-9a-f]{16})-[0-9a-f]{2}$");
 
@@ -40,15 +46,27 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
 		String correlationId = resolverCorrelationId(request);
 		try {
 			MDC.put(MDC_CORRELATION_ID, correlationId);
-			extrairContextoTrace(request.getHeader("traceparent")).ifPresent(contexto -> {
-				MDC.put(MDC_TRACE_ID, contexto.traceId());
-				MDC.put(MDC_SPAN_ID, contexto.spanId());
-			});
+			extrairContextoTrace(request.getHeader("traceparent")).ifPresent(this::adicionarContextoTrace);
+			adicionarContextoSpanAtual();
 			response.setHeader(HEADER_CORRELATION_ID, correlationId);
 			filterChain.doFilter(request, response);
 		}
 		finally {
 			MDC.clear();
+		}
+	}
+
+	private void adicionarContextoTrace(TraceContext contexto) {
+		MDC.put(MDC_TRACE_ID, contexto.traceId());
+		MDC.put(MDC_SPAN_ID, contexto.spanId());
+		MDC.put(MDC_OTEL_TRACE_ID, contexto.traceId());
+		MDC.put(MDC_OTEL_SPAN_ID, contexto.spanId());
+	}
+
+	private void adicionarContextoSpanAtual() {
+		SpanContext contexto = Span.current().getSpanContext();
+		if (contexto.isValid()) {
+			adicionarContextoTrace(new TraceContext(contexto.getTraceId(), contexto.getSpanId()));
 		}
 	}
 
