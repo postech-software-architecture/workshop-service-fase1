@@ -2,11 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: workshop-api
+  annotations:
+    # O AWS Load Balancer Controller usa "internal" por padrao. A API precisa
+    # ser alcancavel pelo API Gateway e pelos smoke tests externos.
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
   labels:
     app.kubernetes.io/name: workshop-service
     app.kubernetes.io/part-of: workshop-service
 # Exposicao PUBLICA da API (so no ambiente AWS). Ao criar um Service type=LoadBalancer,
-# o cloud-controller do EKS provisiona um ELB na AWS automaticamente e devolve o DNS
+# o AWS Load Balancer Controller provisiona um ELB na AWS automaticamente e devolve o DNS
 # publico. Local (overlay dev) nao usa isto — la o acesso e via kubectl port-forward.
 #
 # ATENCAO ao destruir: este Service (o ELB) NAO esta no state do Terraform. Antes de
