@@ -4,6 +4,8 @@ import com.postech.workshop_service.domain.entities.HistoricoStatusOrdemServico;
 import com.postech.workshop_service.domain.entities.StatusOrdemServico;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +57,37 @@ class MicrometerOrdemServicoMetricsTest {
 		metrics.transicaoRegistrada(transition, List.of(transition));
 
 		assertThat(registry.find("workshop.ordem_servico.status.duration").timer()).isNull();
+	}
+
+	@Test
+	void recordsProcessingErrorEvenWhenTransactionRollsBack() {
+		TransactionSynchronizationManager.initSynchronization();
+		try {
+			metrics.erroDeProcessamento("execucao", "finalize");
+
+			assertThat(registry.get("workshop.ordem_servico.processing.error.count").counter().count()).isEqualTo(1);
+			assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
+		}
+		finally {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
+	}
+
+	@Test
+	void defersSuccessMetricUntilCommit() {
+		TransactionSynchronizationManager.initSynchronization();
+		try {
+			metrics.ordemServicoCriada();
+			assertThat(registry.find("workshop.ordem_servico.created.count").counter()).isNull();
+
+			for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+				synchronization.afterCommit();
+			}
+			assertThat(registry.get("workshop.ordem_servico.created.count").counter().count()).isEqualTo(1);
+		}
+		finally {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
 	}
 
 	private HistoricoStatusOrdemServico history(StatusOrdemServico previous, StatusOrdemServico next,

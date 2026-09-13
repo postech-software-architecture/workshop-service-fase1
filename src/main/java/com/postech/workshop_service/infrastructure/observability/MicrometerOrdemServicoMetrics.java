@@ -69,15 +69,16 @@ public class MicrometerOrdemServicoMetrics implements OrdemServicoMetrics {
 
 	@Override
 	public void erroDeProcessamento(String stage, String operation) {
-		afterCommit(() -> counter(PROCESSING_ERROR, "stage", stage, "operation", operation, "outcome", "error")
-			.increment());
+		// Error paths normally roll the surrounding transaction back. Recording this in
+		// an
+		// afterCommit callback would therefore suppress the exact signal used by the W5
+		// alert.
+		counter(PROCESSING_ERROR, "stage", stage, "operation", operation, "outcome", "error").increment();
 	}
 
 	@Override
 	public void erroDeIntegracao(String integration, String operation) {
-		afterCommit(
-				() -> counter(INTEGRATION_ERROR, "integration", integration, "operation", operation, "outcome", "error")
-					.increment());
+		counter(INTEGRATION_ERROR, "integration", integration, "operation", operation, "outcome", "error").increment();
 	}
 
 	private io.micrometer.core.instrument.Counter counter(String name, String... tags) {
