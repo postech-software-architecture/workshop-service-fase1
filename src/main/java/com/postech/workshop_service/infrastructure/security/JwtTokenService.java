@@ -5,6 +5,7 @@ import com.postech.workshop_service.domain.entities.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
@@ -44,11 +45,16 @@ public class JwtTokenService implements TokenService {
 		Instant expiracao = agora.plusSeconds(properties.getExpiracaoAccessSegundos());
 		return Jwts.builder()
 			.subject(usuario.getId().toString())
+			.issuer(properties.getIssuer())
+			.audience()
+			.add(properties.getAudience())
+			.and()
+			.id(UUID.randomUUID().toString())
 			.claim("username", usuario.getUsername())
 			.claim("roles", usuario.getRoles().stream().map(Enum::name).toList())
 			.issuedAt(Date.from(agora))
 			.expiration(Date.from(expiracao))
-			.signWith(obterSecretKey())
+			.signWith(obterSecretKey(), SignatureAlgorithm.HS256)
 			.compact();
 	}
 
@@ -106,7 +112,13 @@ public class JwtTokenService implements TokenService {
 	}
 
 	private Claims extrairClaims(String token) {
-		return Jwts.parser().verifyWith(obterSecretKey()).build().parseSignedClaims(token).getPayload();
+		return Jwts.parser()
+			.requireIssuer(properties.getIssuer())
+			.requireAudience(properties.getAudience())
+			.verifyWith(obterSecretKey())
+			.build()
+			.parseSignedClaims(token)
+			.getPayload();
 	}
 
 	private SecretKey obterSecretKey() {

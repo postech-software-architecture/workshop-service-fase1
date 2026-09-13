@@ -3,15 +3,18 @@ kind: Service
 metadata:
   name: workshop-api
   annotations:
-    # O AWS Load Balancer Controller usa "internal" por padrao. A API precisa
-    # ser alcancavel pelo API Gateway e pelos smoke tests externos.
-    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-name: workshop-api-internal
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /actuator/health/readiness
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "8080"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: HTTP
   labels:
     app.kubernetes.io/name: workshop-service
     app.kubernetes.io/part-of: workshop-service
-# Exposicao PUBLICA da API (so no ambiente AWS). Ao criar um Service type=LoadBalancer,
+# Exposicao privada da API (so no ambiente AWS). Ao criar um Service type=LoadBalancer,
 # o AWS Load Balancer Controller provisiona um ELB na AWS automaticamente e devolve o DNS
-# publico. Local (overlay dev) nao usa isto — la o acesso e via kubectl port-forward.
+# interno. Local (overlay dev) nao usa isto — la o acesso e via kubectl port-forward.
 #
 # ATENCAO ao destruir: este Service (o ELB) NAO esta no state do Terraform. Antes de
 # `terraform destroy`, rode `kubectl delete -k k8s/overlays/aws` (ou delete este Service)

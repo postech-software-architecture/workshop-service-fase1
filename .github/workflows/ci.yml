@@ -22,14 +22,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validar exposicao publica do overlay AWS
+      - name: Validar NLB interno do overlay AWS
         shell: bash
         run: |
-          grep -q 'service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing' \
+          grep -q 'service.beta.kubernetes.io/aws-load-balancer-scheme: internal' \
             k8s/overlays/aws/service-lb.yaml || {
-              echo '::error::O Load Balancer do overlay AWS deve ser internet-facing.'
+              echo '::error::O Load Balancer do overlay AWS deve ser internal.'
               exit 1
             }
+          ! grep -R -q 'internet-facing' k8s/overlays/aws || {
+            echo '::error::O overlay AWS nao pode usar internet-facing.'
+            exit 1
+          }
+          grep -q 'service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip' \
+            k8s/overlays/aws/service-lb.yaml || exit 1
+          grep -q 'service.beta.kubernetes.io/aws-load-balancer-name: workshop-api-internal' \
+            k8s/overlays/aws/service-lb.yaml || exit 1
+          ! find k8s/overlays/aws -iname '*ingress*' -type f | grep -q . || {
+            echo '::error::O overlay AWS nao deve adicionar Ingress.'
+            exit 1
+          }
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4

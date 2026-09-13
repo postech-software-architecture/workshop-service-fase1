@@ -8,8 +8,9 @@ O cluster e a rede são mantidos em
 Os valores dinâmicos precisam ser configurados na hora do deploy:
 
 O Service `workshop-api` define explicitamente o Load Balancer como
-`internet-facing`. Sem essa anotação, o AWS Load Balancer Controller adota o esquema
-interno e o DNS resolve apenas para endereços privados da VPC.
+interno. O AWS Load Balancer Controller provisiona o NLB dentro da VPC, e o DNS
+resolve apenas para endereços privados da VPC; o acesso externo ocorre pelo API Gateway
+através do VPC Link.
 
 > **Gate W3:** não execute este overlay até que o `db_client_sg_id` esteja anexado aos
 > nodes do EKS ou o ADR-005 autorize o `node_security_group_id` no RDS. Sem isso, os
