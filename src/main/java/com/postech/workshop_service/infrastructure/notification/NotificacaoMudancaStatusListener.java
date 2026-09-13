@@ -2,6 +2,7 @@ package com.postech.workshop_service.infrastructure.notification;
 
 import com.postech.workshop_service.application.usecases.ClienteNotificationService;
 import com.postech.workshop_service.application.usecases.MudancaStatusOrdemServicoEvent;
+import com.postech.workshop_service.application.usecases.OrdemServicoMetrics;
 import com.postech.workshop_service.domain.entities.OrdemServico;
 import com.postech.workshop_service.domain.repositories.OrdemServicoRepository;
 import org.slf4j.Logger;
@@ -32,10 +33,13 @@ public class NotificacaoMudancaStatusListener {
 
 	private final ClienteNotificationService clienteNotificationService;
 
+	private final OrdemServicoMetrics ordemServicoMetrics;
+
 	public NotificacaoMudancaStatusListener(OrdemServicoRepository ordemServicoRepository,
-			ClienteNotificationService clienteNotificationService) {
+			ClienteNotificationService clienteNotificationService, OrdemServicoMetrics ordemServicoMetrics) {
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.clienteNotificationService = clienteNotificationService;
+		this.ordemServicoMetrics = ordemServicoMetrics;
 	}
 
 	@Async("notificacaoExecutor")
@@ -52,6 +56,9 @@ public class NotificacaoMudancaStatusListener {
 			}
 		}
 		catch (RuntimeException ex) {
+			if (ordemServicoMetrics != null) {
+				ordemServicoMetrics.erroDeIntegracao("email", "status_notification");
+			}
 			LOGGER.warn("Falha ao notificar cliente sobre mudanca de status da OS {}", evento.idOrdemServico(), ex);
 		}
 	}
