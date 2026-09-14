@@ -19,10 +19,14 @@ public class IniciarDiagnosticoUseCase {
 
 	private final RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
 
+	private final OrdemServicoMetrics ordemServicoMetrics;
+
 	public IniciarDiagnosticoUseCase(OrdemServicoRepository ordemServicoRepository,
-			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase) {
+			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase,
+			OrdemServicoMetrics ordemServicoMetrics) {
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
+		this.ordemServicoMetrics = ordemServicoMetrics;
 	}
 
 	@Transactional
@@ -30,10 +34,18 @@ public class IniciarDiagnosticoUseCase {
 		OrdemServico ordemServico = ordemServicoRepository.buscarPorId(idOrdemServico)
 			.orElseThrow(() -> new RecursoNaoEncontradoException("Ordem de servico nao encontrada."));
 		StatusOrdemServico statusAnterior = ordemServico.getStatus();
-		ordemServico.iniciarDiagnostico();
-		OrdemServico ordemSalva = ordemServicoRepository.salvar(ordemServico);
-		registrarHistoricoUseCase.executar(ordemSalva.getId(), statusAnterior, ordemSalva.getStatus());
-		return ordemSalva;
+		try {
+			ordemServico.iniciarDiagnostico();
+			OrdemServico ordemSalva = ordemServicoRepository.salvar(ordemServico);
+			registrarHistoricoUseCase.executar(ordemSalva.getId(), statusAnterior, ordemSalva.getStatus());
+			return ordemSalva;
+		}
+		catch (RuntimeException ex) {
+			if (ordemServicoMetrics != null) {
+				ordemServicoMetrics.erroDeProcessamento("diagnostico", "iniciar");
+			}
+			throw ex;
+		}
 	}
 
 }

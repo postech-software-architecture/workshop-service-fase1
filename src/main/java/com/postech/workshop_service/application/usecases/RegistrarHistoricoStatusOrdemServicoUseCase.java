@@ -24,12 +24,15 @@ public class RegistrarHistoricoStatusOrdemServicoUseCase {
 
 	private final ApplicationEventPublisher eventPublisher;
 
+	private final OrdemServicoMetrics ordemServicoMetrics;
+
 	public RegistrarHistoricoStatusOrdemServicoUseCase(HistoricoStatusOrdemServicoRepository historicoRepository,
 			BuscarResponsavelTransicaoUseCase buscarResponsavelTransicaoUseCase,
-			ApplicationEventPublisher eventPublisher) {
+			ApplicationEventPublisher eventPublisher, OrdemServicoMetrics ordemServicoMetrics) {
 		this.historicoRepository = historicoRepository;
 		this.buscarResponsavelTransicaoUseCase = buscarResponsavelTransicaoUseCase;
 		this.eventPublisher = eventPublisher;
+		this.ordemServicoMetrics = ordemServicoMetrics;
 	}
 
 	public HistoricoStatusOrdemServico executar(UUID idOrdemServico, StatusOrdemServico statusAnterior,
@@ -38,6 +41,9 @@ public class RegistrarHistoricoStatusOrdemServicoUseCase {
 		HistoricoStatusOrdemServico historico = new HistoricoStatusOrdemServico(null, idOrdemServico, statusAnterior,
 				statusNovo, LocalDateTime.now(), responsavel.idUsuario(), responsavel.username());
 		HistoricoStatusOrdemServico salvo = historicoRepository.salvar(historico);
+		if (ordemServicoMetrics != null) {
+			ordemServicoMetrics.transicaoRegistrada(salvo, historicoRepository.listarPorOrdemServico(idOrdemServico));
+		}
 		// A notificacao acontece apos o commit e fora da thread (listener assincrono).
 		eventPublisher.publishEvent(new MudancaStatusOrdemServicoEvent(idOrdemServico, statusAnterior, statusNovo));
 		return salvo;

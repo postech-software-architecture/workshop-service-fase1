@@ -40,16 +40,19 @@ public class AprovarOrcamentoUseCase {
 
 	private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
 
+	private final OrdemServicoMetrics ordemServicoMetrics;
+
 	public AprovarOrcamentoUseCase(OrcamentoRepository orcamentoRepository,
 			OrdemServicoRepository ordemServicoRepository, MecanicoNotificationService mecanicoNotificationService,
 			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase, EstoqueRepository estoqueRepository,
-			MovimentacaoEstoqueRepository movimentacaoEstoqueRepository) {
+			MovimentacaoEstoqueRepository movimentacaoEstoqueRepository, OrdemServicoMetrics ordemServicoMetrics) {
 		this.orcamentoRepository = orcamentoRepository;
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.mecanicoNotificationService = mecanicoNotificationService;
 		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
 		this.estoqueRepository = estoqueRepository;
 		this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
+		this.ordemServicoMetrics = ordemServicoMetrics;
 	}
 
 	/**
@@ -77,6 +80,9 @@ public class AprovarOrcamentoUseCase {
 			mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);
 		}
 		catch (RuntimeException ex) {
+			if (ordemServicoMetrics != null) {
+				ordemServicoMetrics.erroDeIntegracao("webhook", "budget_notification");
+			}
 			log.warn("Falha ao notificar mecanico sobre aprovacao do orcamento da OS {}: {}", ordemServico.getNumero(),
 					ex.getMessage());
 		}

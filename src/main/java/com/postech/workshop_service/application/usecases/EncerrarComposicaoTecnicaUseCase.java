@@ -36,6 +36,8 @@ public class EncerrarComposicaoTecnicaUseCase {
 
 	private final RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
 
+	private final OrdemServicoMetrics ordemServicoMetrics;
+
 	/**
 	 * Construtor para injecao das dependencias do caso de uso.
 	 * @param ordemServicoRepository repositorio de ordens de servico.
@@ -44,11 +46,13 @@ public class EncerrarComposicaoTecnicaUseCase {
 	 */
 	public EncerrarComposicaoTecnicaUseCase(OrdemServicoRepository ordemServicoRepository,
 			OrcamentoRepository orcamentoRepository, ClienteNotificationService clienteNotificationService,
-			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase) {
+			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase,
+			OrdemServicoMetrics ordemServicoMetrics) {
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.orcamentoRepository = orcamentoRepository;
 		this.clienteNotificationService = clienteNotificationService;
 		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
+		this.ordemServicoMetrics = ordemServicoMetrics;
 	}
 
 	/**
@@ -91,6 +95,9 @@ public class EncerrarComposicaoTecnicaUseCase {
 			clienteNotificationService.notificarOrcamentoPendente(ordemServico, orcamentoPersistido);
 		}
 		catch (RuntimeException ex) {
+			if (ordemServicoMetrics != null) {
+				ordemServicoMetrics.erroDeIntegracao("email", "budget_notification");
+			}
 			log.warn("Falha ao notificar cliente sobre orcamento pendente da OS {}: {}", ordemServico.getNumero(),
 					ex.getMessage());
 		}

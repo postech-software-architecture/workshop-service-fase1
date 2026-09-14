@@ -32,6 +32,8 @@ public class RejeitarOrcamentoUseCase {
 
 	private final RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase;
 
+	private final OrdemServicoMetrics ordemServicoMetrics;
+
 	/**
 	 * Construtor para injecao das dependencias do caso de uso.
 	 * @param orcamentoRepository repositorio de orcamentos.
@@ -44,12 +46,14 @@ public class RejeitarOrcamentoUseCase {
 	public RejeitarOrcamentoUseCase(OrcamentoRepository orcamentoRepository,
 			OrdemServicoRepository ordemServicoRepository, LiberarReservasEstoqueService liberarReservasEstoqueService,
 			MecanicoNotificationService mecanicoNotificationService,
-			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase) {
+			RegistrarHistoricoStatusOrdemServicoUseCase registrarHistoricoUseCase,
+			OrdemServicoMetrics ordemServicoMetrics) {
 		this.orcamentoRepository = orcamentoRepository;
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.liberarReservasEstoqueService = liberarReservasEstoqueService;
 		this.mecanicoNotificationService = mecanicoNotificationService;
 		this.registrarHistoricoUseCase = registrarHistoricoUseCase;
+		this.ordemServicoMetrics = ordemServicoMetrics;
 	}
 
 	/**
@@ -83,6 +87,9 @@ public class RejeitarOrcamentoUseCase {
 			mecanicoNotificationService.notificarAtualizacaoOrcamento(ordemServico, orcamentoPersistido);
 		}
 		catch (RuntimeException ex) {
+			if (ordemServicoMetrics != null) {
+				ordemServicoMetrics.erroDeIntegracao("webhook", "budget_notification");
+			}
 			log.warn("Falha ao notificar mecanico sobre rejeicao do orcamento da OS {}: {}", ordemServico.getNumero(),
 					ex.getMessage());
 		}
