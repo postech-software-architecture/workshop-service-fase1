@@ -30,12 +30,16 @@ public class CriarOrdemServicoComItensUseCase {
 
 	private final PrepararItemComposicaoService prepararItemService;
 
+	private final OrdemServicoMetrics ordemServicoMetrics;
+
 	public CriarOrdemServicoComItensUseCase(ClienteRepository clienteRepository, VeiculoRepository veiculoRepository,
-			OrdemServicoRepository ordemServicoRepository, PrepararItemComposicaoService prepararItemService) {
+			OrdemServicoRepository ordemServicoRepository, PrepararItemComposicaoService prepararItemService,
+			OrdemServicoMetrics ordemServicoMetrics) {
 		this.clienteRepository = clienteRepository;
 		this.veiculoRepository = veiculoRepository;
 		this.ordemServicoRepository = ordemServicoRepository;
 		this.prepararItemService = prepararItemService;
+		this.ordemServicoMetrics = ordemServicoMetrics;
 	}
 
 	@Transactional
@@ -62,6 +66,9 @@ public class CriarOrdemServicoComItensUseCase {
 		OrdemServico ordem = new OrdemServico(null, cliente.getId(), veiculo.getId(), numero, dados.observacoes(),
 				itens);
 		OrdemServico salva = ordemServicoRepository.salvar(ordem);
+		if (ordemServicoMetrics != null) {
+			ordemServicoMetrics.ordemServicoCriada();
+		}
 		pecas.forEach(peca -> prepararItemService.reservarPeca(peca, salva));
 		return new ResultadoCriacaoOrdemServico(salva, null, cliente, veiculo);
 	}

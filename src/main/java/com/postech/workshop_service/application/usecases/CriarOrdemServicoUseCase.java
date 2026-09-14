@@ -32,11 +32,14 @@ public class CriarOrdemServicoUseCase {
 
 	private final OrdemServicoRepository ordemServicoRepository;
 
+	private final OrdemServicoMetrics ordemServicoMetrics;
+
 	public CriarOrdemServicoUseCase(ClienteRepository clienteRepository, VeiculoRepository veiculoRepository,
-			OrdemServicoRepository ordemServicoRepository) {
+			OrdemServicoRepository ordemServicoRepository, OrdemServicoMetrics ordemServicoMetrics) {
 		this.clienteRepository = clienteRepository;
 		this.veiculoRepository = veiculoRepository;
 		this.ordemServicoRepository = ordemServicoRepository;
+		this.ordemServicoMetrics = ordemServicoMetrics;
 	}
 
 	@Transactional
@@ -50,6 +53,9 @@ public class CriarOrdemServicoUseCase {
 			OrdemServico os = new OrdemServico(null, cliente.getId(), veiculo.getId(), numero, dados.observacoes(),
 					List.of());
 			OrdemServico osSalva = ordemServicoRepository.salvar(os);
+			if (ordemServicoMetrics != null) {
+				ordemServicoMetrics.ordemServicoCriada();
+			}
 
 			return new ResultadoCriacaoOrdemServico(osSalva, null, cliente, veiculo);
 		}
