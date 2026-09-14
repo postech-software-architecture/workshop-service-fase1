@@ -1,5 +1,9 @@
 package com.postech.workshop_service.infrastructure.observability;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -83,6 +87,21 @@ class CorrelationIdFilterTest {
 			assertThat(MDC.get(CorrelationIdFilter.MDC_CORRELATION_ID)).isNotBlank();
 		});
 
+		assertMdcCleared();
+	}
+
+	@Test
+	void shouldPutCurrentOpenTelemetrySpanInMdc() throws Exception {
+		SpanContext spanContext = SpanContext.createFromRemoteParent("4bf92f3577b34da6a3ce929d0e0e4736",
+				"00f067aa0ba902b7", TraceFlags.getSampled(), TraceState.getDefault());
+		try (var ignored = Span.wrap(spanContext).makeCurrent()) {
+			MockHttpServletRequest request = new MockHttpServletRequest();
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			filter.doFilter(request, response, (currentRequest, currentResponse) -> {
+				assertThat(MDC.get("trace.id")).isEqualTo(spanContext.getTraceId());
+				assertThat(MDC.get("span.id")).isEqualTo(spanContext.getSpanId());
+			});
+		}
 		assertMdcCleared();
 	}
 

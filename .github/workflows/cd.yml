@@ -120,10 +120,7 @@ jobs:
           sed -i "s|^DB_NAME=.*|DB_NAME=${DB_NAME}|" k8s/overlays/aws/config.env
           grep -E '^DB_(HOST|NAME)=' k8s/overlays/aws/config.env
 
-      - name: Aplica os manifestos (overlay aws)
-        run: kubectl apply -k k8s/overlays/aws
-
-      - name: Injeta a tag imutavel da imagem
+      - name: Valida a tag e injeta a versao de telemetria
         env:
           IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
@@ -131,6 +128,16 @@ jobs:
             echo "::error::image_tag deve ser imutavel e usar o formato sha-<sha>."
             exit 1
           fi
+          sed -i "s|service.version=[^,]*|service.version=${IMAGE_TAG}|" k8s/overlays/aws/config.env
+          grep '^OTEL_RESOURCE_ATTRIBUTES=' k8s/overlays/aws/config.env
+
+      - name: Aplica os manifestos (overlay aws)
+        run: kubectl apply -k k8s/overlays/aws
+
+      - name: Injeta a tag imutavel da imagem
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
           echo "Deploying ${IMAGE}:${IMAGE_TAG}"
           kubectl -n "$NAMESPACE" set image deployment/workshop-service \
             workshop-service="${IMAGE}:${IMAGE_TAG}"

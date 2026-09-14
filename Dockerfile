@@ -23,7 +23,11 @@ RUN ./mvnw -B -q clean package -DskipTests
 ########################################
 FROM eclipse-temurin:21-jre-alpine AS runtime
 
+ARG OTEL_JAVA_AGENT_VERSION=2.16.0
+
 RUN apk add --no-cache curl \
+	&& curl -fsSL "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVA_AGENT_VERSION}/opentelemetry-javaagent.jar" \
+		-o /opentelemetry-javaagent.jar \
 	&& addgroup -g 1000 -S spring \
 	&& adduser -u 1000 -S -G spring -h /app -s /sbin/nologin spring
 
@@ -33,6 +37,14 @@ WORKDIR /app
 COPY --from=build /workspace/target/workshop-service-*.jar app.jar
 
 ENV SPRING_PROFILES_ACTIVE=docker
+# The agent is always present in the image, but exporters are disabled by default.
+# The AWS overlay enables OTLP and points it at the NRDOT collector service.
+ENV OTEL_SERVICE_NAME=workshop-service \
+	OTEL_SERVICE_VERSION=unknown \
+	OTEL_RESOURCE_ATTRIBUTES=deployment.environment=local \
+	OTEL_TRACES_EXPORTER=none \
+	OTEL_METRICS_EXPORTER=none \
+	OTEL_LOGS_EXPORTER=none
 
 USER spring:spring
 
@@ -42,4 +54,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
 	CMD curl -fsS http://localhost:8080/actuator/health/liveness | grep -q '"status":"UP"' || exit 1
 
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-javaagent:/opentelemetry-javaagent.jar", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]
