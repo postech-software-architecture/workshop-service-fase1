@@ -190,3 +190,6 @@ scratch/
 # Kubernetes secrets com valores reais (nunca commitar; apenas o template .example vai ao git)
 k8s/02-secret.yaml
 k8s/*.secret.yaml
+
+# Agente APM New Relic baixado localmente (contem license_key em texto plano)
+newrelic/
