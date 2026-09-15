@@ -48,6 +48,11 @@ management:
       export:
         enabled: ${OTEL_METRICS_ENABLED:false}
         url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:}
+        # A New Relic soma contadores OTLP por delta. Com a temporalidade
+        # cumulativa, que e o padrao do Micrometer, as amostras chegam mas
+        # sum() devolve zero: os paineis de ordem de servico mostravam a
+        # metrica existindo e sem valor.
+        aggregation-temporality: ${OTEL_METRICS_TEMPORALITY:delta}
   observations:
     key-values:
       service.name: ${OTEL_SERVICE_NAME:workshop-service}
