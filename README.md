@@ -43,6 +43,9 @@ src/main/java/com/postech/workshop_service/
 
 Principais capacidades expostas: abertura e consulta de **Ordem de Serviço**, aprovação/recusa de **orçamento** (webhook externo), **listagem** de OS ordenada por status (exclusão lógica das finalizadas/entregues) e **atualização de status** com notificação.
 
+![Diagrama de Componentes](docs/infra/images/diagrama_componentes_service.png)
+> Fonte editável: [diagrama_componentes_service.drawio](docs/infra/images/diagrama_componentes_service.drawio)
+
 ### Infraestrutura provisionada (AWS)
 
 ![Infra geral](docs/infra/images/workshop_infra-infraestrutura-geral.drawio.png)
