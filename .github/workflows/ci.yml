@@ -18,7 +18,7 @@ jobs:
     name: Build, test (unit + integration) and coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -43,8 +43,25 @@ jobs:
             exit 1
           }
 
+      # O README do overlay manda reescrever DB_HOST no proprio config.env, que e
+      # um arquivo versionado. Um 'git add .' distraido publica o endpoint real do
+      # RDS num repositorio publico. O CD sobrescreve esse valor a partir do secret
+      # DB_HOST, entao o commitado deve permanecer sempre o placeholder.
+      - name: Impedir endpoint real do RDS versionado
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DB_HOST=REPLACE_WITH_RDS_ENDPOINT$' k8s/overlays/aws/config.env || {
+            echo '::error file=k8s/overlays/aws/config.env::DB_HOST versionado deve ser REPLACE_WITH_RDS_ENDPOINT. O valor real entra no deploy a partir do secret DB_HOST.'
+            exit 1
+          }
+          if grep -REn '[a-z0-9-]+\.[a-z0-9]{10,}\.[a-z0-9-]+\.rds\.amazonaws\.com' k8s/; then
+            echo '::error::Endpoint real de RDS encontrado nos manifestos. Use o placeholder; o valor real vem do secret no deploy.'
+            exit 1
+          fi
+
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
@@ -58,7 +75,7 @@ jobs:
 
       - name: Upload JaCoCo report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jacoco-report
           path: target/site/jacoco/
@@ -74,7 +91,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: docker/setup-buildx-action@v3
 
