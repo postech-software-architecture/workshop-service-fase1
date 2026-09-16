@@ -15,7 +15,13 @@
 		</root>
 	</springProfile>
 
-	<springProfile name="prod">
+	<!--
+		`docker` entra junto com `prod`: e o perfil que o deployment do Kubernetes
+		ativa (k8s/base/deployment.yaml) e tambem o do compose. Enquanto ele nao
+		casava com nenhum springProfile, o root logger ficava sem appender e a
+		aplicacao nao emitia log nenhum em producao.
+	-->
+	<springProfile name="prod | docker">
 		<appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
 			<encoder class="net.logstash.logback.encoder.LogstashEncoder">
 				<fieldNames>
