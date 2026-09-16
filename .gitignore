@@ -193,3 +193,19 @@ k8s/*.secret.yaml
 
 # Agente APM New Relic baixado localmente (contem license_key em texto plano)
 newrelic/
+
+# Planos do Terraform: carregam os valores das variaveis sensiveis e nunca
+# devem ser versionados. O infra/.gitignore ja cobre state e tfvars.
+tfplan
+*.tfplan
+errored.tfstate
+
+# Secrets de overlay do Kustomize com valores reais. O overlay aws nao gera
+# Secret de proposito; se alguem criar um secret.env ali, ele nao vai ao git.
+k8s/overlays/*/secret.env
+!k8s/overlays/dev/secret.env
+
+# IDE
+.idea/
+*.iml
+*.iws
